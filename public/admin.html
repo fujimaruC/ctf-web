@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTF Daily — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="modulepreload" href="../js/config.js">
+  <link rel="modulepreload" href="../js/auth.js">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="admin">
+<div id="page-loader">
+  <div class="spinner"></div>
+</div>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <a href="/dashboard.html" class="logo-mark">
+        <div class="logo-icon">&gt;_</div>
+        CTFArena
+      </a>
+    </div>
+    <span class="sidebar__section-label">Admin</span>
+    <nav class="sidebar__nav">
+      <a href="/admin.html" class="active"><span class="nav-icon">🛡</span> Challenges</a>
+      <a href="/leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a href="/dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+    </nav>
+    <span class="sidebar__section-label">Account</span>
+    <nav class="sidebar__nav">
+      <a href="/profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="avatar" id="user-avatar" style="border-color:var(--clr-accent)">A</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">Admin</div>
+          <div class="user-role" style="color:var(--clr-accent)">administrator</div>
+        </div>
+      </div>
+      <button class="btn btn--ghost btn--sm btn--full" id="btn-logout" style="margin-top:.75rem">Sign Out</button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <h1 class="topbar__title">Admin Panel</h1>
+      <span class="topbar__tag topbar__tag--admin" style="border-color:var(--clr-accent);color:var(--clr-accent)">🛡 Restricted Access</span>
+    </header>
+
+    <main class="main-content">
+      <!-- Stats Panel -->
+      <div class="grid-2" style="margin-bottom:2rem" data-stagger>
+        <div class="card">
+          <div class="card__label">Total Challenges</div>
+          <div class="card__value" id="stat-challenges">—</div>
+        </div>
+        <div class="card">
+          <div class="card__label">Total Solves</div>
+          <div class="card__value card__value--green" id="stat-total-solves">—</div>
+        </div>
+        <div class="card">
+          <div class="card__label">Registered Users</div>
+          <div class="card__value" id="stat-users">—</div>
+        </div>
+        <div class="card">
+          <div class="card__label">Most Solved</div>
+          <div class="card__value card__value--gold" id="stat-most-solved">—</div>
+          <div class="card__sub" id="stat-most-solved-sub"></div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+
+        <!-- Create Challenge Form -->
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:1rem">Create Challenge</h2>
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input class="form-input" type="text" id="c-title" placeholder="SQL Injection 101">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-textarea" id="c-desc" rows="4" placeholder="Brief challenge description…"></textarea>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="c-category">
+                  <option value="Web">Web</option>
+                  <option value="Crypto">Crypto</option>
+                  <option value="Forensics">Forensics</option>
+                  <option value="Pwn">Pwn</option>
+                  <option value="Rev">Rev</option>
+                  <option value="OSINT">OSINT</option>
+                  <option value="Misc">Misc</option>
+                  <option value="SSTI">SSTI</option>
+                  <option value="RSA">RSA</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unlock Date</label>
+                <input class="form-input" type="datetime-local" id="c-unlock">
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group">
+                <label class="form-label">Initial Points</label>
+                <input class="form-input" type="number" id="c-init-pts" value="500" min="50" max="2000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Min Points</label>
+                <input class="form-input" type="number" id="c-min-pts" value="50" min="10" max="500">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Raw Flag <span style="color:var(--clr-primary)">(auto-hashed)</span></label>
+              <input class="form-input" type="text" id="c-flag" placeholder="CTF{s3cr3t_fl4g}" autocomplete="off" spellcheck="false">
+              <div id="flag-hash-preview" style="font-family:var(--font-mono);font-size:.68rem;color:var(--clr-text-muted);margin-top:.4rem;word-break:break-all"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Asset Path <span style="color:var(--clr-text-muted)">(optional)</span></label>
+              <input class="form-input" type="text" id="c-asset" placeholder="/assets/challenges/chall01.zip">
+            </div>
+
+            <div id="admin-error" style="display:none;background:#ef444415;border:1px solid #ef444440;border-radius:6px;color:#fca5a5;font-family:var(--font-mono);font-size:.78rem;padding:.6rem .875rem;margin-bottom:1rem"></div>
+            <div id="admin-success" style="display:none;background:#00ff9d15;border:1px solid #00ff9d40;border-radius:6px;color:var(--clr-primary);font-family:var(--font-mono);font-size:.78rem;padding:.6rem .875rem;margin-bottom:1rem"></div>
+
+            <button class="btn btn--primary btn--full" id="btn-create">Create Challenge</button>
+          </div>
+        </div>
+
+        <!-- Recent challenges preview -->
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:1rem">Recent Challenges</h2>
+          <div id="admin-challenge-list" data-stagger>
+            <div class="empty-state"><span class="spinner" style="display:inline-block;width:24px;height:24px;border-width:2px;border-top-color:var(--clr-primary)"></span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Audit Log -->
+      <section style="margin-top:2rem">
+        <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:1rem">Audit Log</h2>
+        <div style="
+          max-height: 500px;
+          overflow-y: auto;
+          border: 1px solid var(--clr-border);
+          border-radius: 0.75rem;
+          background: var(--clr-bg-surface);
+        ">
+          <table style="width: 100%; border-collapse: collapse">
+            <thead style="position: sticky; top: 0; background: var(--clr-bg-raised); border-bottom: 1px solid var(--clr-border)">
+              <tr>
+                <th style="padding: 0.75rem; text-align: left; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--clr-text-muted)">Timestamp</th>
+                <th style="padding: 0.75rem; text-align: left; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--clr-text-muted)">User ID</th>
+                <th style="padding: 0.75rem; text-align: left; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--clr-text-muted)">Action</th>
+                <th style="padding: 0.75rem; text-align: left; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--clr-text-muted)">Details</th>
+              </tr>
+            </thead>
+            <tbody id="audit-log-tbody" style="font-size: 0.85rem">
+              <tr>
+                <td colspan="4" style="padding: 1rem; text-align: center; color: var(--clr-text-muted)">
+                  <span class="spinner" style="display: inline-block; width: 20px; height: 20px; border-width: 2px; border-top-color: var(--clr-primary)"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logout }      from "../js/auth.js";
+  import { setupLogoutConfirmation, timeAgo }  from "../js/ui.js";
+  import { createChallenge, getArchivedChallenges, getDailyChallenge, getChallengeCount, getUserCount, getTotalSolves, getMostSolvedChallenge, getRecentLogs, updateChallenge, deleteChallenge } from "../js/db.js";
+  import { sha256 }                   from "../js/crypto.js";
+  import { categoryBadge, showToast, formatDate } from "../js/ui.js";
+
+  let currentUser, currentProfile;
+
+  try {
+    ({ user: currentUser, profile: currentProfile } = await requireAuth("admin"));
+    document.getElementById("page-loader").classList.add("hidden");
+  } catch { /* redirected */ }
+
+  document.getElementById("user-name").textContent   = currentProfile.displayName;
+  document.getElementById("user-avatar").textContent = currentProfile.displayName[0].toUpperCase();
+
+  // ── Load Stats ──
+  async function loadStats() {
+    try {
+      const [challenges, users, totalSolves, mostSolved] = await Promise.all([
+        getChallengeCount(),
+        getUserCount(),
+        getTotalSolves(),
+        getMostSolvedChallenge(),
+      ]);
+      document.getElementById("stat-challenges").textContent = challenges;
+      document.getElementById("stat-users").textContent = users;
+      document.getElementById("stat-total-solves").textContent = totalSolves;
+      if (mostSolved) {
+        document.getElementById("stat-most-solved").textContent = mostSolved.solvesCount;
+        document.getElementById("stat-most-solved-sub").textContent = mostSolved.title;
+      }
+    } catch (err) {
+      console.error("Failed to load stats:", err);
+    }
+  }
+
+  // ── Load Audit Log ──
+  async function loadAuditLog() {
+    try {
+      const logs = await getRecentLogs(20);
+      const tbody = document.getElementById("audit-log-tbody");
+      
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:1rem;text-align:center;color:var(--clr-text-muted)">No logs yet</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(log => {
+        const actionColor = 
+          log.action === "solved" ? "var(--clr-primary)" :
+          log.action === "failed_flag" ? "#f97316" :
+          log.action === "login" ? "#38bdf8" :
+          log.action === "admin_access_denied" ? "#ef4444" :
+          "var(--clr-text-muted)";
+        
+        const actionBgColor = 
+          log.action === "solved" ? "#00ff9d15" :
+          log.action === "failed_flag" ? "#f9731615" :
+          log.action === "login" ? "#38bdf815" :
+          log.action === "admin_access_denied" ? "#ef444415" :
+          "transparent";
+
+        return `
+          <tr style="border-bottom: 1px solid var(--clr-border); hover:background: var(--clr-bg-hover)">
+            <td style="padding: 0.75rem; whitespace: nowrap; color: var(--clr-text-muted)">${timeAgo(log.timestamp)}</td>
+            <td style="padding: 0.75rem; font-family: var(--font-mono); color: var(--clr-text-muted); font-size: 0.75rem">${log.uid.substring(0, 8)}</td>
+            <td style="padding: 0.75rem">
+              <span style="
+                display: inline-block;
+                padding: 0.25rem 0.6rem;
+                background: ${actionBgColor};
+                color: ${actionColor};
+                border-radius: 4px;
+                font-family: var(--font-mono);
+                font-size: 0.75rem;
+                font-weight: 600;
+              ">${log.action.toUpperCase()}</span>
+            </td>
+            <td style="padding: 0.75rem; color: var(--clr-text-muted); font-size: 0.8rem">
+              ${log.details ? JSON.stringify(log.details).substring(0, 50) : "—"}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    } catch (err) {
+      console.error("Failed to load audit log:", err);
+    }
+  }
+
+  // ── Track editing state ──
+  let editingChallengeId = null;
+
+  // ── Live flag hash preview ──
+  const flagInput = document.getElementById("c-flag");
+  const hashPreview = document.getElementById("flag-hash-preview");
+
+  flagInput.addEventListener("input", async () => {
+    const val = flagInput.value.trim();
+    if (!val) { hashPreview.textContent = ""; return; }
+    const hash = await sha256(val);
+    hashPreview.textContent = `SHA-256 → ${hash}`;
+  });
+
+  // ── Load recent challenges ──
+  async function loadChallenges() {
+    const [daily, archived] = await Promise.all([getDailyChallenge(), getArchivedChallenges()]);
+    const all = [daily, ...archived].filter(Boolean).slice(0, 10);
+    const wrap = document.getElementById("admin-challenge-list");
+    wrap.innerHTML = all.length
+      ? all.map(c => `
+          <div class="card" style="margin-bottom:.75rem;padding:1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">
+              ${categoryBadge(c.category)}
+              <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--clr-primary)">${c.currentPoints} pts</span>
+              <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--clr-text-muted);margin-left:auto">${formatDate(c.unlockDate)}</span>
+            </div>
+            <div style="font-family:var(--font-display);font-weight:700">${c.title}</div>
+            <div style="font-size:.78rem;color:var(--clr-text-muted);margin-top:.2rem">👥 ${c.solvesCount} solves</div>
+            <div style="display:flex;gap:.5rem;margin-top:.75rem">
+              <button class="btn btn--ghost btn--sm edit-challenge-btn" data-id="${c.id}">✎ Edit</button>
+              <button class="btn btn--ghost btn--sm delete-challenge-btn" data-id="${c.id}" style="color:#ef4444">✕ Delete</button>
+            </div>
+          </div>`)
+        .join("")
+      : `<div class="empty-state"><div class="empty-state__icon">📭</div><div>No challenges yet.</div></div>`;
+
+    // Add event listeners
+    wrap.querySelectorAll(".edit-challenge-btn").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        const id = e.target.dataset.id;
+        const challenge = all.find(c => c.id === id);
+        if (!challenge) return;
+        // Populate form with challenge data
+        document.getElementById("c-title").value = challenge.title;
+        document.getElementById("c-desc").value = challenge.description;
+        document.getElementById("c-category").value = challenge.category;
+        document.getElementById("c-init-pts").value = challenge.initialPoints;
+        document.getElementById("c-min-pts").value = challenge.minPoints;
+        document.getElementById("c-asset").value = challenge.assetUrl || "";
+        // Set unlock date in datetime-local format
+        if (challenge.unlockDate) {
+          const dt = challenge.unlockDate.toDate ? challenge.unlockDate.toDate() : new Date(challenge.unlockDate);
+          document.getElementById("c-unlock").value = dt.toISOString().slice(0, 16);
+        }
+        // Clear flag preview when editing (user can optionally change flag)
+        document.getElementById("c-flag").value = "";
+        hashPreview.textContent = "";
+        // Set editing mode
+        editingChallengeId = id;
+        const btn = document.getElementById("btn-create");
+        btn.textContent = "Update Challenge";
+        btn.style.background = "var(--clr-accent)";
+        // Focus form
+        document.getElementById("c-title").scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    wrap.querySelectorAll(".delete-challenge-btn").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        const id = e.target.dataset.id;
+        const deleteBtn = e.target;
+        
+        if (deleteBtn.dataset.deleteConfirm !== "true") {
+          // First click - change appearance and set confirm flag
+          deleteBtn.dataset.deleteConfirm = "true";
+          const originalContent = deleteBtn.innerHTML;
+          deleteBtn.innerHTML = "✓ Confirm Delete";
+          deleteBtn.style.background = "#ef444440";
+          deleteBtn.style.color = "#ef4444";
+          
+          // Revert after 3 seconds
+          setTimeout(() => {
+            deleteBtn.dataset.deleteConfirm = "false";
+            deleteBtn.innerHTML = originalContent;
+            deleteBtn.style.background = "";
+            deleteBtn.style.color = "#ef4444";
+          }, 3000);
+        } else {
+          // Second click - delete
+          try {
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<span class="spinner" style="display:inline-block;width:12px;height:12px;border-width:1px;border-top-color:#ef4444"></span> Deleting…';
+            await deleteChallenge(id);
+            showToast("Challenge deleted successfully.", "success");
+            loadChallenges();
+          } catch (err) {
+            showToast(`Delete failed: ${err.message}`, "error");
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = "✕ Delete";
+            deleteBtn.dataset.deleteConfirm = "false";
+          }
+        }
+      });
+    });
+  }
+
+  loadChallenges();
+  loadStats();
+  loadAuditLog();
+
+  // ── Create/Update Challenge ──
+  document.getElementById("btn-create").addEventListener("click", async () => {
+    const title    = document.getElementById("c-title").value.trim();
+    const desc     = document.getElementById("c-desc").value.trim();
+    const category = document.getElementById("c-category").value;
+    const unlock   = document.getElementById("c-unlock").value;
+    const initPts  = parseInt(document.getElementById("c-init-pts").value);
+    const minPts   = parseInt(document.getElementById("c-min-pts").value);
+    const rawFlag  = document.getElementById("c-flag").value.trim();
+    const assetUrl = document.getElementById("c-asset").value.trim();
+
+    const errEl  = document.getElementById("admin-error");
+    const succEl = document.getElementById("admin-success");
+    errEl.style.display  = "none";
+    succEl.style.display = "none";
+
+    // When updating, only flag is optional (keep existing if empty)
+    if (editingChallengeId) {
+      if (!title || !desc || !unlock) {
+        errEl.textContent = "Title, description, and unlock date are required.";
+        errEl.style.display = "block";
+        return;
+      }
+    } else {
+      // When creating, flag is required
+      if (!title || !desc || !unlock || !rawFlag) {
+        errEl.textContent = "Title, description, unlock date, and flag are required.";
+        errEl.style.display = "block";
+        return;
+      }
+    }
+
+    if (minPts >= initPts) {
+      errEl.textContent = "Min points must be less than initial points.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    const btn = document.getElementById("btn-create");
+    btn.disabled = true;
+    const isUpdate = editingChallengeId !== null;
+    btn.innerHTML = '<span class="spinner"></span> ' + (isUpdate ? 'Updating…' : 'Creating…');
+
+    try {
+      if (isUpdate) {
+        // Update existing challenge
+        const updateData = {
+          title,
+          description: desc,
+          category,
+          unlockDate: new Date(unlock),
+          initialPoints: initPts,
+          minPoints: minPts,
+          assetUrl: assetUrl || null,
+        };
+        // Only update flag if a new one is provided
+        if (rawFlag) {
+          updateData.rawFlag = rawFlag;
+        }
+        await updateChallenge(editingChallengeId, updateData);
+        succEl.textContent = "✓ Challenge updated successfully!";
+        succEl.style.display = "block";
+        showToast("Challenge updated.", "success");
+        editingChallengeId = null;
+      } else {
+        // Create new challenge
+        const id = await createChallenge(currentUser.uid, {
+          title,
+          description: desc,
+          category,
+          unlockDate: new Date(unlock),
+          initialPoints: initPts,
+          minPoints: minPts,
+          rawFlag,
+          assetUrl: assetUrl || null,
+        });
+        succEl.textContent = `✓ Challenge created! ID: ${id}`;
+        succEl.style.display = "block";
+        showToast("Challenge created successfully.", "success");
+      }
+
+      // Clear form
+      ["c-title","c-desc","c-flag","c-asset"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("c-unlock").value = "";
+      hashPreview.textContent = "";
+      document.getElementById("c-init-pts").value = "500";
+      document.getElementById("c-min-pts").value = "50";
+      
+      // Reset button
+      btn.textContent = "Create Challenge";
+      btn.style.background = "";
+      
+      loadChallenges();
+    } catch (err) {
+      errEl.textContent = `Error: ${err.message}`;
+      errEl.style.display = "block";
+    }
+
+    btn.disabled = false;
+    if (!isUpdate) {
+      btn.textContent = "Create Challenge";
+    } else {
+      btn.textContent = "Update Challenge";
+    }
+  });
+
+  setupLogoutConfirmation(document.getElementById("btn-logout"), logout);
+</script>
+</body>
+</html>

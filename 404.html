@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Signal Lost</title>
+  <link rel="stylesheet" href="public/css/variables.css">
+</head>
+<body style="
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  font-family: 'DM Sans', 'Inter', sans-serif;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+">
+  <div style="
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--clr-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%);
+    opacity: 0.4;
+    pointer-events: none;
+  "></div>
+
+  <div style="
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+    text-align: center;
+  ">
+    <div style="
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--clr-primary), #00c97a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 40px #00ff9d40;
+      line-height: 1;
+    ">
+      404
+    </div>
+
+    <h1 style="
+      font-family: 'Syne', 'Space Grotesk', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--clr-text);
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    ">
+      Signal Lost
+    </h1>
+
+    <p style="
+      font-size: 1rem;
+      color: var(--clr-text-muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    ">
+      The page you're looking for seems to have been captured by the void.
+      <br>
+      Let's get you back on track.
+    </p>
+
+    <a href="/" style="
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--clr-primary);
+      color: var(--clr-bg);
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 16px #00ff9d40;
+    " onmouseover="this.style.background='#00c97a';this.style.boxShadow='0 0 24px #00ff9d60'" onmouseout="this.style.background='var(--clr-primary)';this.style.boxShadow='0 0 16px #00ff9d40'">
+      ← Back to Safety
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTF Daily — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="modulepreload" href="../js/config.js">
+  <link rel="modulepreload" href="../js/auth.js">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div id="page-loader">
+  <div class="spinner"></div>
+</div>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <a href="/dashboard.html" class="logo-mark">
+        <div class="logo-icon">&gt;_</div>
+        CTFArena
+      </a>
+    </div>
+
+    <span class="sidebar__section-label">Navigate</span>
+    <nav class="sidebar__nav">
+      <a href="/dashboard.html">
+        <span class="nav-icon">⚡</span> Dashboard
+      </a>
+      <a href="/archive.html">
+        <span class="nav-icon">📁</span> Archive
+        <span class="nav-badge" id="nav-archive-count"></span>
+      </a>
+      <a href="/leaderboard.html">
+        <span class="nav-icon">🏆</span> Leaderboard
+      </a>
+      <a href="/profile.html" class="active">
+        <span class="nav-icon">👤</span> Profile
+      </a>
+    </nav>
+
+    <span class="sidebar__section-label">Account</span>
+    <nav class="sidebar__nav">
+      <a href="#" id="nav-admin" style="display:none">
+        <span class="nav-icon">🛡</span> Admin Panel
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user" id="sidebar-user">
+        <div class="avatar" id="user-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">Loading…</div>
+          <div class="user-role" id="user-role">student</div>
+        </div>
+      </div>
+      <button class="btn btn--ghost btn--sm btn--full" id="btn-logout" style="margin-top:0.75rem">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <h1 class="topbar__title">Profile</h1>
+      <span class="topbar__tag">Your Stats</span>
+    </header>
+
+    <main class="main-content">
+
+      <!-- Profile Header -->
+      <div class="card" style="margin-bottom: 2rem">
+        <div style="display: flex; gap: 2rem; align-items: start">
+          <div style="
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--clr-bg-raised);
+            border: 2px solid var(--clr-primary);
+            display: grid;
+            place-items: center;
+            font-size: 2rem;
+            font-family: var(--font-mono);
+            font-weight: 800;
+            color: var(--clr-primary);
+            flex-shrink: 0;
+            box-shadow: 0 0 24px #00ff9d40;
+          " id="profile-avatar">?</div>
+
+          <div style="flex: 1">
+            <div style="margin-bottom: 1.5rem">
+              <label class="form-label">Display Name</label>
+              <div style="display: flex; gap: 0.5rem; align-items: center">
+                <div id="display-name-view" style="
+                  font-family: var(--font-display);
+                  font-size: 1.8rem;
+                  font-weight: 700;
+                  color: var(--clr-text);
+                  flex: 1;
+                "></div>
+                <button id="edit-name-btn" class="btn btn--ghost btn--sm" style="margin-top: 0.3rem">✎</button>
+              </div>
+              <input id="display-name-input" class="form-input" type="text" style="display: none; margin-top: 0.5rem">
+              <div id="edit-name-controls" style="display: none; margin-top: 0.5rem; gap: 0.5rem; display: flex">
+                <button id="save-name-btn" class="btn btn--primary btn--sm">Save</button>
+                <button id="cancel-name-btn" class="btn btn--ghost btn--sm">Cancel</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1rem">
+              <label class="form-label">Email</label>
+              <div id="user-email" style="
+                font-family: var(--font-mono);
+                font-size: 0.9rem;
+                color: var(--clr-text-muted);
+              "></div>
+            </div>
+
+            <div style="margin-bottom: 1rem">
+              <label class="form-label">Joined</label>
+              <div id="user-joined" style="font-size: 0.9rem; color: var(--clr-text-muted)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid-2" style="margin-bottom: 2rem" data-stagger>
+        <div class="card">
+          <div class="card__label">Total Score</div>
+          <div class="card__value card__value--green" id="stat-score">—</div>
+          <div class="card__sub" id="stat-score-sub"></div>
+        </div>
+        <div class="card">
+          <div class="card__label">Global Rank</div>
+          <div class="card__value card__value--gold" id="stat-rank">—</div>
+          <div class="card__sub" id="stat-rank-sub"></div>
+        </div>
+        <div class="card">
+          <div class="card__label">Challenges Solved</div>
+          <div class="card__value" id="stat-solves">—</div>
+        </div>
+        <div class="card">
+          <div class="card__label">Current Streak</div>
+          <div class="card__value" id="stat-streak">—</div>
+          <div class="card__sub">🔥 consecutive solves</div>
+        </div>
+      </div>
+
+      <!-- Solve Timeline -->
+      <section>
+        <h2 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem">Solve Timeline</h2>
+        <div id="timeline" style="
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 1rem;
+          background: var(--clr-bg-surface);
+          border: 1px solid var(--clr-border);
+          border-radius: 0.75rem;
+          max-height: 400px;
+          overflow-y: auto;
+          font-size: 0.9rem;
+        ">
+          <div style="color: var(--clr-text-muted); text-align: center; padding: 1rem;">
+            Loading timeline…
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logout } from "../js/auth.js";
+  import { getUserProfile, getLeaderboard } from "../js/db.js";
+  import { setupLogoutConfirmation, formatDate, timeAgo } from "../js/ui.js";
+
+  let currentUser, currentProfile;
+
+  try {
+    ({ user: currentUser, profile: currentProfile } = await requireAuth("any"));
+    document.getElementById("page-loader").classList.add("hidden");
+  } catch { /* redirected */ }
+
+  // Populate sidebar
+  document.getElementById("user-name").textContent = currentProfile.displayName;
+  document.getElementById("user-role").textContent = currentProfile.role;
+  document.getElementById("user-avatar").textContent = currentProfile.displayName[0].toUpperCase();
+  if (currentProfile.role === "admin") {
+    const navAdmin = document.getElementById("nav-admin");
+    navAdmin.style.display = "flex";
+    navAdmin.href = "/admin.html";
+  }
+
+  // Populate profile header
+  document.getElementById("profile-avatar").textContent = currentProfile.displayName[0].toUpperCase();
+  document.getElementById("display-name-view").textContent = currentProfile.displayName;
+  document.getElementById("user-email").textContent = currentProfile.email || "—";
+  document.getElementById("user-joined").textContent = currentProfile.createdAt 
+    ? formatDate(currentProfile.createdAt) 
+    : "—";
+
+  // Stats
+  document.getElementById("stat-score").textContent = currentProfile.score.toLocaleString();
+  document.getElementById("stat-solves").textContent = (currentProfile.solves || []).length;
+  document.getElementById("stat-streak").textContent = currentProfile.streak || 0;
+
+  const board = await getLeaderboard(100);
+  const myRank = board.findIndex(u => u.id === currentUser.uid) + 1;
+  const topPct = board.length ? Math.round((myRank / board.length) * 100) : 0;
+  document.getElementById("stat-rank").textContent = myRank ? `#${myRank}` : "—";
+  document.getElementById("stat-rank-sub").textContent = myRank ? `top ${topPct}%` : "";
+  document.getElementById("stat-score-sub").textContent = `+${currentProfile.score} total`;
+
+  // Timeline (show last solves from profile.solves if future feature stores timestamps)
+  const timelineEl = document.getElementById("timeline");
+  if (currentProfile.solves && currentProfile.solves.length > 0) {
+    timelineEl.innerHTML = `
+      <div style="color: var(--clr-text-muted); text-align: center; padding: 1rem;">
+        You've solved ${currentProfile.solves.length} challenge${currentProfile.solves.length !== 1 ? 's' : ''}.
+      </div>
+    `;
+  } else {
+    timelineEl.innerHTML = `
+      <div style="color: var(--clr-text-muted); text-align: center; padding: 1rem;">
+        No solves yet. Visit the dashboard to get started!
+      </div>
+    `;
+  }
+
+  // ── Inline Edit Display Name ──
+  const editBtn = document.getElementById("edit-name-btn");
+  const displayNameView = document.getElementById("display-name-view");
+  const displayNameInput = document.getElementById("display-name-input");
+  const editControls = document.getElementById("edit-name-controls");
+  const saveBtn = document.getElementById("save-name-btn");
+  const cancelBtn = document.getElementById("cancel-name-btn");
+
+  editBtn.addEventListener("click", () => {
+    displayNameView.style.display = "none";
+    editBtn.style.display = "none";
+    displayNameInput.style.display = "block";
+    displayNameInput.value = currentProfile.displayName;
+    editControls.style.display = "flex";
+    displayNameInput.focus();
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    displayNameView.style.display = "block";
+    editBtn.style.display = "block";
+    displayNameInput.style.display = "none";
+    editControls.style.display = "none";
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    const newName = displayNameInput.value.trim();
+    if (!newName) return alert("Display name cannot be empty.");
+    if (newName === currentProfile.displayName) {
+      cancelBtn.click();
+      return;
+    }
+    
+    saveBtn.disabled = true;
+    try {
+      // Note: Add updateUserProfile function if implementing backend save
+      // For now, this is a placeholder
+      currentProfile.displayName = newName;
+      displayNameView.textContent = newName;
+      document.getElementById("profile-avatar").textContent = newName[0].toUpperCase();
+      document.getElementById("user-name").textContent = newName;
+      cancelBtn.click();
+    } catch (err) {
+      alert("Failed to save. Please try again.");
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  // ── Logout ──
+  setupLogoutConfirmation(document.getElementById("btn-logout"), logout);
+</script>
+</body>
+</html>

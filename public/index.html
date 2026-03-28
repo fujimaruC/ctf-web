@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CTF Daily — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/variables.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    body {
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Animated background grid ── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--clr-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ── Glowing orb ── */
+    body::after {
+      content: "";
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, #00ff9d12, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .auth-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 1rem;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-brand .logo-icon {
+      width: 52px;
+      height: 52px;
+      border: 2px solid var(--clr-primary);
+      border-radius: 10px;
+      display: inline-grid;
+      place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--clr-primary);
+      box-shadow: 0 0 24px #00ff9d40;
+      margin-bottom: 1rem;
+    }
+
+    .auth-brand h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--clr-text);
+      letter-spacing: -0.02em;
+    }
+
+    .auth-brand p {
+      font-size: 0.875rem;
+      color: var(--clr-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .auth-card {
+      background: var(--clr-bg-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 32px #00000060, 0 0 0 1px #ffffff05;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--clr-bg-raised);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.75rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--clr-text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+    }
+
+    .tab-btn.active {
+      background: var(--clr-bg-surface);
+      color: var(--clr-primary);
+      box-shadow: 0 1px 4px #00000040;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-label {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--clr-text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--clr-bg-raised);
+      border: 1px solid var(--clr-border);
+      border-radius: 8px;
+      color: var(--clr-text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      padding: 0.7rem 1rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-input:focus {
+      border-color: var(--clr-primary);
+      box-shadow: 0 0 0 3px #00ff9d20;
+    }
+
+    .btn-submit {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: var(--clr-primary);
+      color: var(--clr-bg);
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #00c97a;
+      box-shadow: 0 0 16px #00ff9d40;
+    }
+
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-msg {
+      background: #ef444415;
+      border: 1px solid #ef444440;
+      border-radius: 6px;
+      color: #fca5a5;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.6rem 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--clr-text-subtle);
+      margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid transparent;
+      border-top-color: var(--clr-bg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="logo-icon">&gt;_</div>
+      <h1>CTF Daily</h1>
+      <p>Sharpen your skills. One challenge at a time.</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login">Sign In</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <div id="error-box" class="error-msg" role="alert"></div>
+
+      <!-- Login Panel -->
+      <div id="panel-login" class="panel active">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input class="form-input" type="email" id="login-email" placeholder="operator@ctf.io" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input class="form-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-submit" id="btn-login">Sign In</button>
+      </div>
+
+      <!-- Register Panel -->
+      <div id="panel-register" class="panel">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Handle</label>
+          <input class="form-input" type="text" id="reg-name" placeholder="h4xor_42" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="operator@ctf.io" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="min. 8 characters" autocomplete="new-password">
+        </div>
+        <button class="btn-submit" id="btn-register">Create Account</button>
+      </div>
+    </div>
+
+    <p class="footer-note">// ctf-daily &mdash; serverless &middot; zero-trust &middot; modular</p>
+  </div>
+
+  <script type="module">
+    import { login, register } from "../js/auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { auth } from "../js/config.js";
+
+    // ── Auth redirect: if already logged in, go to dashboard ──
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        window.location.href = "/dashboard.html";
+      }
+    });
+
+    // ── Tabs ──
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
+        hideError();
+      });
+    });
+
+    function showError(msg) {
+      const box = document.getElementById("error-box");
+      box.textContent = msg;
+      box.classList.add("visible");
+    }
+
+    function hideError() {
+      document.getElementById("error-box").classList.remove("visible");
+    }
+
+    function setLoading(btn, loading) {
+      btn.disabled = loading;
+      btn.innerHTML = loading ? '<span class="spinner"></span>' : btn.dataset.label;
+    }
+
+    // ── Initialize button labels ──
+    const btnLogin = document.getElementById("btn-login");
+    const btnRegister = document.getElementById("btn-register");
+    btnLogin.dataset.label = "Sign In";
+    btnRegister.dataset.label = "Create Account";
+
+    // ── Login ──
+    btnLogin.addEventListener("click", async () => {
+      hideError();
+      const email    = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      if (!email || !password) return showError("All fields are required.");
+      setLoading(btnLogin, true);
+      try {
+        await login(email, password);
+      } catch (err) {
+        showError(friendlyError(err.code));
+        setLoading(btnLogin, false);
+      }
+    });
+
+    // Enter key on password
+    document.getElementById("login-password").addEventListener("keydown", e => {
+      if (e.key === "Enter") btnLogin.click();
+    });
+
+    // ── Register ──
+    btnRegister.addEventListener("click", async () => {
+      hideError();
+      const name     = document.getElementById("reg-name").value.trim();
+      const email    = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value;
+      if (!name || !email || !password) return showError("All fields are required.");
+      if (password.length < 8) return showError("Password must be at least 8 characters.");
+      setLoading(btnRegister, true);
+      try {
+        await register(email, password, name);
+      } catch (err) {
+        showError(friendlyError(err.code));
+        setLoading(btnRegister, false);
+      }
+    });
+
+    function friendlyError(code) {
+      const map = {
+        "auth/user-not-found":       "No account found with that email.",
+        "auth/wrong-password":       "Incorrect password.",
+        "auth/email-already-in-use": "Email is already registered.",
+        "auth/weak-password":        "Password is too weak.",
+        "auth/invalid-email":        "Invalid email address.",
+        "auth/too-many-requests":    "Too many attempts. Try again later.",
+      };
+      return map[code] || "An error occurred. Please try again.";
+    }
+  </script>
+</body>
+</html>
