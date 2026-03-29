@@ -6,7 +6,7 @@
   <title>CTF Daily — Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="/public/css/variables.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -281,14 +281,13 @@
   </div>
 
   <script type="module">
-    import { login, register } from "../js/auth.js";
+    import { login, register } from "./js/auth.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { auth } from "../js/config.js";
+    import { auth } from "./js/config.js";
 
-    // ── Auth redirect: if already logged in, go to dashboard ──
     onAuthStateChanged(auth, user => {
       if (user) {
-        window.location.href = "/dashboard.html";
+        window.location.href = "dashboard.html";
       }
     });
 

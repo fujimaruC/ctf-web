@@ -6,8 +6,8 @@
   <title>CTF Daily — Admin Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="modulepreload" href="../js/config.js">
-  <link rel="modulepreload" href="../js/auth.js">
+  <link rel="modulepreload" href="./js/config.js">
+  <link rel="modulepreload" href="./js/auth.js">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -20,20 +20,20 @@
 
   <aside class="sidebar">
     <div class="sidebar__logo">
-      <a href="/dashboard.html" class="logo-mark">
+      <a href="./dashboard.html" class="logo-mark">
         <div class="logo-icon">&gt;_</div>
         CTFArena
       </a>
     </div>
     <span class="sidebar__section-label">Admin</span>
     <nav class="sidebar__nav">
-      <a href="/admin.html" class="active"><span class="nav-icon">🛡</span> Challenges</a>
-      <a href="/leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
-      <a href="/dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+      <a href="./admin.html" class="active"><span class="nav-icon">🛡</span> Challenges</a>
+      <a href="./leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a href="./dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
     </nav>
     <span class="sidebar__section-label">Account</span>
     <nav class="sidebar__nav">
-      <a href="/profile.html"><span class="nav-icon">👤</span> Profile</a>
+      <a href="./profile.html"><span class="nav-icon">👤</span> Profile</a>
     </nav>
     <div class="sidebar__footer">
       <div class="sidebar__user">
@@ -186,11 +186,11 @@
 </div>
 
 <script type="module">
-  import { requireAuth, logout }      from "../js/auth.js";
-  import { setupLogoutConfirmation, timeAgo }  from "../js/ui.js";
-  import { createChallenge, getArchivedChallenges, getDailyChallenge, getChallengeCount, getUserCount, getTotalSolves, getMostSolvedChallenge, getRecentLogs, updateChallenge, deleteChallenge } from "../js/db.js";
-  import { sha256 }                   from "../js/crypto.js";
-  import { categoryBadge, showToast, formatDate } from "../js/ui.js";
+  import { requireAuth, logout }      from "./js/auth.js";
+  import { setupLogoutConfirmation, timeAgo }  from "./js/ui.js";
+  import { createChallenge, getArchivedChallenges, getDailyChallenge, getChallengeCount, getUserCount, getTotalSolves, getMostSolvedChallenge, getRecentLogs, updateChallenge, deleteChallenge } from "./js/db.js";
+  import { sha256 }                   from "./js/crypto.js";
+  import { categoryBadge, showToast, formatDate } from "./js/ui.js";
 
   let currentUser, currentProfile;
 
@@ -202,7 +202,6 @@
   document.getElementById("user-name").textContent   = currentProfile.displayName;
   document.getElementById("user-avatar").textContent = currentProfile.displayName[0].toUpperCase();
 
-  // ── Load Stats ──
   async function loadStats() {
     try {
       const [challenges, users, totalSolves, mostSolved] = await Promise.all([
@@ -223,7 +222,6 @@
     }
   }
 
-  // ── Load Audit Log ──
   async function loadAuditLog() {
     try {
       const logs = await getRecentLogs(20);

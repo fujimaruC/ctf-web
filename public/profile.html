@@ -6,8 +6,8 @@
   <title>CTF Daily — Profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="modulepreload" href="../js/config.js">
-  <link rel="modulepreload" href="../js/auth.js">
+  <link rel="modulepreload" href="./js/config.js">
+  <link rel="modulepreload" href="./js/auth.js">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -20,7 +20,7 @@
 
   <aside class="sidebar">
     <div class="sidebar__logo">
-      <a href="/dashboard.html" class="logo-mark">
+      <a href="./dashboard.html" class="logo-mark">
         <div class="logo-icon">&gt;_</div>
         CTFArena
       </a>
@@ -28,17 +28,17 @@
 
     <span class="sidebar__section-label">Navigate</span>
     <nav class="sidebar__nav">
-      <a href="/dashboard.html">
+      <a href="./dashboard.html">
         <span class="nav-icon">⚡</span> Dashboard
       </a>
-      <a href="/archive.html">
+      <a href="./archive.html">
         <span class="nav-icon">📁</span> Archive
         <span class="nav-badge" id="nav-archive-count"></span>
       </a>
-      <a href="/leaderboard.html">
+      <a href="./leaderboard.html">
         <span class="nav-icon">🏆</span> Leaderboard
       </a>
-      <a href="/profile.html" class="active">
+      <a href="./profile.html" class="active">
         <span class="nav-icon">👤</span> Profile
       </a>
     </nav>
@@ -177,9 +177,9 @@
 </div>
 
 <script type="module">
-  import { requireAuth, logout } from "../js/auth.js";
-  import { getUserProfile, getLeaderboard } from "../js/db.js";
-  import { setupLogoutConfirmation, formatDate, timeAgo } from "../js/ui.js";
+  import { requireAuth, logout } from "./js/auth.js";
+  import { getUserProfile, getLeaderboard } from "./js/db.js";
+  import { setupLogoutConfirmation, formatDate, timeAgo } from "./js/ui.js";
 
   let currentUser, currentProfile;
 
@@ -195,7 +195,7 @@
   if (currentProfile.role === "admin") {
     const navAdmin = document.getElementById("nav-admin");
     navAdmin.style.display = "flex";
-    navAdmin.href = "/admin.html";
+    navAdmin.href = "./admin.html";
   }
 
   // Populate profile header

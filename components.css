@@ -1,0 +1,103 @@
+/* =====================================================
+   components.css - Cyberpunk UI Components
+   Cards, badges, animations, glows & interactive extras
+   ===================================================== */
+
+/* re-usable badge style */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.7rem;
+  border-radius: 30px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: rgba(0,255,157,0.1);
+  border: 1px solid var(--clr-border);
+}
+
+.badge-primary {
+  background: rgba(0,255,157,0.2);
+  color: var(--clr-neon-green);
+}
+
+/* neon glow text */
+.neon-text {
+  color: var(--clr-neon-green);
+  text-shadow: 0 0 3px currentColor;
+}
+
+/* tooltips / misc */
+[data-stagger] {
+  animation: fadeSlideUp 0.3s ease backwards;
+  animation-delay: calc(var(--stagger, 0) * 0.07s);
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* challenge category helper */
+.category-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  background: rgba(185, 103, 255, 0.2);
+  border-left: 3px solid var(--clr-neon-purple);
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* timeline - for recent solves avatars */
+.recent-avatar {
+  background: linear-gradient(145deg, #0f172a, #000);
+}
+
+/* responsive refinements */
+@media (max-width: 640px) {
+  .modal { padding: 1rem; width: 95%;}
+  .topbar { flex-direction: column; align-items: flex-start;}
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0e16;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--clr-neon-green);
+  border-radius: 8px;
+}
+
+/* admin badge / special */
+.sidebar__nav a#nav-admin {
+  color: #ff77aa;
+}
+.sidebar__nav a#nav-admin:hover {
+  border-left-color: #ff3b9b;
+  color: #ff77aa;
+}
+
+/* glitch effect for logo */
+.logo-mark {
+  position: relative;
+}
+.logo-mark::after {
+  content: '>';
+  position: absolute;
+  left: 10px;
+  opacity: 0;
+  animation: glitch 2s infinite;
+}
+@keyframes glitch {
+  0%,100% { opacity: 0; transform: translate(0);}
+  95% { opacity: 0; }
+  96% { opacity: 0.4; transform: translate(-1px,1px);}
+  97% { opacity: 0; }
+}

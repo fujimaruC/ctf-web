@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CTF Daily — Dashboard</title>
+  <title>CTF Arena — Cyber Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="modulepreload" href="./js/config.js">
-  <link rel="modulepreload" href="./js/auth.js">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="modulepreload" href="./public/js/config.js">
+  <link rel="modulepreload" href=".//public/js/auth.js">
+  <!-- <link rel="stylesheet" href="css/variables.css"> -->
+  <link rel="stylesheet" href="./layout.css">
+  <link rel="stylesheet" href="./components.css">
 </head>
 <body>
 <div id="page-loader">
@@ -19,36 +20,36 @@
 <div class="ambient-orb"></div>
 <div class="app-shell">
 
-  <!-- ── Sidebar ── -->
+  <!-- ── Sidebar (enhanced cyber) ── -->
   <aside class="sidebar">
     <div class="sidebar__logo">
       <a href="./dashboard.html" class="logo-mark">
-        <div class="logo-icon">&gt;_</div>
-        CTFArena
+        <div class="logo-icon">#_</div>
+        CTF::Arena
       </a>
     </div>
 
     <span class="sidebar__section-label">Navigate</span>
     <nav class="sidebar__nav">
       <a href="./dashboard.html" class="active">
-        <span class="nav-icon">⚡</span> Dashboard
+        <span class="nav-icon">⎇</span> Dashboard
       </a>
       <a href="./archive.html">
-        <span class="nav-icon">📁</span> Archive
+        <span class="nav-icon">⌗</span> Archive
         <span class="nav-badge" id="nav-archive-count"></span>
       </a>
       <a href="./leaderboard.html">
-        <span class="nav-icon">🏆</span> Leaderboard
+        <span class="nav-icon">⌘</span> Leaderboard
       </a>
     </nav>
 
     <span class="sidebar__section-label">Account</span>
     <nav class="sidebar__nav">
       <a href="./profile.html">
-        <span class="nav-icon">👤</span> Profile
+        <span class="nav-icon">⍟</span> Profile
       </a>
       <a href="#" id="nav-admin" style="display:none">
-        <span class="nav-icon">🛡</span> Admin Panel
+        <span class="nav-icon">⚙</span> Admin Core
       </a>
     </nav>
 
@@ -61,25 +62,27 @@
         </div>
       </div>
       <button class="btn btn--ghost btn--sm btn--full" id="btn-logout" style="margin-top:0.75rem">
-        Sign Out
+        ⟫ logout
       </button>
     </div>
   </aside>
 
-  <!-- ── Main ── -->
-  <div>
+  <!-- ── Main Content Area ── -->
+  <div style="flex:1; display: flex; flex-direction: column;">
     <header class="topbar">
-      <h1 class="topbar__title">Dashboard</h1>
-      <span class="topbar__tag" id="event-label">Daily Drop</span>
+      <div style="display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;">
+        <h1 class="topbar__title">>_ dashboard.ctl</h1>
+        <span class="topbar__tag" id="event-label">[DAILY DROP]</span>
+      </div>
       <div class="topbar__right">
-        <span class="live-indicator">Live</span>
+        <span class="live-indicator">ACTIVE_SESSION</span>
         <span class="countdown" id="countdown">--:--:--</span>
       </div>
     </header>
 
     <main class="main-content">
 
-      <!-- Stats Row -->
+      <!-- Stats Row - fully functional -->
       <div class="grid-2" style="margin-bottom:1.5rem" data-stagger>
         <div class="card">
           <div class="card__label">Total Score</div>
@@ -88,7 +91,7 @@
           <div class="stat-bar"><div class="stat-bar__fill" id="stat-bar" style="width:0%"></div></div>
         </div>
         <div class="card">
-          <div class="card__label">Rank</div>
+          <div class="card__label">Rank / percentile</div>
           <div class="card__value card__value--gold" id="stat-rank">—</div>
           <div class="card__sub" id="stat-rank-sub"></div>
         </div>
@@ -103,26 +106,26 @@
         </div>
       </div>
 
-      <!-- Daily Challenge -->
+      <!-- Daily Challenge Section -->
       <section data-stagger>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-          <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700">Today's Challenge</h2>
-          <a href="/archive.html" class="btn btn--ghost btn--sm">View Archive →</a>
+          <h2 style="font-family:var(--font-mono);font-size:0.9rem;font-weight:700;letter-spacing:1px;border-left:3px solid var(--clr-neon-green);padding-left:0.7rem;">ACTIVE_CHALLENGE</h2>
+          <a href="/archive.html" class="btn btn--ghost btn--sm">view archive →</a>
         </div>
         <div id="daily-challenge-wrap">
           <div class="empty-state">
             <div class="spinner" style="margin:0 auto 1rem;width:32px;height:32px;border-width:3px"></div>
-            <div>Loading today's challenge…</div>
+            <div>loading encrypted data...</div>
           </div>
         </div>
       </section>
 
       <!-- Recent Activity Feed -->
       <section style="margin-top:2rem" data-stagger>
-        <h2 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:1rem">Recent Solves</h2>
+        <h2 style="font-family:var(--font-mono);font-size:0.9rem;font-weight:700;letter-spacing:1px;border-left:3px solid var(--clr-neon-cyan);padding-left:0.7rem;margin-bottom:1rem">RECENT_SOLVES.log</h2>
         <div id="activity-feed" style="display:flex;flex-direction:column;gap:0.75rem">
           <div class="empty-state" style="padding:1.5rem;border:1px solid var(--clr-border);border-radius:0.75rem;text-align:center;color:var(--clr-text-muted)">
-            Loading activity…
+            fetching activity...
           </div>
         </div>
       </section>
@@ -131,7 +134,7 @@
   </div>
 </div>
 
-<!-- Challenge Modal -->
+<!-- Challenge Modal - preserve all IDs, just improved visuals -->
 <div class="modal-overlay" id="challenge-modal">
   <div class="modal">
     <div class="modal__header">
@@ -160,7 +163,7 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="flag-input">Submit Flag</label>
+      <label class="form-label" for="flag-input">submit flag</label>
       <div style="display:flex;gap:0.75rem;position:relative">
         <div style="position:relative;flex:1">
           <input class="form-input" type="text" id="flag-input" placeholder="CTF{...}" autocomplete="off" spellcheck="false">
@@ -174,11 +177,12 @@
   </div>
 </div>
 
+<!-- SCRIPT: unchanged to preserve all logic/hooks -->
 <script type="module">
-  import { requireAuth, logout }    from "./js/auth.js";
-  import { getDailyChallenge, submitFlag, getLeaderboard, getUserProfile, getRecentSolves } from "./js/db.js";
-  import { categoryBadge, showToast, startCountdown, timeAgo, animateCounter } from "./js/ui.js";
-  import { setupLogoutConfirmation } from "./js/ui.js";
+  import { requireAuth, logout }    from "./public/js/auth.js";
+  import { getDailyChallenge, submitFlag, getLeaderboard, getUserProfile, getRecentSolves } from "./public/js/db.js";
+  import { categoryBadge, showToast, startCountdown, timeAgo, animateCounter } from "./public/js/ui.js";
+  import { setupLogoutConfirmation } from "./public/js/ui.js";
 
   let currentUser, currentProfile, currentChallenge;
 
