@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — Admin</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .admin-sidebar { background: #0d0f12; border-right-color: #1e2229; }
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(232,160,32,0.12); border: 1px solid rgba(232,160,32,0.2);
+      border-radius: 99px; padding: 2px 10px;
+      font-size: 10px; font-weight: 700; color: var(--accent);
+      font-family: var(--font-display); letter-spacing: 0.5px;
+    }
+    /* Tabs */
+    .admin-tabs { display: flex; gap: 4px; background: var(--surface); border-radius: var(--radius); padding: 4px; margin-bottom: 28px; }
+    .admin-tab {
+      flex: 1; padding: 9px 14px; border-radius: 7px; border: none;
+      font-family: var(--font-display); font-size: 13px; font-weight: 600;
+      cursor: pointer; background: none; color: var(--text-muted); transition: all 0.2s;
+    }
+    .admin-tab.active { background: var(--bg-2); color: var(--text-primary); }
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    /* Stats row */
+    .admin-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+
+    /* Challenge form */
+    .ch-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ch-form-grid .full { grid-column: 1/-1; }
+
+    /* Challenge table actions */
+    .action-btns { display: flex; gap: 6px; }
+
+    /* Students table */
+    .user-row { cursor: pointer; }
+    .role-toggle {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 99px; font-size: 11px; font-weight: 700; font-family: var(--font-display);
+      cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .role-toggle.student { background: var(--surface-2); color: var(--text-secondary); }
+    .role-toggle.admin { background: var(--accent-dim); color: var(--accent); }
+
+    /* File entry */
+    .file-entry { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: start; }
+    .remove-file-btn { background: var(--red-dim); color: var(--red); border: none; border-radius: 6px; padding: 8px 10px; cursor: pointer; font-size: 14px; height: 42px; }
+    .add-file-btn { background: none; border: 1px dashed var(--border); color: var(--text-muted); border-radius: var(--radius); padding: 8px 16px; cursor: pointer; font-size: 13px; width: 100%; transition: all 0.2s; }
+    .add-file-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Hint entry */
+    .hint-entry { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 8px; }
+    .hint-entry-row { display: grid; grid-template-columns: 1fr 100px auto; gap: 8px; align-items: start; }
+
+    .publish-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .toggle-switch { width: 42px; height: 24px; background: var(--border); border-radius: 99px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-switch.on { background: var(--green); }
+    .toggle-switch::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .toggle-switch.on::after { transform: translateX(18px); }
+
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+
+    .search-bar { margin-bottom: 16px; }
+
+    /* Category accent colors */
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    @media (max-width: 1000px) {
+      .admin-stats { grid-template-columns: repeat(2,1fr); }
+      .ch-form-grid { grid-template-columns: 1fr; }
+      .ch-form-grid .full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar admin-sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Navigation</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Student Dashboard</a>
+      <a href="challenges.html" class="nav-item"><span class="nav-icon">⚑</span> Challenges</a>
+      <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">Admin</div>
+      <a href="admin.html" class="nav-item active" style="color:var(--accent);"><span class="nav-icon">⚡</span> Admin Dashboard</a>
+      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon">↩</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
+        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">A</div>
+        <div><div style="font-weight:600;font-size:14px;" id="nav-name">Admin</div><div style="font-size:11px;"><span class="admin-badge">⚡ Admin</span></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header anim-fadeup">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p>Manage challenges, students, and platform settings.</p>
+        </div>
+        <span class="admin-badge" style="margin-left:auto;">⚡ Admin Access</span>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <!-- Overview stats -->
+      <div class="admin-stats anim-fadeup anim-delay-1">
+        <div class="stat-card">
+          <div class="stat-label">Total Challenges</div>
+          <div class="stat-value" id="total-chs">—</div>
+          <div class="stat-sub" id="pub-chs">— published</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Students</div>
+          <div class="stat-value" id="total-students">—</div>
+          <div class="stat-sub">Registered accounts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Solves</div>
+          <div class="stat-value" id="total-solves" style="color:var(--green);">—</div>
+          <div class="stat-sub">Across all challenges</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Solve Rate</div>
+          <div class="stat-value" id="solve-rate" style="color:var(--accent);">—%</div>
+          <div class="stat-sub">avg per challenge</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs anim-fadeup anim-delay-2">
+        <button class="admin-tab active" onclick="switchPanel('challenges')">⚑ Challenges</button>
+        <button class="admin-tab" onclick="switchPanel('create')">＋ Create Challenge</button>
+        <button class="admin-tab" onclick="switchPanel('students')">👥 Students</button>
+        <button class="admin-tab" onclick="switchPanel('settings')">⚙ Settings</button>
+      </div>
+
+      <!-- ── CHALLENGES PANEL ── -->
+      <div class="admin-panel active" id="panel-challenges">
+        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+          <div class="search-bar" style="flex:1;min-width:180px;margin-bottom:0;">
+            <input type="text" class="form-input" id="ch-search" placeholder="Search challenges..." oninput="renderChallengesTable()" />
+          </div>
+          <select class="form-input" id="ch-filter-cat" onchange="renderChallengesTable()" style="width:auto;">
+            <option value="">All Categories</option>
+            <option>Web</option><option>Crypto</option><option>Pwn</option>
+            <option>Forensics</option><option>Reversing</option><option>Misc</option>
+          </select>
+          <select class="form-input" id="ch-filter-pub" onchange="renderChallengesTable()" style="width:auto;">
+            <option value="">All Status</option>
+            <option value="1">Published</option>
+            <option value="0">Draft</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Title</th><th>Category</th><th>Difficulty</th><th>Points</th>
+              <th>Solves</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="ch-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── CREATE CHALLENGE PANEL ── -->
+      <div class="admin-panel" id="panel-create">
+        <div class="card">
+          <h2 style="font-size:20px;margin-bottom:4px;" id="form-panel-title">Create New Challenge</h2>
+          <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;">Fill in the details below to add a challenge to FlagForge.</p>
+          <input type="hidden" id="edit-ch-id" />
+          <div class="ch-form-grid">
+            <div class="form-group full">
+              <label class="form-label">Challenge Title *</label>
+              <input type="text" class="form-input" id="ch-title" placeholder="e.g. Cookie Monster" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-input" id="ch-category">
+                <option>Web</option><option>Crypto</option><option>Pwn</option>
+                <option>Forensics</option><option>Reversing</option><option>Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficulty *</label>
+              <select class="form-input" id="ch-difficulty">
+                <option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Points *</label>
+              <input type="number" class="form-input" id="ch-points" placeholder="100" min="1" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Flag *</label>
+              <input type="text" class="form-input" id="ch-flag" placeholder="FLAG{example_flag_here}" />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Description *</label>
+              <textarea class="form-input" id="ch-description" placeholder="Describe the challenge. What should the player do? Include any relevant context." style="min-height:120px;"></textarea>
+            </div>
+
+            <!-- Files section -->
+            <div class="form-group full">
+              <label class="form-label">Challenge Files <span style="color:var(--text-muted);font-weight:400;">(Google Drive / GitHub links)</span></label>
+              <div id="files-container"></div>
+              <button class="add-file-btn" onclick="addFileEntry()">+ Add File Link</button>
+            </div>
+
+            <!-- Hints -->
+            <div class="form-group full">
+              <label class="form-label">Hints <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+              <div id="hints-container"></div>
+              <button class="add-file-btn" onclick="addHintEntry()">+ Add Hint</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Author Name</label>
+              <input type="text" class="form-input" id="ch-author" placeholder="Your name or handle" />
+            </div>
+            <div class="form-group" style="justify-content:flex-end;padding-top:8px;">
+              <label class="form-label">Publish Immediately</label>
+              <label class="publish-toggle">
+                <div class="toggle-switch on" id="publish-toggle" onclick="togglePublish()"></div>
+                <span id="publish-label" style="font-size:14px;">Published</span>
+              </label>
+            </div>
+          </div>
+          <hr class="section-divider" />
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-lg" onclick="saveChallenge()">💾 Save Challenge</button>
+            <button class="btn btn-ghost" onclick="resetForm()">✕ Clear Form</button>
+            <button class="btn btn-ghost" id="cancel-edit-btn" onclick="cancelEdit()" style="display:none;">Cancel Edit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STUDENTS PANEL ── -->
+      <div class="admin-panel" id="panel-students">
+        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;">
+          <input type="text" class="form-input" id="student-search" placeholder="Search students..." oninput="renderStudentsTable()" style="flex:1;" />
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Player</th><th>Email</th><th>Points</th><th>Solves</th><th>Role</th><th>Joined</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="students-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS PANEL ── -->
+      <div class="admin-panel" id="panel-settings">
+        <div class="card" style="max-width:560px;">
+          <h2 style="font-size:20px;margin-bottom:20px;">Platform Settings</h2>
+          <div class="form-group">
+            <label class="form-label">Platform Name</label>
+            <input type="text" class="form-input" id="set-name" placeholder="FlagForge" value="FlagForge" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Challenges (meta stat)</label>
+            <input type="number" class="form-input" id="set-chs" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Events (meta stat)</label>
+            <input type="number" class="form-input" id="set-events" placeholder="0" />
+          </div>
+          <hr class="section-divider" />
+          <div class="form-group">
+            <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+              Competition Mode
+              <label class="publish-toggle">
+                <div class="toggle-switch" id="comp-toggle" onclick="toggleComp()"></div>
+                <span id="comp-label" style="font-size:14px;font-weight:400;">Off</span>
+              </label>
+            </label>
+            <span style="font-size:12px;color:var(--text-muted);">When enabled, the leaderboard is hidden until competition ends.</span>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </main>
+</div>
+
+<!-- ── Edit/Delete confirm modal ── -->
+<div class="modal-overlay hidden" id="delete-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title">Delete Challenge?</div>
+      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+    </div>
+    <p style="color:var(--text-secondary);margin-bottom:24px;">This will permanently delete the challenge and all associated solve data. This cannot be undone.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+let allChallengesAdmin = [];
+let allStudents = [];
+let publishState = true;
+let compMode = false;
+let deleteTargetId = null;
+
+requireAdmin().then(async user => {
+  const userDoc = await db.collection('users').doc(user.uid).get();
+  const ud = userDoc.data() || {};
+  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Admin';
+  const avatarEl = document.getElementById('nav-avatar');
+  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+
+  loadAdminData();
+});
+
+async function loadAdminData() {
+  // Challenges
+  const chSnap = await db.collection('challenges').orderBy('createdAt','desc').get();
+  allChallengesAdmin = chSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderChallengesTable();
+
+  // Students
+  const studSnap = await db.collection('users').orderBy('createdAt','desc').get();
+  allStudents = studSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderStudentsTable();
+
+  // Stats
+  const solveSnap = await db.collection('solves').get();
+  const published = allChallengesAdmin.filter(c => c.published).length;
+  document.getElementById('total-chs').textContent = allChallengesAdmin.length;
+  document.getElementById('pub-chs').textContent = `${published} published`;
+  document.getElementById('total-students').textContent = allStudents.filter(u => u.role !== 'admin').length;
+  document.getElementById('total-solves').textContent = solveSnap.size;
+  const rate = allChallengesAdmin.length ? Math.round((solveSnap.size / allChallengesAdmin.length)) : 0;
+  document.getElementById('solve-rate').textContent = rate + '%';
+
+  // Settings
+  const settingsDoc = await db.collection('meta').doc('settings').get();
+  if (settingsDoc.exists) {
+    const s = settingsDoc.data();
+    if (s.platformName) document.getElementById('set-name').value = s.platformName;
+    if (s.events !== undefined) document.getElementById('set-events').value = s.events;
+    if (s.compMode !== undefined) { compMode = s.compMode; updateCompToggle(); }
+  }
+}
+
+function switchPanel(name) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── Challenges table ──
+function renderChallengesTable() {
+  const q = document.getElementById('ch-search').value.toLowerCase();
+  const cat = document.getElementById('ch-filter-cat').value;
+  const pub = document.getElementById('ch-filter-pub').value;
+  let filtered = allChallengesAdmin.filter(ch => {
+    if (q && !ch.title?.toLowerCase().includes(q)) return false;
+    if (cat && ch.category !== cat) return false;
+    if (pub === '1' && !ch.published) return false;
+    if (pub === '0' && ch.published) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    document.getElementById('ch-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">No challenges found.</td></tr>';
+    return;
+  }
+
+  document.getElementById('ch-tbody').innerHTML = filtered.map(ch => `
+    <tr>
+      <td><span style="font-weight:600;">${sanitize(ch.title)}</span></td>
+      <td>${categoryBadge(ch.category)}</td>
+      <td>${difficultyBadge(ch.difficulty)}</td>
+      <td><span style="font-family:var(--font-display);font-weight:700;color:var(--accent);">${ch.points}</span></td>
+      <td>${ch.solveCount||0}</td>
+      <td>
+        <span class="badge ${ch.published?'badge-solved':'badge-unsolved'}">
+          ${ch.published ? '● Published' : '○ Draft'}
+        </span>
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="editChallenge('${ch.id}')">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="togglePublishChallenge('${ch.id}', ${!ch.published})">${ch.published?'Unpublish':'Publish'}</button>
+          <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);" onclick="confirmDelete('${ch.id}')">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function togglePublishChallenge(id, state) {
+  await db.collection('challenges').doc(id).update({ published: state });
+  const ch = allChallengesAdmin.find(c => c.id === id);
+  if (ch) ch.published = state;
+  renderChallengesTable();
+  showToast(state ? 'Challenge published.' : 'Challenge set to draft.', 'success');
+}
+
+function confirmDelete(id) {
+  deleteTargetId = id;
+  openModal('delete-modal');
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    await db.collection('challenges').doc(deleteTargetId).delete();
+    allChallengesAdmin = allChallengesAdmin.filter(c => c.id !== deleteTargetId);
+    renderChallengesTable();
+    closeModal('delete-modal');
+    showToast('Challenge deleted.', 'success');
+  };
+}
+
+// ── Create / Edit challenge ──
+let fileCount = 0;
+let hintCount = 0;
+
+function addFileEntry(name='', url='', type='') {
+  const id = fileCount++;
+  const div = document.createElement('div');
+  div.className = 'file-entry'; div.id = `file-${id}`;
+  div.innerHTML = `
+    <input type="text" class="form-input" placeholder="File name (e.g. chall.zip)" value="${sanitize(name)}" id="fname-${id}" />
+    <input type="text" class="form-input" placeholder="Google Drive / GitHub URL" value="${sanitize(url)}" id="furl-${id}" />
+    <button class="remove-file-btn" onclick="document.getElementById('file-${id}').remove()">✕</button>`;
+  document.getElementById('files-container').appendChild(div);
+}
+
+function addHintEntry(text='', cost=0) {
+  const id = hintCount++;
+  const div = document.createElement('div');
+  div.className = 'hint-entry'; div.id = `hint-entry-${id}`;
+  div.innerHTML = `
+    <div class="hint-entry-row">
+      <div><input type="text" class="form-input" placeholder="Hint text..." value="${sanitize(text)}" id="htext-${id}" /></div>
+      <div><input type="number" class="form-input" placeholder="Cost (pts)" value="${cost}" id="hcost-${id}" min="0" /></div>
+      <div style="display:flex;align-items:flex-start;padding-top:0;"><button class="remove-file-btn" onclick="document.getElementById('hint-entry-${id}').remove()">✕</button></div>
+    </div>`;
+  document.getElementById('hints-container').appendChild(div);
+}
+
+function getFiles() {
+  const entries = document.querySelectorAll('#files-container .file-entry');
+  return Array.from(entries).map(e => {
+    const id = e.id.split('-')[1];
+    return { name: document.getElementById(`fname-${id}`)?.value?.trim(), url: document.getElementById(`furl-${id}`)?.value?.trim() };
+  }).filter(f => f.name && f.url);
+}
+
+function getHints() {
+  const entries = document.querySelectorAll('#hints-container .hint-entry');
+  return Array.from(entries).map(e => {
+    const id = e.id.split('-')[2];
+    return { text: document.getElementById(`htext-${id}`)?.value?.trim(), cost: parseInt(document.getElementById(`hcost-${id}`)?.value)||0 };
+  }).filter(h => h.text);
+}
+
+function togglePublish() {
+  publishState = !publishState;
+  updatePublishToggle();
+}
+function updatePublishToggle() {
+  const el = document.getElementById('publish-toggle');
+  el.classList.toggle('on', publishState);
+  document.getElementById('publish-label').textContent = publishState ? 'Published' : 'Draft';
+}
+
+async function saveChallenge() {
+  const id = document.getElementById('edit-ch-id').value;
+  const title = document.getElementById('ch-title').value.trim();
+  const category = document.getElementById('ch-category').value;
+  const difficulty = document.getElementById('ch-difficulty').value;
+  const points = parseInt(document.getElementById('ch-points').value);
+  const flag = document.getElementById('ch-flag').value.trim();
+  const description = document.getElementById('ch-description').value.trim();
+  const authorName = document.getElementById('ch-author').value.trim() || 'Admin';
+
+  if (!title||!flag||!description||!points) { showToast('Please fill in all required fields.', 'error'); return; }
+
+  const data = {
+    title, category, difficulty, points, flag, description,
+    authorName, published: publishState,
+    files: getFiles(), hints: getHints(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const btn = event.target;
+  btn.innerHTML = '💾 Saving...'; btn.disabled = true;
+
+  try {
+    if (id) {
+      await db.collection('challenges').doc(id).update(data);
+      const idx = allChallengesAdmin.findIndex(c => c.id === id);
+      if (idx >= 0) allChallengesAdmin[idx] = { ...allChallengesAdmin[idx], ...data };
+      showToast('Challenge updated!', 'success');
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      data.solveCount = 0;
+      const ref = await db.collection('challenges').add(data);
+      allChallengesAdmin.unshift({ id: ref.id, ...data });
+      showToast('Challenge created!', 'success');
+    }
+    renderChallengesTable();
+    resetForm();
+  } catch(e) { showToast('Error saving challenge: ' + e.message, 'error'); }
+
+  btn.innerHTML = '💾 Save Challenge'; btn.disabled = false;
+}
+
+function editChallenge(id) {
+  const ch = allChallengesAdmin.find(c => c.id === id);
+  if (!ch) return;
+  document.getElementById('edit-ch-id').value = id;
+  document.getElementById('ch-title').value = ch.title||'';
+  document.getElementById('ch-category').value = ch.category||'Web';
+  document.getElementById('ch-difficulty').value = ch.difficulty||'Easy';
+  document.getElementById('ch-points').value = ch.points||'';
+  document.getElementById('ch-flag').value = ch.flag||'';
+  document.getElementById('ch-description').value = ch.description||'';
+  document.getElementById('ch-author').value = ch.authorName||'';
+  publishState = ch.published || false; updatePublishToggle();
+
+  document.getElementById('files-container').innerHTML = '';
+  document.getElementById('hints-container').innerHTML = '';
+  fileCount = 0; hintCount = 0;
+  (ch.files||[]).forEach(f => addFileEntry(f.name, f.url));
+  (ch.hints||[]).forEach(h => addHintEntry(h.text, h.cost));
+
+  document.getElementById('form-panel-title').textContent = 'Edit Challenge';
+  document.getElementById('cancel-edit-btn').style.display = '';
+  // Switch to create panel
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-create').classList.add('active');
+  document.querySelectorAll('.admin-tab')[1].classList.add('active');
+  window.scrollTo({ top: 200, behavior: 'smooth' });
+}
+
+function cancelEdit() { resetForm(); switchPanel('challenges'); }
+function resetForm() {
+  document.getElementById('edit-ch-id').value = '';
+  ['ch-title','ch-flag','ch-description','ch-author'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ch-points').value = '';
+  document.getElementById('ch-category').value = 'Web';
+  document.getElementById('ch-difficulty').value = 'Easy';
+  document.getElementById('files-container').innerHTML = '';
+  document.getElementById('hints-container').innerHTML = '';
+  fileCount=0; hintCount=0;
+  publishState=true; updatePublishToggle();
+  document.getElementById('form-panel-title').textContent = 'Create New Challenge';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+}
+
+// ── Students table ──
+function renderStudentsTable() {
+  const q = document.getElementById('student-search').value.toLowerCase();
+  const filtered = allStudents.filter(u => {
+    if (q && !u.displayName?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q) && !u.username?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    document.getElementById('students-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">No students found.</td></tr>';
+    return;
+  }
+
+  document.getElementById('students-tbody').innerHTML = filtered.map(u => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${getInitials(u.displayName)}</div>
+          <div>
+            <div style="font-weight:600;font-size:13px;">${sanitize(u.displayName||'—')}</div>
+            <div style="font-size:11px;color:var(--text-muted);">@${sanitize(u.username||'—')}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:13px;color:var(--text-secondary);">${sanitize(u.email||'—')}</td>
+      <td><span style="font-family:var(--font-display);font-weight:700;color:var(--accent);">${(u.points||0).toLocaleString()}</span></td>
+      <td>${u.solves||0}</td>
+      <td>
+        <button class="role-toggle ${u.role||'student'}" onclick="toggleUserRole('${u.id}', '${u.role||'student'}')">
+          ${u.role==='admin' ? '⚡ Admin' : '👤 Student'}
+        </button>
+      </td>
+      <td style="font-size:12px;color:var(--text-muted);">${u.createdAt ? new Date(u.createdAt.toMillis()).toLocaleDateString() : '—'}</td>
+      <td>
+        <button class="btn btn-sm" style="background:var(--red-dim);color:var(--red);" onclick="deleteUser('${u.id}')">Remove</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function toggleUserRole(uid, currentRole) {
+  const newRole = currentRole === 'admin' ? 'student' : 'admin';
+  if (!confirm(`Change this user to ${newRole}?`)) return;
+  await db.collection('users').doc(uid).update({ role: newRole });
+  const u = allStudents.find(s => s.id === uid);
+  if (u) u.role = newRole;
+  renderStudentsTable();
+  showToast(`User role updated to ${newRole}.`, 'success');
+}
+
+async function deleteUser(uid) {
+  if (!confirm('Remove this student from the platform? This only removes their Firestore record, not their Auth account.')) return;
+  await db.collection('users').doc(uid).delete();
+  allStudents = allStudents.filter(s => s.id !== uid);
+  renderStudentsTable();
+  showToast('Student removed.', 'success');
+}
+
+// ── Settings ──
+function toggleComp() {
+  compMode = !compMode;
+  document.getElementById('comp-toggle').classList.toggle('on', compMode);
+  document.getElementById('comp-label').textContent = compMode ? 'On' : 'Off';
+}
+function updateCompToggle() {
+  document.getElementById('comp-toggle').classList.toggle('on', compMode);
+  document.getElementById('comp-label').textContent = compMode ? 'On' : 'Off';
+}
+
+async function saveSettings() {
+  const data = {
+    platformName: document.getElementById('set-name').value.trim(),
+    events: parseInt(document.getElementById('set-events').value)||0,
+    challenges: allChallengesAdmin.filter(c => c.published).length,
+    players: allStudents.filter(u => u.role !== 'admin').length,
+    solves: allStudents.reduce((a,u)=>a+(u.solves||0),0),
+    compMode
+  };
+  await db.collection('meta').doc('settings').set(data, { merge: true });
+  await db.collection('meta').doc('stats').set({
+    challenges: data.challenges, players: data.players, solves: data.solves, events: data.events
+  }, { merge: true });
+  showToast('Settings saved!', 'success');
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove('hidden');
+}
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.add('hidden');
+} 
+</script>
+</body>
+</html>

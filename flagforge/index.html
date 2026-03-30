@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — Sharpen Your Edge</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    /* ── Landing-specific ── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      background: rgba(12,14,16,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(42,48,64,0.6);
+      transition: background 0.3s;
+    }
+    .topnav-links { display: flex; align-items: center; gap: 32px; }
+    .topnav-links a {
+      color: var(--text-secondary); text-decoration: none; font-size: 14px;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .topnav-links a:hover { color: var(--text-primary); }
+    .topnav-actions { display: flex; align-items: center; gap: 12px; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 24px 60px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% -10%, rgba(232,160,32,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, rgba(45,212,160,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 90% 70%, rgba(74,158,255,0.05) 0%, transparent 60%);
+    }
+    /* Grid overlay */
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.25;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim); border: 1px solid rgba(232,160,32,0.25);
+      border-radius: 99px; padding: 5px 14px;
+      font-size: 12px; font-family: var(--font-display); font-weight: 600;
+      color: var(--accent); letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 28px; animation: fadeUp 0.6s ease both;
+    }
+    .hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s infinite; }
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 88px); font-weight: 800; line-height: 1.05;
+      letter-spacing: -2px; margin-bottom: 24px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      max-width: 520px; color: var(--text-secondary); font-size: 17px; line-height: 1.7;
+      margin: 0 auto 40px; animation: fadeUp 0.6s ease 0.2s both;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s ease 0.3s both; }
+    .hero-stats {
+      display: flex; gap: 40px; margin-top: 72px;
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .num { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--text-primary); }
+    .hero-stat .lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .hero-divider { width: 1px; background: var(--border); }
+
+    /* ── Category strip ── */
+    .categories-strip {
+      padding: 20px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+      overflow: hidden; position: relative;
+    }
+    .strip-track {
+      display: flex; gap: 12px; width: max-content;
+      animation: scrollStrip 25s linear infinite;
+    }
+    @keyframes scrollStrip {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .strip-item {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 16px; white-space: nowrap;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    }
+
+    /* ── Features section ── */
+    .section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+    .section-tag {
+      display: inline-flex; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+      font-family: var(--font-display);
+    }
+    .section h2 { font-size: clamp(32px, 4vw, 48px); margin-bottom: 16px; }
+    .section > p { color: var(--text-secondary); max-width: 500px; font-size: 16px; line-height: 1.7; margin-bottom: 56px; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+    .feature-card {
+      background: var(--bg-2); padding: 32px;
+      border: 1px solid var(--border);
+      transition: background 0.2s, border-color 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card:first-child { border-radius: var(--radius-lg) 0 0 0; }
+    .feature-card:nth-child(3) { border-radius: 0 var(--radius-lg) 0 0; }
+    .feature-card:nth-child(4) { border-radius: 0 0 0 var(--radius-lg); }
+    .feature-card:last-child { border-radius: 0 0 var(--radius-lg) 0; }
+    .feature-card:hover { background: var(--surface); border-color: var(--border-light); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 18px;
+      background: var(--accent-dim);
+    }
+    .feature-card h3 { font-size: 17px; margin-bottom: 10px; }
+    .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+
+    /* ── Challenge preview ── */
+    .challenges-preview { padding: 0 48px 100px; max-width: 1200px; margin: 0 auto; }
+    .challenges-preview h2 { font-size: 36px; margin-bottom: 8px; }
+    .challenges-preview > p { color: var(--text-secondary); margin-bottom: 36px; }
+    .challenge-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+    .ch-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 22px;
+      transition: all 0.2s; cursor: pointer; text-decoration: none; display: block;
+    }
+    .ch-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-accent); }
+    .ch-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .ch-card-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ch-card h3 { font-size: 16px; margin-bottom: 6px; }
+    .ch-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px; }
+    .ch-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+    .ch-points { font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 18px; }
+    .ch-solves { font-size: 12px; color: var(--text-muted); }
+
+    /* ── CTA ── */
+    .cta-section {
+      margin: 0 48px 80px; border-radius: var(--radius-lg);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 64px 48px; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(232,160,32,0.12), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 { font-size: 40px; margin-bottom: 16px; }
+    .cta-section p { color: var(--text-secondary); max-width: 400px; margin: 0 auto 32px; font-size: 16px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 32px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--text-muted); font-size: 13px;
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text-secondary); }
+
+    @media (max-width: 900px) {
+      .topnav { padding: 0 20px; }
+      .topnav-links { display: none; }
+      .section, .challenges-preview { padding-left: 20px; padding-right: 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .challenge-cards { grid-template-columns: 1fr; }
+      .cta-section { margin: 0 20px 60px; padding: 40px 24px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px 20px; }
+      .hero-stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Nav ── -->
+<nav class="topnav" id="topnav">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">⚑</div>
+    FlagForge
+  </a>
+  <div class="topnav-links">
+    <a href="#features">Features</a>
+    <a href="#challenges">Challenges</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="#about">About</a>
+  </div>
+  <div class="topnav-actions">
+    <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+    <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow"><span class="dot"></span> Live Competition Platform</div>
+  <h1>Capture Flags.<br>Forge <em>Skills.</em></h1>
+  <p>A professional CTF platform for students and security enthusiasts. Solve real-world challenges across Web, Crypto, Forensics, Pwn, and more.</p>
+  <div class="hero-actions">
+    <a href="register.html" class="btn btn-primary btn-lg">Start Competing →</a>
+    <a href="#challenges" class="btn btn-ghost btn-lg">Browse Challenges</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num" id="stat-challenges">248</div><div class="lbl">Challenges</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="num" id="stat-players">1.2k</div><div class="lbl">Players</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="num" id="stat-solves">14k</div><div class="lbl">Total Solves</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="num" id="stat-events">12</div><div class="lbl">Events</div></div>
+  </div>
+</section>
+
+<!-- ── Category strip ── -->
+<div class="categories-strip">
+  <div class="strip-track" id="strip">
+    <div class="strip-item">🌐 Web Exploitation</div>
+    <div class="strip-item">🔐 Cryptography</div>
+    <div class="strip-item">💥 Binary Pwn</div>
+    <div class="strip-item">🔎 Forensics</div>
+    <div class="strip-item">⚙️ Reverse Engineering</div>
+    <div class="strip-item">🧩 Miscellaneous</div>
+    <div class="strip-item">📡 OSINT</div>
+    <div class="strip-item">🛡️ Hardware</div>
+    <!-- duplicated for seamless loop -->
+    <div class="strip-item">🌐 Web Exploitation</div>
+    <div class="strip-item">🔐 Cryptography</div>
+    <div class="strip-item">💥 Binary Pwn</div>
+    <div class="strip-item">🔎 Forensics</div>
+    <div class="strip-item">⚙️ Reverse Engineering</div>
+    <div class="strip-item">🧩 Miscellaneous</div>
+    <div class="strip-item">📡 OSINT</div>
+    <div class="strip-item">🛡️ Hardware</div>
+  </div>
+</div>
+
+<!-- ── Features ── -->
+<section class="section" id="features">
+  <div class="section-tag">Platform Features</div>
+  <h2>Everything you need to<br>run a serious CTF.</h2>
+  <p>Built for educators and competitors. FlagForge handles the platform so you can focus on the challenges.</p>
+  <div class="features-grid">
+    <div class="feature-card anim-fadeup">
+      <div class="feature-icon">⚑</div>
+      <h3>Flag Submission</h3>
+      <p>Dynamic and static flag support. Real-time validation, attempt tracking, and anti-bruteforce protection built in.</p>
+    </div>
+    <div class="feature-card anim-fadeup anim-delay-1">
+      <div class="feature-icon">📊</div>
+      <h3>Live Scoreboard</h3>
+      <p>Real-time leaderboard updates. First blood tracking, score graph over time, and category breakdowns.</p>
+    </div>
+    <div class="feature-card anim-fadeup anim-delay-2">
+      <div class="feature-icon">🗂️</div>
+      <h3>Challenge Manager</h3>
+      <p>Create, edit, and publish challenges from the admin dashboard. Attach files via Google Drive or GitHub links.</p>
+    </div>
+    <div class="feature-card anim-fadeup anim-delay-3">
+      <div class="feature-icon">👥</div>
+      <h3>Student Management</h3>
+      <p>Invite students, manage roles, track individual progress, and export solve data at any time.</p>
+    </div>
+    <div class="feature-card anim-fadeup anim-delay-4">
+      <div class="feature-icon">🔒</div>
+      <h3>Firebase Auth</h3>
+      <p>Secure authentication with email/password and optional Google Sign-In. Powered by Firebase on the free Spark plan.</p>
+    </div>
+    <div class="feature-card anim-fadeup anim-delay-5">
+      <div class="feature-icon">📁</div>
+      <h3>File Distribution</h3>
+      <p>Share challenge files via Google Drive or GitHub. No storage costs — just paste a link and it's live.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Challenge preview ── -->
+<section class="challenges-preview" id="challenges">
+  <div class="section-tag">Sample Challenges</div>
+  <h2>A taste of what's inside.</h2>
+  <p>Challenges across every category, from beginner-friendly to expert-level. New ones drop regularly.</p>
+  <div class="challenge-cards">
+    <a href="login.html" class="ch-card anim-fadeup">
+      <div class="ch-card-top">
+        <div class="ch-card-badges">
+          <span class="badge badge-web">Web</span>
+          <span class="badge badge-easy">Easy</span>
+        </div>
+      </div>
+      <h3>Cookie Monster</h3>
+      <p>Authentication bypass through cookie manipulation. Can you steal the session?</p>
+      <div class="ch-card-footer">
+        <span class="ch-points">100 pts</span>
+        <span class="ch-solves">🏁 342 solves</span>
+      </div>
+    </a>
+    <a href="login.html" class="ch-card anim-fadeup anim-delay-1">
+      <div class="ch-card-top">
+        <div class="ch-card-badges">
+          <span class="badge badge-crypto">Crypto</span>
+          <span class="badge badge-medium">Medium</span>
+        </div>
+      </div>
+      <h3>Broken RSA</h3>
+      <p>A classic RSA implementation with a subtle flaw in prime generation. Find the weakness.</p>
+      <div class="ch-card-footer">
+        <span class="ch-points">300 pts</span>
+        <span class="ch-solves">🏁 89 solves</span>
+      </div>
+    </a>
+    <a href="login.html" class="ch-card anim-fadeup anim-delay-2">
+      <div class="ch-card-top">
+        <div class="ch-card-badges">
+          <span class="badge badge-forensics">Forensics</span>
+          <span class="badge badge-hard">Hard</span>
+        </div>
+      </div>
+      <h3>Hidden in Plain Sight</h3>
+      <p>A PNG file hides a deeply nested secret. Multiple layers of steganography await.</p>
+      <div class="ch-card-footer">
+        <span class="ch-points">500 pts</span>
+        <span class="ch-solves">🏁 21 solves</span>
+      </div>
+    </a>
+  </div>
+  <div style="text-align:center">
+    <a href="register.html" class="btn btn-primary btn-lg">View All Challenges →</a>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<div class="cta-section" id="about">
+  <h2>Ready to forge your skills?</h2>
+  <p>Join hundreds of students competing, learning, and leveling up their cybersecurity skills.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="register.html" class="btn btn-primary btn-lg">Create Account</a>
+    <a href="login.html" class="btn btn-ghost btn-lg">Sign In</a>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<footer>
+  <a href="index.html" class="nav-logo" style="font-size:16px;">
+    <div class="logo-mark" style="width:26px;height:26px;font-size:13px;">⚑</div>
+    FlagForge
+  </a>
+  <div style="display:flex;gap:24px;">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+  <span>© 2025 FlagForge. All rights reserved.</span>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('topnav').style.background =
+      window.scrollY > 30 ? 'rgba(12,14,16,0.97)' : 'rgba(12,14,16,0.85)';
+  });
+
+  // Redirect if already logged in
+  redirectIfLoggedIn('dashboard.html');
+
+  // Animate stats from firebase
+  auth.onAuthStateChanged(async () => {
+    try {
+      const snap = await db.collection('meta').doc('stats').get();
+      if (snap.exists) {
+        const d = snap.data();
+        if (d.challenges) document.getElementById('stat-challenges').textContent = d.challenges;
+        if (d.players) document.getElementById('stat-players').textContent = d.players >= 1000 ? (d.players/1000).toFixed(1)+'k' : d.players;
+        if (d.solves) document.getElementById('stat-solves').textContent = d.solves >= 1000 ? (d.solves/1000).toFixed(1)+'k' : d.solves;
+        if (d.events) document.getElementById('stat-events').textContent = d.events;
+      }
+    } catch(e) { /* use defaults */ }
+  });
+
+  // Intersection observer for animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.style.animationPlayState = 'running'; });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.anim-fadeup').forEach(el => {
+    el.style.animationPlayState = 'paused'; observer.observe(el);
+  });
+</script>
+</body>
+</html>

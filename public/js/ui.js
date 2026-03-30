@@ -77,7 +77,7 @@ export function categoryBadge(cat) {
     Rev:       "badge--rev",
     OSINT:     "badge--osint",
     Misc:      "badge--misc",
-  };
+ 8};
   return `<span class="badge ${map[cat] || "badge--misc"}">${cat}</span>`;
 }
 

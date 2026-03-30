@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — Leaderboard</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin-bottom: 48px; }
+    .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .podium-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: 22px;
+      position: relative;
+    }
+    .podium-slot:nth-child(1) .podium-avatar { width: 80px; height: 80px; font-size: 28px; border: 3px solid #FFD700; background: rgba(255,215,0,0.1); color: #FFD700; }
+    .podium-slot:nth-child(2) .podium-avatar { border: 2px solid #C0C0C0; background: rgba(192,192,192,0.1); color: #C0C0C0; }
+    .podium-slot:nth-child(3) .podium-avatar { border: 2px solid #CD7F32; background: rgba(205,127,50,0.1); color: #CD7F32; }
+    .podium-crown { font-size: 28px; line-height: 1; margin-bottom: -4px; }
+    .podium-name { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+    .podium-pts { font-size: 13px; color: var(--text-muted); }
+    .podium-block {
+      border-radius: var(--radius) var(--radius) 0 0; width: 100px;
+    }
+    .podium-slot:nth-child(1) .podium-block { height: 80px; background: linear-gradient(180deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
+    .podium-slot:nth-child(2) .podium-block { height: 56px; background: linear-gradient(180deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03)); border: 1px solid rgba(192,192,192,0.15); }
+    .podium-slot:nth-child(3) .podium-block { height: 40px; background: linear-gradient(180deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03)); border: 1px solid rgba(205,127,50,0.15); }
+    .podium-rank { font-family: var(--font-display); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
+
+    .lb-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .lb-row {
+      display: grid; grid-template-columns: 60px 1fr auto auto auto;
+      align-items: center; gap: 16px;
+      padding: 14px 20px; border-bottom: 1px solid rgba(42,48,64,0.5);
+      transition: background 0.15s; text-decoration: none; color: inherit;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--surface-2); }
+    .lb-row.current-user { background: var(--accent-dim); }
+    .lb-rank { font-family: var(--font-display); font-weight: 800; font-size: 16px; color: var(--text-muted); text-align: center; }
+    .lb-rank.top { color: var(--accent); }
+    .lb-player { display: flex; align-items: center; gap: 12px; }
+    .lb-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .lb-name { font-weight: 600; font-size: 14px; }
+    .lb-username { font-size: 12px; color: var(--text-muted); }
+    .lb-pts { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--accent); text-align: right; }
+    .lb-solves { font-size: 13px; color: var(--text-secondary); text-align: center; }
+    .lb-bloods { font-size: 13px; color: var(--red); text-align: center; }
+
+    .lb-header {
+      display: grid; grid-template-columns: 60px 1fr auto auto auto;
+      gap: 16px; padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-muted); font-family: var(--font-display);
+    }
+
+    .my-rank-banner {
+      background: var(--accent-dim); border: 1px solid rgba(232,160,32,0.2);
+      border-radius: var(--radius-lg); padding: 16px 20px;
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+    }
+    .my-rank-banner .rank-num { font-family: var(--font-display); font-weight: 800; font-size: 32px; color: var(--accent); }
+    .my-rank-banner .rank-info .label { font-size: 12px; color: var(--text-muted); }
+    .my-rank-banner .rank-info .val { font-size: 15px; font-weight: 600; }
+
+    @media (max-width: 700px) {
+      .lb-row, .lb-header { grid-template-columns: 48px 1fr auto; }
+      .lb-solves, .lb-bloods { display: none; }
+      .lb-header span:nth-child(3), .lb-header span:nth-child(4) { display: none; }
+      .podium { gap: 8px; }
+      .podium-block { width: 80px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="challenges.html" class="nav-item"><span class="nav-icon">⚑</span> Challenges</a>
+      <a href="leaderboard.html" class="nav-item active"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">Account</div>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span> My Profile</a>
+      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon">↩</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
+        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
+        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);" id="nav-pts">0 pts</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header anim-fadeup">
+      <h1>🏆 Leaderboard</h1>
+      <p>Top performers on FlagForge. Updated in real-time.</p>
+    </div>
+    <div class="page-body">
+      <div id="my-rank-banner"></div>
+      <div id="podium" class="podium anim-fadeup anim-delay-1"></div>
+      <div class="lb-table-wrap anim-fadeup anim-delay-2">
+        <div class="lb-header">
+          <span>Rank</span><span>Player</span>
+          <span style="text-align:center;">Solves</span>
+          <span style="text-align:center;">🩸 Bloods</span>
+          <span style="text-align:right;">Points</span>
+        </div>
+        <div id="lb-body">
+          <div style="text-align:center;padding:40px;color:var(--text-muted);">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+const MEDAL_COLORS = ['#FFD700','#C0C0C0','#CD7F32'];
+const MEDAL_LABELS = ['🥇','🥈','🥉'];
+
+requireAuth().then(async user => {
+  const userDoc = await db.collection('users').doc(user.uid).get();
+  const ud = userDoc.data() || {};
+  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
+  document.getElementById('nav-pts').textContent = (ud.points||0).toLocaleString() + ' pts';
+  const avatarEl = document.getElementById('nav-avatar');
+  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+
+  // Load top 50
+  const snap = await db.collection('users').where('role','==','student').orderBy('points','desc').limit(50).get();
+  const players = snap.docs.map((d,i) => ({ rank: i+1, ...d.data() }));
+
+  // My rank
+  const myRank = players.findIndex(p => p.uid === user.uid) + 1;
+  if (myRank > 0) {
+    const me = players[myRank-1];
+    document.getElementById('my-rank-banner').innerHTML = `
+      <div class="my-rank-banner">
+        <div class="rank-num">#${myRank}</div>
+        <div style="width:1px;height:40px;background:var(--border);"></div>
+        <div class="rank-info"><div class="label">Your Rank</div><div class="val">${sanitize(me.displayName||'You')}</div></div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-family:var(--font-display);font-weight:800;font-size:24px;color:var(--accent);">${(me.points||0).toLocaleString()} pts</div>
+          <div style="font-size:12px;color:var(--text-muted);">${me.solves||0} solves</div>
+        </div>
+      </div>`;
+  }
+
+  // Podium (top 3) — reorder: 2nd, 1st, 3rd
+  const podiumOrder = [players[1], players[0], players[2]].filter(Boolean);
+  const podiumPositions = [2, 1, 3];
+  const podiumHTML = podiumOrder.map((p, idx) => {
+    const pos = podiumPositions[idx];
+    const heights = [56, 80, 40];
+    return `
+      <div class="podium-slot">
+        ${pos===1 ? '<div class="podium-crown">👑</div>' : '<div style="height:36px;"></div>'}
+        <div class="podium-avatar">${getInitials(p.displayName)}</div>
+        <div class="podium-name">${sanitize(p.displayName||'Player')}</div>
+        <div class="podium-pts">${(p.points||0).toLocaleString()} pts</div>
+        <div class="podium-block"><div class="podium-rank" style="color:${MEDAL_COLORS[pos-1]}">${MEDAL_LABELS[pos-1]}</div></div>
+      </div>`;
+  }).join('');
+  document.getElementById('podium').innerHTML = podiumHTML;
+
+  // Table (all)
+  if (!players.length) {
+    document.getElementById('lb-body').innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><h3>No players yet</h3><p>Be the first to solve challenges!</p></div>';
+    return;
+  }
+  document.getElementById('lb-body').innerHTML = players.map(p => `
+    <div class="lb-row ${p.uid===user.uid?'current-user':''}">
+      <div class="lb-rank ${p.rank<=3?'top':''}">${p.rank<=3 ? MEDAL_LABELS[p.rank-1] : p.rank}</div>
+      <div class="lb-player">
+        <div class="lb-avatar" style="${p.uid===user.uid?'border:2px solid var(--accent);':''}">${getInitials(p.displayName)}</div>
+        <div>
+          <div class="lb-name">${sanitize(p.displayName||'Player')} ${p.uid===user.uid?'<span style="font-size:10px;color:var(--accent);font-family:var(--font-display);">YOU</span>':''}</div>
+          <div class="lb-username">@${sanitize(p.username||'—')}</div>
+        </div>
+      </div>
+      <div class="lb-solves">${p.solves||0}</div>
+      <div class="lb-bloods">${p.firstBloods||0}</div>
+      <div class="lb-pts">${(p.points||0).toLocaleString()}</div>
+    </div>`).join('');
+});
+</script>
+</body>
+</html>

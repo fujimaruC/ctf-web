@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — My Profile</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .profile-header {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px;
+      display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap;
+      position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: -50px; right: -50px;
+      width: 250px; height: 250px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+    }
+    .profile-avatar-lg {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--accent-dim); border: 3px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: 32px; color: var(--accent);
+      flex-shrink: 0; overflow: hidden; position: relative; z-index: 1;
+    }
+    .profile-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .profile-info h2 { font-size: 26px; margin-bottom: 4px; }
+    .profile-info .handle { color: var(--text-muted); font-size: 14px; margin-bottom: 12px; }
+    .profile-stats-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .pstat { text-align: center; }
+    .pstat .num { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
+    .pstat .lbl { font-size: 11px; color: var(--text-muted); }
+
+    .profile-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+    .solve-history-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px; border-radius: var(--radius); margin-bottom: 4px;
+      border: 1px solid transparent; text-decoration: none; color: inherit;
+      transition: all 0.15s;
+    }
+    .solve-history-item:hover { background: var(--surface-2); border-color: var(--border); }
+    .solve-cat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .solve-info { flex: 1; min-width: 0; }
+    .solve-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .solve-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; }
+    .solve-pts { font-family: var(--font-display); font-weight: 700; color: var(--green); font-size: 14px; }
+
+    @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="challenges.html" class="nav-item"><span class="nav-icon">⚑</span> Challenges</a>
+      <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">Account</div>
+      <a href="profile.html" class="nav-item active"><span class="nav-icon">👤</span> My Profile</a>
+      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon">↩</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
+        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
+        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);">My Account</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header anim-fadeup"><h1>My Profile</h1><p>View your stats and solve history.</p></div>
+    <div class="page-body">
+
+      <!-- Profile header -->
+      <div class="profile-header anim-fadeup anim-delay-1" id="profile-header">
+        <div class="profile-avatar-lg" id="profile-avatar">?</div>
+        <div class="profile-info">
+          <h2 id="profile-name">—</h2>
+          <div class="handle" id="profile-handle">@—</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="profile-badges"></div>
+          <div class="profile-stats-row">
+            <div class="pstat"><div class="num" id="p-pts" style="color:var(--accent);">—</div><div class="lbl">Points</div></div>
+            <div class="pstat"><div class="num" id="p-solves">—</div><div class="lbl">Solves</div></div>
+            <div class="pstat"><div class="num" id="p-rank" style="color:var(--green);">#—</div><div class="lbl">Rank</div></div>
+            <div class="pstat"><div class="num" id="p-bloods" style="color:var(--red);">—</div><div class="lbl">🩸 First Bloods</div></div>
+          </div>
+        </div>
+        <div style="position:relative;z-index:1;">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('edit-profile-modal')">✏ Edit Profile</button>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- Solve history -->
+        <div class="card anim-fadeup anim-delay-2">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <h2 style="font-size:17px;">Solve History</h2>
+            <span id="solve-count-label" style="font-size:13px;color:var(--text-muted);"></span>
+          </div>
+          <div id="solve-history">
+            <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Edit profile form -->
+        <div>
+          <div class="card anim-fadeup anim-delay-3">
+            <h2 style="font-size:17px;margin-bottom:16px;">Account Settings</h2>
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" class="form-input" id="edit-name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-input" id="edit-username" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="edit-email" disabled style="opacity:0.5;cursor:not-allowed;" />
+              <span style="font-size:11px;color:var(--text-muted);">Email cannot be changed here.</span>
+            </div>
+            <button class="btn btn-primary" onclick="saveProfile()" style="width:100%;justify-content:center;">Save Changes</button>
+            <hr class="divider" />
+            <h3 style="font-size:14px;margin-bottom:14px;">Change Password</h3>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-input" id="new-password" placeholder="Min. 8 characters" />
+            </div>
+            <button class="btn btn-ghost" onclick="changePassword()" style="width:100%;justify-content:center;">Update Password</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+const CAT_ICONS = { Web:'🌐', Crypto:'🔐', Pwn:'💥', Forensics:'🔎', Reversing:'⚙️', Misc:'🧩' };
+const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
+
+requireAuth().then(async user => {
+  const userDoc = await db.collection('users').doc(user.uid).get();
+  const ud = userDoc.data() || {};
+
+  // Nav
+  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
+  const navAv = document.getElementById('nav-avatar');
+  if (ud.avatar || user.photoURL) navAv.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+  else navAv.textContent = getInitials(ud.displayName || user.displayName);
+
+  // Profile header
+  const avatarEl = document.getElementById('profile-avatar');
+  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" />`;
+  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+
+  document.getElementById('profile-name').textContent = ud.displayName || user.displayName || 'Player';
+  document.getElementById('profile-handle').textContent = `@${ud.username||'—'}`;
+  document.getElementById('p-pts').textContent = (ud.points||0).toLocaleString();
+  document.getElementById('p-solves').textContent = ud.solves||0;
+  document.getElementById('p-bloods').textContent = ud.firstBloods||0;
+
+  // Rank
+  const rankSnap = await db.collection('users').where('points','>',ud.points||0).get();
+  const rank = rankSnap.size + 1;
+  document.getElementById('p-rank').textContent = `#${rank}`;
+
+  // Badges
+  const badges = [];
+  if (ud.role === 'admin') badges.push('<span class="badge" style="background:var(--accent-dim);color:var(--accent);">⚡ Admin</span>');
+  if ((ud.firstBloods||0)>0) badges.push(`<span class="badge" style="background:var(--red-dim);color:var(--red);">🩸 ${ud.firstBloods} First Bloods</span>`);
+  if (rank<=3) badges.push('<span class="badge" style="background:rgba(255,215,0,0.1);color:#FFD700;">🏆 Top 3</span>');
+  document.getElementById('profile-badges').innerHTML = badges.join('');
+
+  // Edit form prefill
+  document.getElementById('edit-name').value = ud.displayName || user.displayName || '';
+  document.getElementById('edit-username').value = ud.username || '';
+  document.getElementById('edit-email').value = user.email || '';
+
+  // Solve history
+  const solvesSnap = await db.collection('solves').where('uid','==',user.uid).orderBy('solvedAt','desc').get();
+  document.getElementById('solve-count-label').textContent = `${solvesSnap.size} total solve${solvesSnap.size!==1?'s':''}`;
+
+  if (solvesSnap.empty) {
+    document.getElementById('solve-history').innerHTML = `
+      <div class="empty-state"><div class="empty-icon">⚑</div><h3>No solves yet</h3><p>Go solve some challenges!</p></div>`;
+    return;
+  }
+
+  document.getElementById('solve-history').innerHTML = solvesSnap.docs.map(d => {
+    const s = d.data();
+    const cat = s.category || 'Misc';
+    return `
+      <a href="challenge.html?id=${s.challengeId}" class="solve-history-item">
+        <div class="solve-cat-icon" style="background:${CAT_BG[cat]||CAT_BG.Misc}">${CAT_ICONS[cat]||'🧩'}</div>
+        <div class="solve-info">
+          <div class="solve-name">${sanitize(s.challengeName)}</div>
+          <div class="solve-meta">
+            ${categoryBadge(cat)} ${difficultyBadge(s.difficulty||'Easy')}
+            <span>${timeAgo(s.solvedAt)}</span>
+            ${s.isFirstBlood ? '<span style="color:var(--red);font-weight:700;">🩸 First Blood!</span>' : ''}
+          </div>
+        </div>
+        <div class="solve-pts">+${s.points}</div>
+      </a>`;
+  }).join('');
+});
+
+async function saveProfile() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const name = document.getElementById('edit-name').value.trim();
+  const username = document.getElementById('edit-username').value.trim();
+  if (!name || !username) { showToast('Name and username are required.', 'error'); return; }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) { showToast('Username can only contain letters, numbers, and underscores.', 'error'); return; }
+
+  try {
+    await user.updateProfile({ displayName: name });
+    await db.collection('users').doc(user.uid).update({ displayName: name, username });
+    document.getElementById('profile-name').textContent = name;
+    document.getElementById('profile-handle').textContent = `@${username}`;
+    document.getElementById('nav-name').textContent = name;
+    showToast('Profile updated!', 'success');
+  } catch(e) { showToast('Failed to update profile.', 'error'); }
+}
+
+async function changePassword() {
+  const newPw = document.getElementById('new-password').value;
+  if (newPw.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+  try {
+    await auth.currentUser.updatePassword(newPw);
+    document.getElementById('new-password').value = '';
+    showToast('Password updated!', 'success');
+  } catch(e) {
+    if (e.code === 'auth/requires-recent-login') showToast('Please sign out and back in, then try again.', 'error');
+    else showToast('Failed to update password.', 'error');
+  }
+}
+</script>
+</body>
+</html>

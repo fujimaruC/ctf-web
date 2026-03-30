@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — Challenge</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .ch-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+
+    .ch-header-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px; margin-bottom: 20px;
+      position: relative; overflow: hidden;
+    }
+    .ch-header-card::before {
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+      pointer-events: none;
+    }
+    .ch-title-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+    .ch-icon-lg {
+      width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+    }
+    .ch-title-info { flex: 1; }
+    .ch-title-info h1 { font-size: 26px; margin-bottom: 8px; }
+    .ch-badges-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .ch-pts-display { font-family: var(--font-display); font-weight: 800; font-size: 36px; color: var(--accent); line-height: 1; }
+    .ch-pts-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    .ch-meta-strip {
+      display: flex; gap: 24px; flex-wrap: wrap;
+      padding: 16px 0; border-top: 1px solid var(--border); margin-top: 16px;
+    }
+    .ch-meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .ch-meta-item .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-display); font-weight: 600; }
+    .ch-meta-item .val { font-size: 14px; font-weight: 500; }
+
+    .desc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; }
+    .desc-card h3 { font-size: 15px; margin-bottom: 14px; color: var(--text-secondary); font-family: var(--font-display); }
+    .desc-body { font-size: 14px; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
+    .desc-body code { background: var(--bg-3); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; color: var(--accent); }
+
+    /* Sidebar */
+    .sidebar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 16px; }
+    .sidebar-card h3 { font-size: 14px; margin-bottom: 16px; color: var(--text-secondary); font-family: var(--font-display); }
+
+    .flag-input-wrap { position: relative; }
+    .flag-input-wrap input { font-family: monospace; font-size: 14px; padding-right: 56px; letter-spacing: 0.5px; }
+    .flag-submit-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 6px 12px; font-size: 12px; }
+
+    .solved-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--green-dim); border: 1px solid rgba(45,212,160,0.3);
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+    }
+    .solved-banner .icon { font-size: 24px; }
+    .solved-banner .text .title { font-weight: 700; font-size: 15px; color: var(--green); font-family: var(--font-display); }
+    .solved-banner .text .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    .attempts-counter { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+
+    .hint-item {
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px;
+    }
+    .hint-item .hint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; cursor: pointer; }
+    .hint-item .hint-body { display: none; margin-top: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding-top: 10px; border-top: 1px solid var(--border); }
+    .hint-item.open .hint-body { display: block; }
+    .hint-cost { font-size: 11px; color: var(--accent); font-weight: 600; }
+
+    .file-link {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px;
+      text-decoration: none; color: var(--text-primary); font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .file-link:hover { border-color: var(--accent); }
+    .file-link .file-icon { font-size: 20px; }
+    .file-link .file-info { flex: 1; }
+    .file-link .file-name { font-weight: 500; font-size: 13px; }
+    .file-link .file-type { font-size: 11px; color: var(--text-muted); }
+
+    .first-blood-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--red-dim); border: 1px solid rgba(240,82,82,0.2);
+      border-radius: 99px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: var(--red); font-family: var(--font-display);
+    }
+
+    .recent-solvers { display: flex; flex-direction: column; gap: 10px; }
+    .solver-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .solver-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+    @media (max-width: 900px) { .ch-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="challenges.html" class="nav-item active"><span class="nav-icon">⚑</span> Challenges</a>
+      <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="nav-section-label">Account</div>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span> My Profile</a>
+      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon">↩</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
+        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
+        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);" id="nav-pts">0 pts</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header anim-fadeup" style="padding-bottom:8px;">
+      <a href="challenges.html" style="color:var(--text-muted);text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;">← Back to Challenges</a>
+    </div>
+    <div class="page-body">
+      <div id="ch-content">
+        <div style="text-align:center;padding:80px 0;color:var(--text-muted);">Loading challenge...</div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+const CAT_ICONS = { Web:'🌐', Crypto:'🔐', Pwn:'💥', Forensics:'🔎', Reversing:'⚙️', Misc:'🧩' };
+const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
+
+const chId = new URLSearchParams(window.location.search).get('id');
+let currentUser, userData, challenge, isSolved = false, attempts = 0;
+
+requireAuth().then(async user => {
+  currentUser = user;
+  const userDoc = await db.collection('users').doc(user.uid).get();
+  userData = userDoc.data() || {};
+
+  document.getElementById('nav-name').textContent = userData.displayName || user.displayName || 'Player';
+  document.getElementById('nav-pts').textContent = (userData.points||0).toLocaleString() + ' pts';
+  const avatarEl = document.getElementById('nav-avatar');
+  if (userData.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${userData.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+  else avatarEl.textContent = getInitials(userData.displayName || user.displayName);
+
+  if (!chId) { document.getElementById('ch-content').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Challenge not found</h3></div>'; return; }
+
+  // Load challenge
+  const chDoc = await db.collection('challenges').doc(chId).get();
+  if (!chDoc.exists || !chDoc.data().published) { document.getElementById('ch-content').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Challenge not found</h3></div>'; return; }
+  challenge = { id: chDoc.id, ...chDoc.data() };
+  document.title = `FlagForge — ${challenge.title}`;
+
+  // Check if solved
+  const solveDoc = await db.collection('solves').doc(`${user.uid}_${chId}`).get();
+  isSolved = solveDoc.exists;
+
+  // Attempts
+  const attDoc = await db.collection('attempts').doc(`${user.uid}_${chId}`).get();
+  attempts = attDoc.exists ? (attDoc.data().count || 0) : 0;
+
+  // Recent solvers
+  const solversSnap = await db.collection('solves').where('challengeId','==',chId).orderBy('solvedAt','asc').limit(5).get();
+
+  renderChallenge(solversSnap);
+});
+
+function renderChallenge(solversSnap) {
+  const cat = challenge.category || 'Misc';
+  const solvers = solversSnap.docs.map(d => d.data());
+
+  const solverHTML = solvers.length ? solvers.map((s,i) => `
+    <div class="solver-item">
+      <div class="solver-avatar">${getInitials(s.playerName)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sanitize(s.playerName)}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${i===0?'🩸 First Blood · ':''}${timeAgo(s.solvedAt)}</div>
+      </div>
+    </div>`).join('') : '<div style="font-size:13px;color:var(--text-muted);">No solves yet. Be first!</div>';
+
+  const filesHTML = (challenge.files||[]).map(f => `
+    <a href="${f.url}" target="_blank" rel="noopener" class="file-link">
+      <span class="file-icon">📁</span>
+      <div class="file-info">
+        <div class="file-name">${sanitize(f.name)}</div>
+        <div class="file-type">${sanitize(f.type||'Download')}</div>
+      </div>
+      <span style="color:var(--accent);font-size:13px;">↗</span>
+    </a>`).join('');
+
+  const hintsHTML = (challenge.hints||[]).map((h,i) => `
+    <div class="hint-item" id="hint-${i}">
+      <div class="hint-header" onclick="toggleHint(${i})">
+        <span style="font-size:13px;font-weight:500;">💡 Hint ${i+1}</span>
+        <span class="hint-cost">${h.cost ? `-${h.cost} pts` : 'Free'}</span>
+      </div>
+      <div class="hint-body">${sanitize(h.text)}</div>
+    </div>`).join('');
+
+  document.getElementById('ch-content').innerHTML = `
+    <div class="ch-layout">
+      <!-- Main -->
+      <div>
+        <div class="ch-header-card anim-fadeup">
+          <div class="ch-title-row">
+            <div class="ch-icon-lg" style="background:${CAT_BG[cat]||CAT_BG.Misc}">${CAT_ICONS[cat]||'🧩'}</div>
+            <div class="ch-title-info">
+              <div class="ch-badges-row">
+                ${categoryBadge(cat)} ${difficultyBadge(challenge.difficulty||'Easy')}
+                ${challenge.solveCount===0 ? '<span class="first-blood-badge">🩸 Unsolved</span>' : ''}
+              </div>
+              <h1>${sanitize(challenge.title)}</h1>
+              <span style="font-size:13px;color:var(--text-muted);">by ${sanitize(challenge.authorName||'Admin')}</span>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div class="ch-pts-display">${challenge.points}</div>
+              <div class="ch-pts-label">points</div>
+            </div>
+          </div>
+          <div class="ch-meta-strip">
+            <div class="ch-meta-item"><span class="lbl">Category</span><span class="val">${cat}</span></div>
+            <div class="ch-meta-item"><span class="lbl">Difficulty</span><span class="val">${challenge.difficulty||'Easy'}</span></div>
+            <div class="ch-meta-item"><span class="lbl">Solves</span><span class="val">${challenge.solveCount||0}</span></div>
+            <div class="ch-meta-item"><span class="lbl">Added</span><span class="val">${challenge.createdAt ? new Date(challenge.createdAt.toMillis()).toLocaleDateString() : '—'}</span></div>
+          </div>
+        </div>
+
+        <div class="desc-card anim-fadeup anim-delay-1">
+          <h3>Challenge Description</h3>
+          <div class="desc-body" id="desc-body"></div>
+        </div>
+
+        ${challenge.files?.length ? `
+        <div class="desc-card anim-fadeup anim-delay-2">
+          <h3>📁 Challenge Files</h3>
+          ${filesHTML}
+        </div>` : ''}
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <!-- Flag submit -->
+        <div class="sidebar-card anim-fadeup anim-delay-1">
+          <h3>Submit Flag</h3>
+          ${isSolved ? `
+            <div class="solved-banner">
+              <div class="icon">✅</div>
+              <div class="text">
+                <div class="title">Challenge Solved!</div>
+                <div class="sub">You earned ${challenge.points} points.</div>
+              </div>
+            </div>` : ''}
+          <div class="flag-input-wrap" ${isSolved?'style="opacity:0.5;pointer-events:none;"':''}>
+            <input type="text" class="form-input" id="flag-input" placeholder="FLAG{...}" autocomplete="off" onkeydown="if(event.key==='Enter')submitFlag()" />
+            <button class="btn btn-primary flag-submit-btn" onclick="submitFlag()">Submit</button>
+          </div>
+          ${!isSolved ? `<div class="attempts-counter" id="attempts-counter">${attempts} attempt${attempts!==1?'s':''} made</div>` : ''}
+        </div>
+
+        <!-- Hints -->
+        ${challenge.hints?.length ? `
+        <div class="sidebar-card anim-fadeup anim-delay-2">
+          <h3>💡 Hints</h3>
+          ${hintsHTML}
+        </div>` : ''}
+
+        <!-- Solvers -->
+        <div class="sidebar-card anim-fadeup anim-delay-3">
+          <h3>🏁 Recent Solvers</h3>
+          <div class="recent-solvers">${solverHTML}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Render description safely
+  document.getElementById('desc-body').textContent = challenge.description || '';
+}
+
+function toggleHint(i) {
+  document.getElementById(`hint-${i}`).classList.toggle('open');
+}
+
+async function submitFlag() {
+  if (isSolved) return;
+  const flag = document.getElementById('flag-input').value.trim();
+  if (!flag) { showToast('Please enter a flag.', 'error'); return; }
+
+  const btn = document.querySelector('.flag-submit-btn');
+  btn.textContent = '...'; btn.disabled = true;
+
+  // Track attempt
+  attempts++;
+  await db.collection('attempts').doc(`${currentUser.uid}_${chId}`).set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
+  document.getElementById('attempts-counter').textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
+
+  // Validate flag (case-sensitive by default)
+  const correctFlag = challenge.flag?.trim();
+  const isCorrect = challenge.caseInsensitive ? flag.toLowerCase() === correctFlag?.toLowerCase() : flag === correctFlag;
+
+  if (isCorrect) {
+    // Check if first blood
+    const isFirstBlood = (challenge.solveCount || 0) === 0;
+
+    // Record solve
+    await db.collection('solves').doc(`${currentUser.uid}_${chId}`).set({
+      uid: currentUser.uid, challengeId: chId,
+      challengeName: challenge.title, category: challenge.category,
+      points: challenge.points, difficulty: challenge.difficulty,
+      playerName: userData.displayName || currentUser.displayName || 'Player',
+      solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      isFirstBlood
+    });
+
+    // Update user points + solves
+    await db.collection('users').doc(currentUser.uid).update({
+      points: firebase.firestore.FieldValue.increment(challenge.points),
+      solves: firebase.firestore.FieldValue.increment(1),
+      ...(isFirstBlood && { firstBloods: firebase.firestore.FieldValue.increment(1) })
+    });
+
+    // Increment solve count on challenge
+    await db.collection('challenges').doc(chId).update({
+      solveCount: firebase.firestore.FieldValue.increment(1)
+    });
+
+    isSolved = true;
+    showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
+
+    // Animate solved
+    document.querySelector('.flag-input-wrap').style.opacity = '0.5';
+    document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
+    document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
+      <div class="solved-banner">
+        <div class="icon">✅</div>
+        <div class="text">
+          <div class="title">Challenge Solved!${isFirstBlood?' 🩸 First Blood!':''}</div>
+          <div class="sub">You earned ${challenge.points} points.</div>
+        </div>
+      </div>`);
+  } else {
+    showToast('Incorrect flag. Keep trying!', 'error');
+    const inp = document.getElementById('flag-input');
+    inp.style.borderColor = 'var(--red)';
+    inp.style.boxShadow = '0 0 0 3px rgba(240,82,82,0.12)';
+    setTimeout(() => { inp.style.borderColor=''; inp.style.boxShadow=''; }, 1500);
+  }
+
+  btn.textContent = 'Submit'; btn.disabled = false;
+}
+</script>
+</body>
+</html>

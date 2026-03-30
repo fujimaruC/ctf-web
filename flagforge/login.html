@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagForge — Sign In</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* ── Left panel ── */
+    .auth-left {
+      flex: 1; background: var(--bg-2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 40px; position: relative; overflow: hidden;
+    }
+    .auth-left-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 20%, rgba(232,160,32,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(45,212,160,0.05) 0%, transparent 60%);
+    }
+    .auth-left-grid {
+      position: absolute; inset: 0; opacity: 0.15;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .auth-brand { position: relative; z-index: 1; }
+    .auth-quote {
+      position: relative; z-index: 1;
+      border-left: 3px solid var(--accent); padding-left: 20px;
+    }
+    .auth-quote p { font-size: 20px; font-family: var(--font-display); font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
+    .auth-quote span { font-size: 13px; color: var(--text-muted); }
+    .auth-bottom-badges { position: relative; z-index: 1; display: flex; gap: 10px; flex-wrap: wrap; }
+    .auth-badge {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Right panel ── */
+    .auth-right {
+      width: 480px; flex-shrink: 0;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 48px 48px;
+    }
+    .auth-tabs { display: flex; gap: 0; margin-bottom: 36px; background: var(--surface); border-radius: var(--radius); padding: 4px; }
+    .auth-tab {
+      flex: 1; padding: 9px; text-align: center; border-radius: 7px;
+      font-family: var(--font-display); font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; background: none; color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .auth-tab.active { background: var(--bg-2); color: var(--text-primary); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+    .auth-form { display: none; animation: fadeUp 0.3s ease; }
+    .auth-form.active { display: block; }
+    .auth-form h2 { font-size: 26px; margin-bottom: 6px; }
+    .auth-form .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
+
+    .divider-or {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); font-size: 12px; margin: 20px 0;
+    }
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .google-btn {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 11px; border-radius: var(--radius);
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-primary); font-size: 14px; font-weight: 500; font-family: var(--font-body);
+      cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
+    }
+    .google-btn:hover { border-color: var(--border-light); background: var(--surface-2); }
+
+    .submit-btn { width: 100%; justify-content: center; margin-top: 4px; padding: 13px; font-size: 15px; }
+
+    .auth-footer-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+    .auth-footer-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 16px; padding: 4px; transition: color 0.2s;
+    }
+    .password-toggle:hover { color: var(--text-primary); }
+    .password-wrap .form-input { padding-right: 40px; }
+
+    .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
+    .strength-seg { flex: 1; height: 3px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
+    .strength-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .error-msg { background: var(--red-dim); border: 1px solid rgba(240,82,82,0.2); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 16px; display: none; }
+    .error-msg.show { display: block; }
+
+    .loading-spinner { width: 16px; height: 16px; border: 2px solid rgba(12,14,16,0.3); border-top-color: #0c0e10; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .auth-left { display: none; }
+      .auth-right { width: 100%; padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Left panel ── -->
+<div class="auth-left">
+  <div class="auth-left-bg"></div>
+  <div class="auth-left-grid"></div>
+  <div class="auth-brand">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark">⚑</div>
+      FlagForge
+    </a>
+  </div>
+  <div class="auth-quote">
+    <p>"The best hackers don't break things — they understand them better than anyone else."</p>
+    <span>FlagForge Community</span>
+  </div>
+  <div class="auth-bottom-badges">
+    <div class="auth-badge">⚑ 248 Challenges</div>
+    <div class="auth-badge">👥 1.2k Players</div>
+    <div class="auth-badge">🔒 Firebase Secured</div>
+    <div class="auth-badge">🆓 Free to Join</div>
+  </div>
+</div>
+
+<!-- ── Right panel ── -->
+<div class="auth-right">
+  <!-- Tabs -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+    <button class="auth-tab" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <!-- ── Login Form ── -->
+  <div class="auth-form active" id="form-login">
+    <h2>Welcome back.</h2>
+    <p class="subtitle">Sign in to your FlagForge account to continue competing.</p>
+    <div class="error-msg" id="login-error"></div>
+
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider-or">or sign in with email</div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="login-email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-wrap">
+        <input type="password" class="form-input" id="login-password" placeholder="Your password" autocomplete="current-password" />
+        <button class="password-toggle" onclick="togglePassword('login-password', this)">👁</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-bottom:20px;margin-top:-10px;">
+      <a href="#" onclick="forgotPassword()" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Forgot password?</a>
+    </div>
+
+    <button class="btn btn-primary submit-btn" id="login-btn" onclick="handleLogin()">
+      Sign In
+    </button>
+    <div class="auth-footer-link">Don't have an account? <a href="#" onclick="switchTab('register')">Register free</a></div>
+  </div>
+
+  <!-- ── Register Form ── -->
+  <div class="auth-form" id="form-register">
+    <h2>Join FlagForge.</h2>
+    <p class="subtitle">Create your account and start solving challenges today.</p>
+    <div class="error-msg" id="register-error"></div>
+
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider-or">or register with email</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" class="form-input" id="reg-fname" placeholder="Alex" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" class="form-input" id="reg-lname" placeholder="Smith" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input type="text" class="form-input" id="reg-username" placeholder="h4ck3r_alex" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" id="reg-email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-wrap">
+        <input type="password" class="form-input" id="reg-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password" />
+        <button class="password-toggle" onclick="togglePassword('reg-password', this)">👁</button>
+      </div>
+      <div class="strength-bar">
+        <div class="strength-seg" id="s1"></div>
+        <div class="strength-seg" id="s2"></div>
+        <div class="strength-seg" id="s3"></div>
+        <div class="strength-seg" id="s4"></div>
+      </div>
+      <div class="strength-label" id="strength-label"></div>
+    </div>
+
+    <button class="btn btn-primary submit-btn" id="register-btn" onclick="handleRegister()">
+      Create Account
+    </button>
+    <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:14px;line-height:1.6;">
+      By registering you agree to our <a href="#" style="color:var(--text-secondary);">Terms of Service</a> and <a href="#" style="color:var(--text-secondary);">Privacy Policy</a>.
+    </p>
+    <div class="auth-footer-link">Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script>
+  redirectIfLoggedIn('dashboard.html');
+
+  // Check for tab query param
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tab') === 'register') switchTab('register');
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+    document.getElementById('form-login').classList.toggle('active', tab==='login');
+    document.getElementById('form-register').classList.toggle('active', tab==='register');
+    document.title = tab === 'login' ? 'FlagForge — Sign In' : 'FlagForge — Register';
+  }
+
+  function togglePassword(id, btn) {
+    const inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  function checkStrength(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const colors = ['', '#f05252','#e8a020','#4a9eff','#2dd4a0'];
+    const labels = ['', 'Weak','Fair','Good','Strong'];
+    for (let i=1;i<=4;i++) {
+      document.getElementById(`s${i}`).style.background = i<=score ? colors[score] : 'var(--border)';
+    }
+    document.getElementById('strength-label').textContent = pw.length ? labels[score] : '';
+    document.getElementById('strength-label').style.color = colors[score];
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) { btn.innerHTML = '<div class="loading-spinner"></div> Please wait...'; btn.disabled = true; }
+    else { btn.disabled = false; }
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) { showError('login-error','Please fill in all fields.'); return; }
+    setLoading('login-btn', true);
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      window.location.href = 'dashboard.html';
+    } catch(e) {
+      const msgs = { 'auth/user-not-found':'No account found with this email.','auth/wrong-password':'Incorrect password.','auth/too-many-requests':'Too many attempts. Try again later.' };
+      showError('login-error', msgs[e.code] || 'Sign in failed. Please try again.');
+      document.getElementById('login-btn').innerHTML = 'Sign In';
+      document.getElementById('login-btn').disabled = false;
+    }
+  }
+
+  async function handleRegister() {
+    const fname = document.getElementById('reg-fname').value.trim();
+    const lname = document.getElementById('reg-lname').value.trim();
+    const username = document.getElementById('reg-username').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!fname||!lname||!username||!email||!password) { showError('register-error','Please fill in all fields.'); return; }
+    if (password.length < 8) { showError('register-error','Password must be at least 8 characters.'); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error','Username can only contain letters, numbers, and underscores.'); return; }
+    setLoading('register-btn', true);
+    try {
+      // Check username taken
+      const usernameSnap = await db.collection('usernames').doc(username.toLowerCase()).get();
+      if (usernameSnap.exists) { showError('register-error','Username already taken. Please choose another.'); document.getElementById('register-btn').innerHTML='Create Account'; document.getElementById('register-btn').disabled=false; return; }
+
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: `${fname} ${lname}` });
+
+      // Save user profile
+      await db.collection('users').doc(cred.user.uid).set({
+        uid: cred.user.uid, firstName: fname, lastName: lname,
+        displayName: `${fname} ${lname}`, username, email,
+        role: 'student', points: 0, solves: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        avatar: null
+      });
+      await db.collection('usernames').doc(username.toLowerCase()).set({ uid: cred.user.uid });
+
+      window.location.href = 'dashboard.html';
+    } catch(e) {
+      const msgs = { 'auth/email-already-in-use':'Email already registered.','auth/invalid-email':'Invalid email address.','auth/weak-password':'Password is too weak.' };
+      showError('register-error', msgs[e.code] || 'Registration failed. Try again.');
+      document.getElementById('register-btn').innerHTML = 'Create Account';
+      document.getElementById('register-btn').disabled = false;
+    }
+  }
+
+  async function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      const result = await auth.signInWithPopup(provider);
+      const user = result.user;
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      if (!userDoc.exists) {
+        const username = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'') + Math.floor(Math.random()*1000);
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid, displayName: user.displayName, email: user.email,
+          username, role: 'student', points: 0, solves: 0,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(), avatar: user.photoURL
+        });
+        await db.collection('usernames').doc(username.toLowerCase()).set({ uid: user.uid });
+      }
+      window.location.href = 'dashboard.html';
+    } catch(e) { showToast('Google sign-in failed. Please try again.','error'); }
+  }
+
+  async function forgotPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) { showError('login-error','Enter your email first, then click forgot password.'); return; }
+    try {
+      await auth.sendPasswordResetEmail(email);
+      showToast('Password reset email sent!', 'success');
+    } catch(e) { showError('login-error','Could not send reset email. Check the address.'); }
+  }
+
+  // Enter key submit
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('form-login').classList.contains('active')) handleLogin();
+    else handleRegister();
+  });
+</script>
+</body>
+</html>
