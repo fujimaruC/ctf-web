@@ -301,86 +301,73 @@ async function submitFlag() {
   const btn = document.querySelector('.flag-submit-btn');
   btn.textContent = '...'; btn.disabled = true;
 
-  // Track attempt
-  attempts++;
-  await db.collection('attempts').doc(`${currentUser.uid}_${chId}`).set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
-  document.getElementById('attempts-counter').textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
-
-  // Validate flag (case-sensitive by default)
   const correctFlag = challenge.flag?.trim();
-  const isCorrect = challenge.caseInsensitive ? flag.toLowerCase() === correctFlag?.toLowerCase() : flag === correctFlag;
+  const isCorrect = challenge.caseInsensitive
+    ? flag.toLowerCase() === correctFlag?.toLowerCase()
+    : flag === correctFlag;
+
+  attempts++;
+  try {
+    await db.collection('attempts').doc(`${currentUser.uid}_${chId}`)
+      .set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
+  } catch(e) {}
+
+  const counterEl = document.getElementById('attempts-counter');
+  if (counterEl) counterEl.textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
 
   if (isCorrect) {
-    let firstBloodAwarded = false;
-
     try {
-      await db.runTransaction(async t => {
-        const chRef = db.collection('challenges').doc(chId);
-        const chSnap = await t.get(chRef);
-        if (!chSnap.exists) throw new Error('Challenge not available');
+      const alreadySolved = await db.collection('solves').doc(`${currentUser.uid}_${chId}`).get();
+      if (alreadySolved.exists) {
+        isSolved = true;
+        showToast('Already solved!', 'info');
+        btn.textContent = 'Submit'; btn.disabled = false;
+        return;
+      }
 
-        const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
-        const existingSolveSnap = await t.get(existingSolveRef);
-        if (existingSolveSnap.exists) throw new Error('Already solved');
+      const chSnap = await db.collection('challenges').doc(chId).get();
+      const currentSolveCount = chSnap.data()?.solveCount || 0;
+      const isFirstBlood = currentSolveCount === 0;
 
-        const currentSolveCount = chSnap.data().solveCount || 0;
-        const isFirstBlood = currentSolveCount === 0;
+      await db.collection('solves').doc(`${currentUser.uid}_${chId}`).set({
+        uid: currentUser.uid,
+        challengeId: chId,
+        challengeName: challenge.title,
+        category: challenge.category,
+        points: challenge.points,
+        difficulty: challenge.difficulty,
+        playerName: userData.displayName || currentUser.displayName || 'Player',
+        solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        isFirstBlood
+      });
 
-        t.set(existingSolveRef, {
-          uid: currentUser.uid,
-          challengeId: chId,
-          challengeName: challenge.title,
-          category: challenge.category,
-          points: challenge.points,
-          difficulty: challenge.difficulty,
-          playerName: userData.displayName || currentUser.displayName || 'Player',
-          solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          isFirstBlood
-        });
+      await db.collection('users').doc(currentUser.uid).update({
+        points: firebase.firestore.FieldValue.increment(challenge.points),
+        solves: firebase.firestore.FieldValue.increment(1),
+        ...(isFirstBlood && { firstBloods: firebase.firestore.FieldValue.increment(1) })
+      });
 
-        t.update(chRef, {
-          solveCount: currentSolveCount + 1
-        });
-
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const userSnap = await t.get(userRef);
-        if (!userSnap.exists) throw new Error('User not found');
-
-        const userPoints = (userSnap.data().points || 0) + challenge.points;
-        const userSolves = (userSnap.data().solves || 0) + 1;
-        const userFirstBloods = (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0);
-
-        t.update(userRef, {
-          points: userPoints,
-          solves: userSolves,
-          firstBloods: userFirstBloods
-        });
-
-        challenge.solveCount = currentSolveCount + 1;
-        if (isFirstBlood) {
-          challenge.firstBloods = (challenge.firstBloods||0) + 1;
-          firstBloodAwarded = true;
-        }
+      await db.collection('challenges').doc(chId).update({
+        solveCount: firebase.firestore.FieldValue.increment(1)
       });
 
       isSolved = true;
       showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
 
-      // Animate solved
-      document.querySelector('.flag-input-wrap').style.opacity = '0.5';
-      document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
-      document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
+      const wrap = document.querySelector('.flag-input-wrap');
+      wrap.style.opacity = '0.5';
+      wrap.style.pointerEvents = 'none';
+      wrap.insertAdjacentHTML('beforebegin', `
         <div class="solved-banner">
           <div class="icon">✅</div>
           <div class="text">
-            <div class="title">Challenge Solved!${firstBloodAwarded ? ' 🩸 First Blood!' : ''}</div>
+            <div class="title">Challenge Solved!${isFirstBlood ? ' 🩸 First Blood!' : ''}</div>
             <div class="sub">You earned ${challenge.points} points.</div>
           </div>
         </div>`);
 
-    } catch (err) {
-      console.error(err);
-      showToast(err.message || 'Solve transaction failed.', 'error');
+    } catch(e) {
+      showToast('Error recording solve. Try again.', 'error');
     }
 
   } else {
@@ -388,7 +375,7 @@ async function submitFlag() {
     const inp = document.getElementById('flag-input');
     inp.style.borderColor = 'var(--red)';
     inp.style.boxShadow = '0 0 0 3px rgba(240,82,82,0.12)';
-    setTimeout(() => { inp.style.borderColor=''; inp.style.boxShadow=''; }, 1500);
+    setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
   }
 
   btn.textContent = 'Submit'; btn.disabled = false;
