@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Challenge</title>
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     .ch-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
 
@@ -102,16 +103,16 @@
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a>
+      <a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
-      <a href="challenges.html" class="nav-item active"><span class="nav-icon">⚑</span> Challenges</a>
-      <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a>
+      <a href="challenges.html" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges</a>
+      <a href="leaderboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard</a>
       <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span> My Profile</a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon">↩</span> Sign Out</button>
+      <a href="profile.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile</a>
+      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out</button>
     </nav>
     <div class="sidebar-footer">
       <div style="display:flex;align-items:center;gap:10px;padding:10px;">
@@ -134,11 +135,13 @@
 </div>
 <div id="toast-container"></div>
 
+<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
 <script>
+lucide.createIcons();
 const CAT_ICONS = { Web:'🌐', Crypto:'🔐', Pwn:'💥', Forensics:'🔎', Reversing:'⚙️', Misc:'🧩' };
 const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
 
@@ -316,58 +319,80 @@ async function submitFlag() {
   if (counterEl) counterEl.textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
 
   if (isCorrect) {
+    let firstBloodAwarded = false;
+
     try {
-      const alreadySolved = await db.collection('solves').doc(`${currentUser.uid}_${chId}`).get();
-      if (alreadySolved.exists) {
-        isSolved = true;
-        showToast('Already solved!', 'info');
-        btn.textContent = 'Submit'; btn.disabled = false;
-        return;
-      }
+      await db.runTransaction(async t => {
+        const chRef = db.collection('challenges').doc(chId);
+        const chSnap = await t.get(chRef);
+        if (!chSnap.exists) throw new Error('Challenge not available');
 
-      const chSnap = await db.collection('challenges').doc(chId).get();
-      const currentSolveCount = chSnap.data()?.solveCount || 0;
-      const isFirstBlood = currentSolveCount === 0;
+        const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
+        const existingSolveSnap = await t.get(existingSolveRef);
+        if (existingSolveSnap.exists) throw new Error('Already solved');
 
-      await db.collection('solves').doc(`${currentUser.uid}_${chId}`).set({
-        uid: currentUser.uid,
-        challengeId: chId,
-        challengeName: challenge.title,
-        category: challenge.category,
-        points: challenge.points,
-        difficulty: challenge.difficulty,
-        playerName: userData.displayName || currentUser.displayName || 'Player',
-        solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        isFirstBlood
-      });
+        const chData = chSnap.data();
+        const currentSolveCount = chData.solveCount || 0;
+        const isFirstBlood = !chData.firstBloodUid; // Only if not already awarded
 
-      await db.collection('users').doc(currentUser.uid).update({
-        points: firebase.firestore.FieldValue.increment(challenge.points),
-        solves: firebase.firestore.FieldValue.increment(1),
-        ...(isFirstBlood && { firstBloods: firebase.firestore.FieldValue.increment(1) })
-      });
+        t.set(existingSolveRef, {
+          uid: currentUser.uid,
+          challengeId: chId,
+          challengeName: challenge.title,
+          category: challenge.category,
+          points: challenge.points,
+          difficulty: challenge.difficulty,
+          playerName: userData.displayName || currentUser.displayName || 'Player',
+          solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          isFirstBlood
+        });
 
-      await db.collection('challenges').doc(chId).update({
-        solveCount: firebase.firestore.FieldValue.increment(1)
+        const updates = { solveCount: currentSolveCount + 1 };
+        if (isFirstBlood) {
+          updates.firstBloodUid = currentUser.uid;
+          updates.firstBloodName = userData.displayName || currentUser.displayName || 'Player';
+        }
+        t.update(chRef, updates);
+
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const userSnap = await t.get(userRef);
+        if (!userSnap.exists) throw new Error('User not found');
+
+        const userPoints = (userSnap.data().points || 0) + challenge.points;
+        const userSolves = (userSnap.data().solves || 0) + 1;
+        const userFirstBloods = (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0);
+
+        t.update(userRef, {
+          points: userPoints,
+          solves: userSolves,
+          firstBloods: userFirstBloods
+        });
+
+        challenge.solveCount = currentSolveCount + 1;
+        if (isFirstBlood) {
+          challenge.firstBloods = (challenge.firstBloods||0) + 1;
+          firstBloodAwarded = true;
+        }
       });
 
       isSolved = true;
       showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
 
-      const wrap = document.querySelector('.flag-input-wrap');
-      wrap.style.opacity = '0.5';
-      wrap.style.pointerEvents = 'none';
-      wrap.insertAdjacentHTML('beforebegin', `
+      // Animate solved
+      document.querySelector('.flag-input-wrap').style.opacity = '0.5';
+      document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
+      document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
         <div class="solved-banner">
           <div class="icon">✅</div>
           <div class="text">
-            <div class="title">Challenge Solved!${isFirstBlood ? ' 🩸 First Blood!' : ''}</div>
+            <div class="title">Challenge Solved!${firstBloodAwarded ? ' 🩸 First Blood!' : ''}</div>
             <div class="sub">You earned ${challenge.points} points.</div>
           </div>
         </div>`);
 
-    } catch(e) {
-      showToast('Error recording solve. Try again.', 'error');
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || 'Solve transaction failed.', 'error');
     }
 
   } else {

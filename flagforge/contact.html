@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta name="charset">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Contact</title>
   <link rel="stylesheet" href="css/main.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <div class="app-layout">
     <aside class="sidebar">
-      <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a></div>
+      <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a></div>
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-item">Home</a>
         <a href="challenges.html" class="nav-item">Challenges</a>
@@ -27,5 +28,8 @@
     </main>
   </div>
   <script src="js/firebase.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>
