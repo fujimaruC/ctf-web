@@ -311,45 +311,78 @@ async function submitFlag() {
   const isCorrect = challenge.caseInsensitive ? flag.toLowerCase() === correctFlag?.toLowerCase() : flag === correctFlag;
 
   if (isCorrect) {
-    // Check if first blood
-    const isFirstBlood = (challenge.solveCount || 0) === 0;
+    let firstBloodAwarded = false;
 
-    // Record solve
-    await db.collection('solves').doc(`${currentUser.uid}_${chId}`).set({
-      uid: currentUser.uid, challengeId: chId,
-      challengeName: challenge.title, category: challenge.category,
-      points: challenge.points, difficulty: challenge.difficulty,
-      playerName: userData.displayName || currentUser.displayName || 'Player',
-      solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      isFirstBlood
-    });
+    try {
+      await db.runTransaction(async t => {
+        const chRef = db.collection('challenges').doc(chId);
+        const chSnap = await t.get(chRef);
+        if (!chSnap.exists) throw new Error('Challenge not available');
 
-    // Update user points + solves
-    await db.collection('users').doc(currentUser.uid).update({
-      points: firebase.firestore.FieldValue.increment(challenge.points),
-      solves: firebase.firestore.FieldValue.increment(1),
-      ...(isFirstBlood && { firstBloods: firebase.firestore.FieldValue.increment(1) })
-    });
+        const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
+        const existingSolveSnap = await t.get(existingSolveRef);
+        if (existingSolveSnap.exists) throw new Error('Already solved');
 
-    // Increment solve count on challenge
-    await db.collection('challenges').doc(chId).update({
-      solveCount: firebase.firestore.FieldValue.increment(1)
-    });
+        const currentSolveCount = chSnap.data().solveCount || 0;
+        const isFirstBlood = currentSolveCount === 0;
 
-    isSolved = true;
-    showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
+        t.set(existingSolveRef, {
+          uid: currentUser.uid,
+          challengeId: chId,
+          challengeName: challenge.title,
+          category: challenge.category,
+          points: challenge.points,
+          difficulty: challenge.difficulty,
+          playerName: userData.displayName || currentUser.displayName || 'Player',
+          solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          isFirstBlood
+        });
 
-    // Animate solved
-    document.querySelector('.flag-input-wrap').style.opacity = '0.5';
-    document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
-    document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
-      <div class="solved-banner">
-        <div class="icon">✅</div>
-        <div class="text">
-          <div class="title">Challenge Solved!${isFirstBlood?' 🩸 First Blood!':''}</div>
-          <div class="sub">You earned ${challenge.points} points.</div>
-        </div>
-      </div>`);
+        t.update(chRef, {
+          solveCount: currentSolveCount + 1
+        });
+
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const userSnap = await t.get(userRef);
+        if (!userSnap.exists) throw new Error('User not found');
+
+        const userPoints = (userSnap.data().points || 0) + challenge.points;
+        const userSolves = (userSnap.data().solves || 0) + 1;
+        const userFirstBloods = (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0);
+
+        t.update(userRef, {
+          points: userPoints,
+          solves: userSolves,
+          firstBloods: userFirstBloods
+        });
+
+        challenge.solveCount = currentSolveCount + 1;
+        if (isFirstBlood) {
+          challenge.firstBloods = (challenge.firstBloods||0) + 1;
+          firstBloodAwarded = true;
+        }
+      });
+
+      isSolved = true;
+      showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
+
+      // Animate solved
+      document.querySelector('.flag-input-wrap').style.opacity = '0.5';
+      document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
+      document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
+        <div class="solved-banner">
+          <div class="icon">✅</div>
+          <div class="text">
+            <div class="title">Challenge Solved!${firstBloodAwarded ? ' 🩸 First Blood!' : ''}</div>
+            <div class="sub">You earned ${challenge.points} points.</div>
+          </div>
+        </div>`);
+
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || 'Solve transaction failed.', 'error');
+    }
+
   } else {
     showToast('Incorrect flag. Keep trying!', 'error');
     const inp = document.getElementById('flag-input');
