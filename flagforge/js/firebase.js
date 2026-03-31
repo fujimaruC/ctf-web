@@ -178,4 +178,37 @@ async function copyToClipboard(text) {
 function getInitials(name) {
   return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
+
+// ── Mobile responsive app menu  ──
+function initMobileNavigation() {
+  const appLayout = document.querySelector('.app-layout');
+  if (!appLayout || !document.querySelector('.sidebar') || window.innerWidth > 900) return;
+  if (document.querySelector('.mobile-bottom-nav')) return;
+
+  const bottomNav = document.createElement('div');
+  bottomNav.className = 'mobile-bottom-nav';
+  const currentPath = window.location.pathname;
+  const isActive = (path) => currentPath.includes(path) ? 'active' : '';
+  bottomNav.innerHTML = `
+    <a href="dashboard.html" class="nav-item ${isActive('dashboard')}">
+      <span class="nav-icon">⊞</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="challenges.html" class="nav-item ${isActive('challenges')}">
+      <span class="nav-icon">⚑</span>
+      <span>Challenges</span>
+    </a>
+    <a href="leaderboard.html" class="nav-item ${isActive('leaderboard')}">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </a>
+    <a href="profile.html" class="nav-item ${isActive('profile')}">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </a>
+  `;
+  document.body.appendChild(bottomNav);
+}
+
+document.addEventListener('DOMContentLoaded', initMobileNavigation);
  

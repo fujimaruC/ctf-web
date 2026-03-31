@@ -14,8 +14,8 @@
       font-family: var(--font-display); font-weight: 800; font-size: 22px;
       position: relative;
     }
-    .podium-slot:nth-child(1) .podium-avatar { width: 80px; height: 80px; font-size: 28px; border: 3px solid #FFD700; background: rgba(255,215,0,0.1); color: #FFD700; }
-    .podium-slot:nth-child(2) .podium-avatar { border: 2px solid #C0C0C0; background: rgba(192,192,192,0.1); color: #C0C0C0; }
+    .podium-slot:nth-child(1) .podium-avatar { border: 2px solid #C0C0C0; background: rgba(192,192,192,0.1); color: #C0C0C0; }
+    .podium-slot:nth-child(2) .podium-avatar { width: 80px; height: 80px; font-size: 28px; border: 3px solid #FFD700; background: rgba(255,215,0,0.1); color: #FFD; }
     .podium-slot:nth-child(3) .podium-avatar { border: 2px solid #CD7F32; background: rgba(205,127,50,0.1); color: #CD7F32; }
     .podium-crown { font-size: 28px; line-height: 1; margin-bottom: -4px; }
     .podium-name { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
@@ -23,8 +23,8 @@
     .podium-block {
       border-radius: var(--radius) var(--radius) 0 0; width: 100px;
     }
-    .podium-slot:nth-child(1) .podium-block { height: 80px; background: linear-gradient(180deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
-    .podium-slot:nth-child(2) .podium-block { height: 56px; background: linear-gradient(180deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03)); border: 1px solid rgba(192,192,192,0.15); }
+    .podium-slot:nth-child(1) .podium-block { height: 56px; background: linear-gradient(180deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03)); border: 1px solid rgba(192,192,192,0.15); }
+    .podium-slot:nth-child(2) .podium-block { height: 80px; background: linear-gradient(180deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
     .podium-slot:nth-child(3) .podium-block { height: 40px; background: linear-gradient(180deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03)); border: 1px solid rgba(205,127,50,0.15); }
     .podium-rank { font-family: var(--font-display); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
 
@@ -138,14 +138,34 @@ requireAuth().then(async user => {
   if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
   else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
 
-  // Load top 50
-  const snap = await db.collection('users').where('role','==','student').orderBy('points','desc').limit(50).get();
-  const players = snap.docs.map((d,i) => ({ rank: i+1, ...d.data() }));
+  const snap = await db.collection('users')
+    .orderBy('points','desc')
+    .orderBy('solves','desc')
+    .limit(50)
+    .get();
 
-  // My rank
-  const myRank = players.findIndex(p => p.uid === user.uid) + 1;
+  const players = snap.docs.map((d, i) => ({ rank: i+1, uid: d.id, ...d.data() }));
+
+  players.sort((a, b) => {
+    const pa = a.points || 0, pb = b.points || 0;
+    if (pb !== pa) return pb - pa;
+    const sa = a.solves || 0, sb = b.solves || 0;
+    if (sb !== sa) return sb - sa;
+    const fa = a.firstBloods || 0, fb = b.firstBloods || 0;
+    if (fb !== fa) return fb - fa;
+    return (a.displayName || '').localeCompare(b.displayName || '');
+  });
+
+  players.forEach((p, idx) => p.rank = idx + 1);
+
+  let myRank = players.findIndex(p => p.uid === user.uid) + 1;
+  if (!myRank) {
+    const countHigher = await db.collection('users').where('points','>', ud.points || 0).get();
+    myRank = countHigher.size + 1;
+  }
+
   if (myRank > 0) {
-    const me = players[myRank-1];
+    const me = players.find(p => p.uid === user.uid) || { displayName: ud.displayName || 'You', points: ud.points || 0, solves: ud.solves || 0 };
     document.getElementById('my-rank-banner').innerHTML = `
       <div class="my-rank-banner">
         <div class="rank-num">#${myRank}</div>
@@ -158,12 +178,21 @@ requireAuth().then(async user => {
       </div>`;
   }
 
-  // Podium (top 3) — reorder: 2nd, 1st, 3rd
-  const podiumOrder = [players[1], players[0], players[2]].filter(Boolean);
-  const podiumPositions = [2, 1, 3];
-  const podiumHTML = podiumOrder.map((p, idx) => {
-    const pos = podiumPositions[idx];
-    const heights = [56, 80, 40];
+  const podiumSlots = [
+    { player: players[1], pos: 2 },
+    { player: players[0], pos: 1 },
+    { player: players[2], pos: 3 },
+  ];
+  const podiumHTML = podiumSlots.map(({ player: p, pos }) => {
+    if (!p) {
+      return `<div class="podium-slot" style="opacity:0;pointer-events:none;">
+        <div style="height:36px;"></div>
+        <div class="podium-avatar"></div>
+        <div class="podium-name">—</div>
+        <div class="podium-pts">—</div>
+        <div class="podium-block"></div>
+      </div>`;
+    }
     return `
       <div class="podium-slot">
         ${pos===1 ? '<div class="podium-crown">👑</div>' : '<div style="height:36px;"></div>'}
@@ -173,9 +202,12 @@ requireAuth().then(async user => {
         <div class="podium-block"><div class="podium-rank" style="color:${MEDAL_COLORS[pos-1]}">${MEDAL_LABELS[pos-1]}</div></div>
       </div>`;
   }).join('');
-  document.getElementById('podium').innerHTML = podiumHTML;
+  if (players.length > 0) {
+    document.getElementById('podium').innerHTML = podiumHTML;
+  } else {
+    document.getElementById('podium').style.display = 'none';
+  }
 
-  // Table (all)
   if (!players.length) {
     document.getElementById('lb-body').innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><h3>No players yet</h3><p>Be the first to solve challenges!</p></div>';
     return;
