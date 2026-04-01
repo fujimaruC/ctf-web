@@ -333,8 +333,13 @@ async function submitFlag() {
 
         const chData = chSnap.data();
         const currentSolveCount = chData.solveCount || 0;
-        const isFirstBlood = !chData.firstBloodUid; // Only if not already awarded
+        
+        // FIXED: First blood should only go to the solver who makes solveCount go from 0->1
+        // AND only if firstBloodUid is still not set (atomic safety)
+        const isFirstBlood = currentSolveCount === 0 && !chData.firstBloodUid;
 
+        const now = firebase.firestore.FieldValue.serverTimestamp();
+        
         t.set(existingSolveRef, {
           uid: currentUser.uid,
           challengeId: chId,
@@ -343,15 +348,19 @@ async function submitFlag() {
           points: challenge.points,
           difficulty: challenge.difficulty,
           playerName: userData.displayName || currentUser.displayName || 'Player',
-          solvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          solvedAt: now,
           isFirstBlood
         });
 
         const updates = { solveCount: currentSolveCount + 1 };
+        
+        // Only set first blood if this is the first solve AND field is still empty
         if (isFirstBlood) {
           updates.firstBloodUid = currentUser.uid;
           updates.firstBloodName = userData.displayName || currentUser.displayName || 'Player';
+          updates.firstBloodTimestamp = now;
         }
+        
         t.update(chRef, updates);
 
         const userRef = db.collection('users').doc(currentUser.uid);

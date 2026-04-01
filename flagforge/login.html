@@ -289,6 +289,18 @@
 <script>
   redirectIfLoggedIn('dashboard.html');
 
+  // FIXED: Handle redirect result from Google Sign-In on mobile
+  auth.getRedirectResult().then(result => {
+    if (result?.user) {
+      syncUserAndRedirect(result.user);
+    }
+  }).catch(err => {
+    console.error('Redirect result error:', err);
+    if (err.code !== 'auth/cancelled-popup-request') {
+      showToast('Google sign-in redirect failed. Please try again.', 'error');
+    }
+  });
+
   // Check for tab query param
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('tab') === 'register') switchTab('register');
@@ -398,20 +410,31 @@
   async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
-      const result = await auth.signInWithPopup(provider);
-      const user = result.user;
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      if (!userDoc.exists) {
-        const username = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'') + Math.floor(Math.random()*1000);
-        await db.collection('users').doc(user.uid).set({
-          uid: user.uid, displayName: user.displayName, email: user.email,
-          username, role: 'student', points: 0, solves: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(), avatar: user.photoURL
-        });
-        await db.collection('usernames').doc(username.toLowerCase()).set({ uid: user.uid });
-      }
-      window.location.href = 'dashboard.html';
+      // FIXED: Use redirect on mobile (popup doesn't work well), popup on desktop
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const result = isMobile 
+        ? await auth.signInWithRedirect(provider)
+        : await auth.signInWithPopup(provider);
+      
+      const user = result?.user;
+      if (!user) return; // Redirect will handle the callback
+      
+      await syncUserAndRedirect(user);
     } catch(e) { showToast('Google sign-in failed. Please try again.','error'); }
+  }
+  
+  async function syncUserAndRedirect(user) {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) {
+      const username = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'') + Math.floor(Math.random()*1000);
+      await db.collection('users').doc(user.uid).set({
+        uid: user.uid, displayName: user.displayName, email: user.email,
+        username, role: 'student', points: 0, solves: 0, firstBloods: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(), avatar: user.photoURL
+      });
+      await db.collection('usernames').doc(username.toLowerCase()).set({ uid: user.uid });
+    }
+    window.location.href = 'dashboard.html';
   }
 
   async function forgotPassword() {
