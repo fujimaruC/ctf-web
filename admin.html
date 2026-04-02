@@ -239,8 +239,8 @@
           </div>
           <hr class="section-divider" />
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-lg" onclick="saveChallenge()">💾 Save Challenge</button>
-            <button class="btn btn-ghost" onclick="resetForm()">✕ Clear Form</button>
+            <button class="btn btn-primary btn-lg" onclick="saveChallenge()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Challenge</button>
+            <button class="btn btn-ghost" onclick="resetForm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Clear Form</button>
             <button class="btn btn-ghost" id="cancel-edit-btn" onclick="cancelEdit()" style="display:none;">Cancel Edit</button>
           </div>
         </div>
@@ -289,6 +289,19 @@
             <span style="font-size:12px;color:var(--text-muted);">When enabled, the leaderboard is hidden until competition ends.</span>
           </div>
           <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+          <hr class="section-divider" />
+          <h3 style="font-size:14px;margin-bottom:14px;color:var(--red);">⚠️ Database Maintenance</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+            Use this to fix corrupted first blood data and recalculate solve counts. This will:
+            <br>• Remove duplicate first bloods (only first solver keeps it)
+            <br>• Recalculate challenge solve counts
+            <br>• Fix user points, solves, and first blood counters
+            <br>• Cannot be undone - backup your database first!
+          </p>
+          <button class="btn btn-danger" onclick="fixDatabase()" id="fix-db-btn">
+            🔧 Fix Database Issues
+          </button>
+          <div id="fix-db-log" style="margin-top:12px;font-size:11px;color:var(--text-muted);font-family:monospace;max-height:200px;overflow-y:auto;"></div>
         </div>
       </div>
 
@@ -301,7 +314,7 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <div class="modal-title">Delete Challenge?</div>
-      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('delete-modal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <p style="color:var(--text-secondary);margin-bottom:24px;">This will permanently delete the challenge and all associated solve data. This cannot be undone.</p>
     <div style="display:flex;gap:10px;">
@@ -446,7 +459,7 @@ function addFileEntry(name='', url='', type='') {
   div.innerHTML = `
     <input type="text" class="form-input" placeholder="File name (e.g. chall.zip)" value="${sanitize(name)}" id="fname-${id}" />
     <input type="text" class="form-input" placeholder="Google Drive / GitHub URL" value="${sanitize(url)}" id="furl-${id}" />
-    <button class="remove-file-btn" onclick="document.getElementById('file-${id}').remove()">✕</button>`;
+    <button class="remove-file-btn" onclick="document.getElementById('file-${id}').remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
   document.getElementById('files-container').appendChild(div);
 }
 
@@ -458,7 +471,7 @@ function addHintEntry(text='', cost=0) {
     <div class="hint-entry-row">
       <div><input type="text" class="form-input" placeholder="Hint text..." value="${sanitize(text)}" id="htext-${id}" /></div>
       <div><input type="number" class="form-input" placeholder="Cost (pts)" value="${cost}" id="hcost-${id}" min="0" /></div>
-      <div style="display:flex;align-items:flex-start;padding-top:0;"><button class="remove-file-btn" onclick="document.getElementById('hint-entry-${id}').remove()">✕</button></div>
+      <div style="display:flex;align-items:flex-start;padding-top:0;"><button class="remove-file-btn" onclick="document.getElementById('hint-entry-${id}').remove()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     </div>`;
   document.getElementById('hints-container').appendChild(div);
 }
@@ -509,7 +522,7 @@ async function saveChallenge() {
   };
 
   const btn = event.target;
-  btn.innerHTML = '💾 Saving...'; btn.disabled = true;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Saving...'; btn.disabled = true;
 
   try {
     if (id) {
@@ -530,7 +543,7 @@ async function saveChallenge() {
     resetForm();
   } catch(e) { showToast('Error saving challenge: ' + e.message, 'error'); }
 
-  btn.innerHTML = '💾 Save Challenge'; btn.disabled = false;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Challenge'; btn.disabled = false;
 }
 
 function editChallenge(id) {
@@ -668,7 +681,135 @@ function openModal(id) {
 function closeModal(id) {
   const modal = document.getElementById(id);
   if (modal) modal.classList.add('hidden');
-} 
+}
+
+async function fixDatabase() {
+  const btn = document.getElementById('fix-db-btn');
+  const log = document.getElementById('fix-db-log');
+  
+  if (!confirm('⚠️ This will recalculate all stats and fix first blood issues. Continue?')) return;
+  
+  btn.innerHTML = '🔄 Processing...';
+  btn.disabled = true;
+  log.innerHTML = '';
+  
+  function addLog(msg) {
+    log.innerHTML += `${new Date().toLocaleTimeString()} - ${msg}<br>`;
+    log.scrollTop = log.scrollHeight;
+  }
+  
+  try {
+    addLog('Starting database cleanup...');
+    
+    // Step 1: Get all challenges
+    const challengesSnap = await db.collection('challenges').get();
+    addLog(`Found ${challengesSnap.size} challenges`);
+    
+    // Step 2: For each challenge, fix first blood and solve count
+    for (const chDoc of challengesSnap.docs) {
+      const chId = chDoc.id;
+      const chData = chDoc.data();
+      
+      // Get all solves for this challenge, ordered by time
+      const solvesSnap = await db.collection('solves')
+        .where('challengeId', '==', chId)
+        .orderBy('solvedAt', 'asc')
+        .get();
+      
+      const actualSolveCount = solvesSnap.size;
+      
+      if (actualSolveCount === 0) {
+        // No solves - reset challenge
+        await db.collection('challenges').doc(chId).update({
+          solveCount: 0,
+          firstBloodUid: null,
+          firstBloodName: null
+        });
+        addLog(`✓ ${chData.title}: Reset (0 solves)`);
+        continue;
+      }
+      
+      // Find the TRUE first blood (earliest solve)
+      const firstSolveDoc = solvesSnap.docs[0];
+      const firstSolveData = firstSolveDoc.data();
+      const trueFirstBloodUid = firstSolveData.uid;
+      
+      // Update challenge with correct data
+      await db.collection('challenges').doc(chId).update({
+        solveCount: actualSolveCount,
+        firstBloodUid: trueFirstBloodUid,
+        firstBloodName: firstSolveData.playerName
+      });
+      
+      // Fix all solve documents - only first should have isFirstBlood: true
+      let fixedBloods = 0;
+      for (const solveDoc of solvesSnap.docs) {
+        const solveData = solveDoc.data();
+        const shouldBeFirstBlood = solveData.uid === trueFirstBloodUid;
+        
+        if (solveData.isFirstBlood !== shouldBeFirstBlood) {
+          await db.collection('solves').doc(solveDoc.id).update({
+            isFirstBlood: shouldBeFirstBlood
+          });
+          fixedBloods++;
+        }
+      }
+      
+      addLog(`✓ ${chData.title}: ${actualSolveCount} solves, fixed ${fixedBloods} first blood(s)`);
+    }
+    
+    addLog('---');
+    addLog('Recalculating user stats...');
+    
+    // Step 3: Recalculate all user stats
+    const usersSnap = await db.collection('users').get();
+    
+    for (const userDoc of usersSnap.docs) {
+      const uid = userDoc.id;
+      
+      // Get all solves for this user
+      const userSolvesSnap = await db.collection('solves')
+        .where('uid', '==', uid)
+        .get();
+      
+      let totalPoints = 0;
+      let totalSolves = userSolvesSnap.size;
+      let totalFirstBloods = 0;
+      
+      userSolvesSnap.forEach(doc => {
+        const solveData = doc.data();
+        totalPoints += solveData.points || 0;
+        if (solveData.isFirstBlood) totalFirstBloods++;
+      });
+      
+      // Update user stats
+      await db.collection('users').doc(uid).update({
+        points: totalPoints,
+        solves: totalSolves,
+        firstBloods: totalFirstBloods
+      });
+      
+      const userData = userDoc.data();
+      addLog(`✓ ${userData.displayName}: ${totalPoints}pts, ${totalSolves} solves, ${totalFirstBloods} bloods`);
+    }
+    
+    addLog('---');
+    addLog('✅ Database cleanup complete!');
+    addLog('Please refresh all pages to see updated data.');
+    
+    showToast('Database fixed successfully!', 'success');
+    
+    // Reload admin stats
+    loadAdminData();
+    
+  } catch (error) {
+    addLog(`❌ Error: ${error.message}`);
+    showToast('Database fix failed: ' + error.message, 'error');
+  }
+  
+  btn.innerHTML = '🔧 Fix Database Issues';
+  btn.disabled = false;
+}
 </script>
 </body>
 </html>

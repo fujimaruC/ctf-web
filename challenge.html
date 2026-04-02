@@ -142,7 +142,14 @@
 <script src="js/firebase.js"></script>
 <script>
 lucide.createIcons();
-const CAT_ICONS = { Web:'🌐', Crypto:'🔐', Pwn:'💥', Forensics:'🔎', Reversing:'⚙️', Misc:'🧩' };
+const CAT_ICONS = { 
+  Web: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  Crypto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  Pwn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
+  Forensics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+  Reversing: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/></svg>',
+  Misc: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m0-18l9 9m-9-9L3 12m9 9l9-9m-9 9L3 12"/></svg>'
+};
 const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
 
 const chId = new URLSearchParams(window.location.search).get('id');
@@ -190,13 +197,13 @@ function renderChallenge(solversSnap) {
       <div class="solver-avatar">${getInitials(s.playerName)}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sanitize(s.playerName)}</div>
-        <div style="font-size:11px;color:var(--text-muted);">${i===0?'🩸 First Blood · ':''}${timeAgo(s.solvedAt)}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${i===0?'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood · ':''}${timeAgo(s.solvedAt)}</div>
       </div>
     </div>`).join('') : '<div style="font-size:13px;color:var(--text-muted);">No solves yet. Be first!</div>';
 
   const filesHTML = (challenge.files||[]).map(f => `
     <a href="${f.url}" target="_blank" rel="noopener" class="file-link">
-      <span class="file-icon">📁</span>
+      <span class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></span>
       <div class="file-info">
         <div class="file-name">${sanitize(f.name)}</div>
         <div class="file-type">${sanitize(f.type||'Download')}</div>
@@ -207,7 +214,7 @@ function renderChallenge(solversSnap) {
   const hintsHTML = (challenge.hints||[]).map((h,i) => `
     <div class="hint-item" id="hint-${i}">
       <div class="hint-header" onclick="toggleHint(${i})">
-        <span style="font-size:13px;font-weight:500;">💡 Hint ${i+1}</span>
+        <span style="font-size:13px;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><circle cx="12" cy="12" r="1"/><path d="M8 16s2.9-5 4-5 4 5 4 5"/><path d="M22 12c0-6.627-1.343-12-3-12S14.656 5.373 12 12s5.343 12 7 12 3-5.373 3-12z"/><rect x="2" y="5" width="4" height="14" rx="2"/></svg> Hint ${i+1}</span>
         <span class="hint-cost">${h.cost ? `-${h.cost} pts` : 'Free'}</span>
       </div>
       <div class="hint-body">${sanitize(h.text)}</div>
@@ -223,7 +230,7 @@ function renderChallenge(solversSnap) {
             <div class="ch-title-info">
               <div class="ch-badges-row">
                 ${categoryBadge(cat)} ${difficultyBadge(challenge.difficulty||'Easy')}
-                ${challenge.solveCount===0 ? '<span class="first-blood-badge">🩸 Unsolved</span>' : ''}
+                ${challenge.solveCount===0 ? '<span class="first-blood-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> Unsolved</span>' : ''}
               </div>
               <h1>${sanitize(challenge.title)}</h1>
               <span style="font-size:13px;color:var(--text-muted);">by ${sanitize(challenge.authorName||'Admin')}</span>
@@ -248,7 +255,7 @@ function renderChallenge(solversSnap) {
 
         ${challenge.files?.length ? `
         <div class="desc-card anim-fadeup anim-delay-2">
-          <h3>📁 Challenge Files</h3>
+          <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:text-bottom;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> Challenge Files</h3>
           ${filesHTML}
         </div>` : ''}
       </div>
@@ -276,7 +283,7 @@ function renderChallenge(solversSnap) {
         <!-- Hints -->
         ${challenge.hints?.length ? `
         <div class="sidebar-card anim-fadeup anim-delay-2">
-          <h3>💡 Hints</h3>
+          <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:text-bottom;"><polyline points="21 8 21 21 3 21 3 8 21 8"/><path d="M1 8h22"/><path d="M3 8v-2a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/></svg> Hints</h3>
           ${hintsHTML}
         </div>` : ''}
 
@@ -394,7 +401,7 @@ async function submitFlag() {
         <div class="solved-banner">
           <div class="icon">✅</div>
           <div class="text">
-            <div class="title">Challenge Solved!${firstBloodAwarded ? ' 🩸 First Blood!' : ''}</div>
+            <div class="title">Challenge Solved!${firstBloodAwarded ? ' <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin:0 4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood!' : ''}</div>
             <div class="sub">You earned ${challenge.points} points.</div>
           </div>
         </div>`);
