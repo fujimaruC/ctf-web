@@ -1,7 +1,5 @@
-// ── Firebase Configuration ──
-// Replace these values with your actual Firebase project config
 const firebaseConfig = {
-  apiKey: "AIzaSyBCiwwfRG-YNvczeBBg93GtuxR2uYBoWck",
+  apiKey: "AIzaSyDy4KPReIescItC0wLT7AaGh2cngs6BQ7E",
   authDomain: "ctf-daily.firebaseapp.com",
   projectId: "ctf-daily",
   storageBucket: "ctf-daily.firebasestorage.app",
@@ -10,22 +8,18 @@ const firebaseConfig = {
   measurementId: "G-1VY7EK4ZBM"
 };
 
-// ── Initialize Firebase (guard against double-init) ──
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 const auth = firebase.auth();
 const db = firebase.firestore();
- 
-// ── Sync user to Firestore after any login (email or Google) ──
-// Safe to call multiple times — uses set() with merge so existing data is preserved.
+
 async function syncUserToFirestore(user) {
   if (!user) return null;
   const ref = db.collection('users').doc(user.uid);
   const snap = await ref.get();
  
   if (!snap.exists) {
-    // Brand-new user — create full profile
     const rawName = user.displayName || user.email?.split('@')[0] || 'Player';
     const username = rawName.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase()
       + Math.floor(Math.random() * 9000 + 1000);
