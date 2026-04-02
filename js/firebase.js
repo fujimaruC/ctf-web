@@ -1,6 +1,6 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDy4KPReIescItC0wLT7AaGh2cngs6BQ7E",
-  authDomain: "ctf-daily.firebaseapp.com",
+  authDomain: "fujimaruc.github.io",
   projectId: "ctf-daily",
   storageBucket: "ctf-daily.firebasestorage.app",
   messagingSenderId: "513878659657",
@@ -236,6 +236,21 @@ function initMobileNavigation() {
       }
     }, 250);
   });
+}
+
+// ── Handle Google Sign-In redirects ──
+async function handleGoogleRedirect(syncCallback) {
+  try {
+    const result = await auth.getRedirectResult();
+    if (result?.user && syncCallback) {
+      await syncCallback(result.user);
+    }
+  } catch (error) {
+    console.error('Google redirect error:', error);
+    if (window.showToast) {
+      showToast('Google sign-in failed. Please try again.', 'error');
+    }
+  }
 }
 
 // Initialize on both load and DOM ready

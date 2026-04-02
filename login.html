@@ -281,22 +281,10 @@
 <script src="js/firebase.js"></script>
 <script>
   // Handle redirect result from Google Sign-In on mobile first
-  (async () => {
-    try {
-      const result = await auth.getRedirectResult();
-      if (result?.user) {
-        await syncUserAndRedirect(result.user);
-        return; // Already redirected
-      }
-    } catch (err) {
-      console.error('Redirect result error:', err);
-      if (err.code !== 'auth/cancelled-popup-request') {
-        showToast('Google sign-in redirect failed. Please try again.', 'error');
-      }
-    }
+  handleGoogleRedirect(syncUserAndRedirect).then(() => {
     // If no redirect result, check if already logged in
     redirectIfLoggedIn('dashboard.html');
-  })();
+  });
 
   // Check for tab query param
   const urlParams = new URLSearchParams(window.location.search);
