@@ -244,4 +244,18 @@ if (document.readyState === 'loading') {
 } else {
   initMobileNavigation();
 }
+
+// Load additional scripts
+function loadScript(src) {
+  const script = document.createElement('script');
+  script.src = src;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
+loadScript('js/validation.js');
+loadScript('js/rate-limit.js');
+loadScript('js/error-handler.js');
+loadScript('js/offline.js');
+loadScript('js/notifications.js');
  

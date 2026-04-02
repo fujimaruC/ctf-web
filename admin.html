@@ -162,6 +162,7 @@
             <option value="1">Published</option>
             <option value="0">Draft</option>
           </select>
+          <button class="btn btn-secondary" onclick="exportChallenges()">Export CSV</button>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -250,6 +251,7 @@
       <div class="admin-panel" id="panel-students">
         <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;">
           <input type="text" class="form-input" id="student-search" placeholder="Search students..." oninput="renderStudentsTable()" style="flex:1;" />
+          <button class="btn btn-secondary" onclick="exportStudents()">Export CSV</button>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -588,6 +590,55 @@ function resetForm() {
   publishState=true; updatePublishToggle();
   document.getElementById('form-panel-title').textContent = 'Create New Challenge';
   document.getElementById('cancel-edit-btn').style.display = 'none';
+}
+
+// ── Export functions ──
+function exportChallenges() {
+  const csv = [
+    ['Title', 'Category', 'Difficulty', 'Points', 'Solves', 'Status', 'Author', 'Created'],
+    ...allChallengesAdmin.map(ch => [
+      ch.title,
+      ch.category,
+      ch.difficulty,
+      ch.points,
+      ch.solveCount || 0,
+      ch.published ? 'Published' : 'Draft',
+      ch.authorName || 'Admin',
+      ch.createdAt?.toDate?.()?.toLocaleDateString() || ''
+    ])
+  ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'challenges.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportStudents() {
+  const csv = [
+    ['Display Name', 'Username', 'Email', 'Role', 'Points', 'Solves', 'First Bloods', 'Joined'],
+    ...allStudents.map(u => [
+      u.displayName || '',
+      u.username || '',
+      u.email || '',
+      u.role || 'student',
+      u.points || 0,
+      u.solves || 0,
+      u.firstBloods || 0,
+      u.createdAt?.toDate?.()?.toLocaleDateString() || ''
+    ])
+  ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'students.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── Students table ──
