@@ -1,6 +1,6 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDy4KPReIescItC0wLT7AaGh2cngs6BQ7E",
-  authDomain: "fujimaruc.github.io",
+  authDomain: "ctf-daily.firebaseapp.com",
   projectId: "ctf-daily",
   storageBucket: "ctf-daily.firebasestorage.app",
   messagingSenderId: "513878659657",
