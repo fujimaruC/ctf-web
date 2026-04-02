@@ -238,21 +238,6 @@ function initMobileNavigation() {
   });
 }
 
-// ── Handle Google Sign-In redirects ──
-async function handleGoogleRedirect(syncCallback) {
-  try {
-    const result = await auth.getRedirectResult();
-    if (result?.user && syncCallback) {
-      await syncCallback(result.user);
-    }
-  } catch (error) {
-    console.error('Google redirect error:', error);
-    if (window.showToast) {
-      showToast('Google sign-in failed. Please try again.', 'error');
-    }
-  }
-}
-
 // Initialize on both load and DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initMobileNavigation);

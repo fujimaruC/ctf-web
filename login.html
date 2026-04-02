@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Sign In</title>
   <link rel="stylesheet" href="css/main.css" />
-  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/style.min.css" /> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/style.min.css" />
   <style>
     body { display: flex; min-height: 100vh; }
 
@@ -213,13 +213,6 @@
     <p class="subtitle">Create your account and start solving challenges today.</p>
     <div class="error-msg" id="register-error"></div>
 
-    <button class="google-btn" onclick="signInWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Continue with Google
-    </button>
-
-    <div class="divider-or">or register with email</div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
       <div class="form-group">
         <label class="form-label">First Name</label>
@@ -280,11 +273,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
 <script>
-  // Handle redirect result from Google Sign-In on mobile first
-  handleGoogleRedirect(syncUserAndRedirect).then(() => {
-    // If no redirect result, check if already logged in
-    redirectIfLoggedIn('dashboard.html');
-  });
+  // Check if already logged in
+  redirectIfLoggedIn('dashboard.html');
 
   // Check for tab query param
   const urlParams = new URLSearchParams(window.location.search);
@@ -389,56 +379,6 @@
       showError('register-error', msgs[e.code] || 'Registration failed. Try again.');
       document.getElementById('register-btn').innerHTML = 'Create Account';
       document.getElementById('register-btn').disabled = false;
-    }
-  }
-
-  async function signInWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        // Use redirect for mobile - result handled in getRedirectResult at top
-        await auth.signInWithRedirect(provider);
-        // Function will exit here, redirect callback handles the rest
-        return;
-      }
-      
-      // Desktop: use popup
-      const result = await auth.signInWithPopup(provider);
-      const user = result?.user;
-      if (!user) return;
-      
-      await syncUserAndRedirect(user);
-    } catch(e) { 
-      console.error('Google sign-in error:', e);
-      showToast('Google sign-in failed. Please try again.','error'); 
-    }
-  }
-  
-  async function syncUserAndRedirect(user) {
-    try {
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      if (!userDoc.exists) {
-        const username = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'') + Math.floor(Math.random()*1000);
-        await db.collection('users').doc(user.uid).set({
-          uid: user.uid, displayName: user.displayName, email: user.email,
-          username, role: 'student', points: 0, solves: 0, firstBloods: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(), avatar: user.photoURL
-        });
-        await db.collection('usernames').doc(username.toLowerCase()).set({ uid: user.uid });
-      } else {
-        // Existing user — patch avatar/displayName if they changed in Google account
-        const data = userDoc.data();
-        const updates = {};
-        if (user.displayName && user.displayName !== data.displayName) updates.displayName = user.displayName;
-        if (user.photoURL && user.photoURL !== data.avatar) updates.avatar = user.photoURL;
-        if (Object.keys(updates).length) await userDoc.ref.update(updates);
-      }
-      window.location.href = 'dashboard.html';
-    } catch (error) {
-      console.error('Error syncing user:', error);
-      showToast('Failed to sign in. Please try again.', 'error');
     }
   }
 
