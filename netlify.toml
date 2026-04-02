@@ -1,11 +1,11 @@
 [build]
-  publish = "public"
+  publish = "."
   command = "echo 'No build step required'"
 
 # SPA routing — redirect all requests to index.html
 [[redirects]]
   from = "/*"
-  to = "/public/index.html"
+  to = "/index.html"
   status = 200
 
 # Security headers

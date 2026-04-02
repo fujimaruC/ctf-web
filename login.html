@@ -192,7 +192,7 @@
       <label class="form-label">Password</label>
       <div class="password-wrap">
         <input type="password" class="form-input" id="login-password" placeholder="Your password" autocomplete="current-password" />
-        <button class="password-toggle" onclick="togglePassword('login-password', this)" type="button">
+        <button class="password-toggle" onclick="togglePassword('login-password', this)" type="button" aria-label="Toggle password visibility">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-icon">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -249,7 +249,7 @@
       <label class="form-label">Password</label>
       <div class="password-wrap">
         <input type="password" class="form-input" id="reg-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password" />
-        <button class="password-toggle" onclick="togglePassword('reg-password', this)" type="button">
+        <button class="password-toggle" onclick="togglePassword('reg-password', this)" type="button" aria-label="Toggle password visibility">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-icon">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -410,17 +410,25 @@
   async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
-      // FIXED: Use redirect on mobile (popup doesn't work well), popup on desktop
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const result = isMobile 
-        ? await auth.signInWithRedirect(provider)
-        : await auth.signInWithPopup(provider);
       
+      if (isMobile) {
+        // Use redirect for mobile - result handled in getRedirectResult at top
+        await auth.signInWithRedirect(provider);
+        // Function will exit here, redirect callback handles the rest
+        return;
+      }
+      
+      // Desktop: use popup
+      const result = await auth.signInWithPopup(provider);
       const user = result?.user;
-      if (!user) return; // Redirect will handle the callback
+      if (!user) return;
       
       await syncUserAndRedirect(user);
-    } catch(e) { showToast('Google sign-in failed. Please try again.','error'); }
+    } catch(e) { 
+      console.error('Google sign-in error:', e);
+      showToast('Google sign-in failed. Please try again.','error'); 
+    }
   }
   
   async function syncUserAndRedirect(user) {

@@ -144,9 +144,17 @@ function formatPoints(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : n; }
  
 // ── Sanitize HTML input ──
 function sanitize(str) {
-  const d = document.createElement('div');
-  d.textContent = str ?? '';
-  return d.innerHTML;
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Add a new function for safe HTML insertion:
+function setSafeHTML(element, html) {
+  const temp = document.createElement('div');
+  temp.textContent = html;
+  element.textContent = html;
 }
  
 // ── Local storage helpers ──
@@ -175,14 +183,24 @@ function getInitials(name) {
 
 // ── Mobile responsive app menu  ──
 function initMobileNavigation() {
-  const appLayout = document.querySelector('.app-layout');
-  if (!appLayout || !document.querySelector('.sidebar') || window.innerWidth > 900) return;
+  // Check if already initialized
   if (document.querySelector('.mobile-bottom-nav')) return;
+  
+  const appLayout = document.querySelector('.app-layout');
+  const sidebar = document.querySelector('.sidebar');
+  
+  // Only initialize if we have the required elements and are on mobile
+  if (!appLayout || !sidebar) return;
+  
+  // More robust mobile detection
+  const isMobile = window.innerWidth <= 900 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (!isMobile) return;
 
   const bottomNav = document.createElement('div');
   bottomNav.className = 'mobile-bottom-nav';
-  const currentPath = window.location.pathname;
-  const isActive = (path) => currentPath.includes(path) ? 'active' : '';
+  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  const isActive = (path) => currentPath === path || currentPath.includes(path.replace('.html', '')) ? 'active' : '';
+  
   bottomNav.innerHTML = `
     <a href="dashboard.html" class="nav-item ${isActive('dashboard')}">
       <span class="nav-icon">⊞</span>
@@ -202,7 +220,28 @@ function initMobileNavigation() {
     </a>
   `;
   document.body.appendChild(bottomNav);
+  
+  // Handle window resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const newIsMobile = window.innerWidth <= 900;
+      const navExists = document.querySelector('.mobile-bottom-nav');
+      
+      if (newIsMobile && !navExists) {
+        initMobileNavigation();
+      } else if (!newIsMobile && navExists) {
+        navExists.remove();
+      }
+    }, 250);
+  });
 }
 
-document.addEventListener('DOMContentLoaded', initMobileNavigation);
+// Initialize on both load and DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMobileNavigation);
+} else {
+  initMobileNavigation();
+}
  
