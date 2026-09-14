@@ -454,6 +454,14 @@ function confirmDelete(id) {
 let fileCount = 0;
 let hintCount = 0;
 
+async function hashFlag(flag) {
+  const bytes = new TextEncoder().encode(flag);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function addFileEntry(name='', url='', type='') {
   const id = fileCount++;
   const div = document.createElement('div');
@@ -516,8 +524,18 @@ async function saveChallenge() {
 
   if (!title||!flag||!description||!points) { showToast('Please fill in all required fields.', 'error'); return; }
 
+  if (!Number.isInteger(points) || points < 1 || points > 10000) {
+    showToast('Points must be between 1 and 10,000.', 'error');
+    return;
+  }
+  if (flag.length < 7 || flag.length > 512) {
+    showToast('Flag length is invalid.', 'error');
+    return;
+  }
+
+  const flagHash = await hashFlag(flag);
   const data = {
-    title, category, difficulty, points, flag, description,
+    title, category, difficulty, points, flagHash, description,
     authorName, published: publishState,
     files: getFiles(), hints: getHints(),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -556,7 +574,7 @@ function editChallenge(id) {
   document.getElementById('ch-category').value = ch.category||'Web';
   document.getElementById('ch-difficulty').value = ch.difficulty||'Easy';
   document.getElementById('ch-points').value = ch.points||'';
-  document.getElementById('ch-flag').value = ch.flag||'';
+  document.getElementById('ch-flag').value = '';\n  document.getElementById('ch-flag').placeholder = ch.flagHash ? 'Enter a new flag only if rotating it' : 'Migrate legacy flag to a hash before publishing';
   document.getElementById('ch-description').value = ch.description||'';
   document.getElementById('ch-author').value = ch.authorName||'';
   publishState = ch.published || false; updatePublishToggle();
@@ -580,7 +598,7 @@ function editChallenge(id) {
 function cancelEdit() { resetForm(); switchPanel('challenges'); }
 function resetForm() {
   document.getElementById('edit-ch-id').value = '';
-  ['ch-title','ch-flag','ch-description','ch-author'].forEach(id => document.getElementById(id).value = '');
+  ['ch-title','ch-flag','ch-description','ch-author'].forEach(id => document.getElementById(id).value = '');\n  document.getElementById('ch-flag').placeholder = 'FLAG{example_flag_here}';
   document.getElementById('ch-points').value = '';
   document.getElementById('ch-category').value = 'Web';
   document.getElementById('ch-difficulty').value = 'Easy';
