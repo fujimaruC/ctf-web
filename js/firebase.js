@@ -105,7 +105,11 @@ function showToast(message, type = 'info', duration = 3500) {
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${icons[type] || icons.info}</span><span>${message}</span>`;
+  const iconEl = document.createElement('span');
+  iconEl.textContent = icons[type] || icons.info;
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+  toast.replaceChildren(iconEl, messageEl);
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, duration);
 }
@@ -129,14 +133,15 @@ function timeAgo(ts) {
 // ── Difficulty color ──
 function difficultyBadge(diff) {
   const map = { Easy: 'easy', Medium: 'medium', Hard: 'hard', Insane: 'insane' };
-  return `<span class="badge badge-${map[diff] || 'misc'}">${diff}</span>`;
+  const safeDiff = sanitize(diff || 'Misc');
+  return `<span class="badge badge-${map[diff] || 'misc'}">${safeDiff}</span>`;
 }
  
 // ── Category badge ──
 function categoryBadge(cat) {
   const map = { Web: 'web', Crypto: 'crypto', Pwn: 'pwn', Forensics: 'forensics', Reversing: 'rev', Misc: 'misc' };
   const key = Object.keys(map).find(k => k.toLowerCase() === cat?.toLowerCase()) || 'misc';
-  return `<span class="badge badge-${map[key]}">${cat}</span>`;
+  return `<span class="badge badge-${map[key]}">${sanitize(cat)}</span>`;
 }
  
 // ── Format points ──
