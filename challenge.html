@@ -309,117 +309,77 @@ async function submitFlag() {
   if (!flag) { showToast('Please enter a flag.', 'error'); return; }
 
   const btn = document.querySelector('.flag-submit-btn');
-  btn.textContent = '...'; btn.disabled = true;
+  btn.textContent = '...';
+  btn.disabled = true;
 
-  const correctFlag = challenge.flag?.trim();
-  const isCorrect = challenge.caseInsensitive
-    ? flag.toLowerCase() === correctFlag?.toLowerCase()
-    : flag === correctFlag;
-
-  attempts++;
   try {
-    await db.collection('attempts').doc(`${currentUser.uid}_${chId}`)
-      .set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
-  } catch(e) {}
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch('/.netlify/functions/submit-flag', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ challengeId: chId, flag })
+    });
 
-  const counterEl = document.getElementById('attempts-counter');
-  if (counterEl) counterEl.textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
+    const result = await response.json().catch(() => ({}));
 
-  if (isCorrect) {
-    let firstBloodAwarded = false;
-
-    try {
-      await db.runTransaction(async t => {
-        const chRef = db.collection('challenges').doc(chId);
-        const chSnap = await t.get(chRef);
-        if (!chSnap.exists) throw new Error('Challenge not available');
-
-        const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
-        const existingSolveSnap = await t.get(existingSolveRef);
-        if (existingSolveSnap.exists) throw new Error('Already solved');
-
-        const chData = chSnap.data();
-        const currentSolveCount = chData.solveCount || 0;
-        
-        // FIXED: First blood should only go to the solver who makes solveCount go from 0->1
-        // AND only if firstBloodUid is still not set (atomic safety)
-        const isFirstBlood = currentSolveCount === 0 && !chData.firstBloodUid;
-
-        const now = firebase.firestore.FieldValue.serverTimestamp();
-        
-        t.set(existingSolveRef, {
-          uid: currentUser.uid,
-          challengeId: chId,
-          challengeName: challenge.title,
-          category: challenge.category,
-          points: challenge.points,
-          difficulty: challenge.difficulty,
-          playerName: userData.displayName || currentUser.displayName || 'Player',
-          solvedAt: now,
-          isFirstBlood
-        });
-
-        const updates = { solveCount: currentSolveCount + 1 };
-        
-        // Only set first blood if this is the first solve AND field is still empty
-        if (isFirstBlood) {
-          updates.firstBloodUid = currentUser.uid;
-          updates.firstBloodName = userData.displayName || currentUser.displayName || 'Player';
-          updates.firstBloodTimestamp = now;
-        }
-        
-        t.update(chRef, updates);
-
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const userSnap = await t.get(userRef);
-        if (!userSnap.exists) throw new Error('User not found');
-
-        const userPoints = (userSnap.data().points || 0) + challenge.points;
-        const userSolves = (userSnap.data().solves || 0) + 1;
-        const userFirstBloods = (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0);
-
-        t.update(userRef, {
-          points: userPoints,
-          solves: userSolves,
-          firstBloods: userFirstBloods
-        });
-
-        challenge.solveCount = currentSolveCount + 1;
-        if (isFirstBlood) {
-          challenge.firstBloods = (challenge.firstBloods||0) + 1;
-          firstBloodAwarded = true;
-        }
-      });
-
+    if (response.status === 401) {
+      showToast('Your session expired. Please sign in again.', 'error');
+      return;
+    }
+    if (response.status === 404) {
+      showToast('Challenge not found.', 'error');
+      return;
+    }
+    if (response.status === 409) {
       isSolved = true;
-      showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
+      showToast('Challenge already solved.', 'info');
+      return;
+    }
+    if (!response.ok) {
+      showToast(result.error || 'Submission failed.', 'error');
+      return;
+    }
 
-      // Animate solved
-      document.querySelector('.flag-input-wrap').style.opacity = '0.5';
-      document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
-      document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
+    attempts = Number(result.attempts || attempts);
+    const counterEl = document.getElementById('attempts-counter');
+    if (counterEl) counterEl.textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
+
+    if (!result.correct) {
+      showToast('Incorrect flag. Keep trying!', 'error');
+      const inp = document.getElementById('flag-input');
+      inp.style.borderColor = 'var(--red)';
+      inp.style.boxShadow = '0 0 0 3px rgba(240,82,82,0.12)';
+      setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
+      return;
+    }
+
+    isSolved = true;
+    challenge.solveCount = (challenge.solveCount || 0) + 1;
+    showToast(`🏁 Correct! +${result.points} points!`, 'success', 5000);
+
+    const wrap = document.querySelector('.flag-input-wrap');
+    if (wrap) {
+      wrap.style.opacity = '0.5';
+      wrap.style.pointerEvents = 'none';
+      wrap.insertAdjacentHTML('beforebegin', `
         <div class="solved-banner">
           <div class="icon">✅</div>
           <div class="text">
-            <div class="title">Challenge Solved!${firstBloodAwarded ? ' <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin:0 4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood!' : ''}</div>
-            <div class="sub">You earned ${challenge.points} points.</div>
+            <div class="title">Challenge Solved!${result.firstBlood ? ' First Blood!' : ''}</div>
+            <div class="sub">You earned ${result.points} points.</div>
           </div>
         </div>`);
-
-    } catch (err) {
-      console.error(err);
-      showToast(err.message || 'Solve transaction failed.', 'error');
     }
-
-  } else {
-    showToast('Incorrect flag. Keep trying!', 'error');
-    const inp = document.getElementById('flag-input');
-    inp.style.borderColor = 'var(--red)';
-    inp.style.boxShadow = '0 0 0 3px rgba(240,82,82,0.12)';
-    setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
+  } catch (err) {
+    console.error(err);
+    showToast('Unable to submit right now. Please try again.', 'error');
+  } finally {
+    btn.textContent = 'Submit';
+    btn.disabled = false;
   }
-
-  btn.textContent = 'Submit'; btn.disabled = false;
 }
 </script>
 </body>
