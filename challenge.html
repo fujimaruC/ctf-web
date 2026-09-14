@@ -163,8 +163,7 @@ requireAuth().then(async user => {
   document.getElementById('nav-name').textContent = userData.displayName || user.displayName || 'Player';
   document.getElementById('nav-pts').textContent = (userData.points||0).toLocaleString() + ' pts';
   const avatarEl = document.getElementById('nav-avatar');
-  if (userData.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${userData.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else avatarEl.textContent = getInitials(userData.displayName || user.displayName);
+  setAvatar(avatarEl, userData.avatar || user.photoURL, getInitials(userData.displayName || user.displayName));
 
   if (!chId) { document.getElementById('ch-content').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Challenge not found</h3></div>'; return; }
 

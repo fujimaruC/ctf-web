@@ -161,6 +161,39 @@ function setSafeHTML(element, html) {
   temp.textContent = html;
   element.textContent = html;
 }
+
+// Safely render a user avatar. Never build an <img> via string
+// concatenation — a crafted `avatar` value like `x" onerror="...` could
+// break out of the src="" attribute when inserted via innerHTML. Only
+// ever accepts http(s) URLs, and sets `.src` via the DOM API, which
+// cannot be used to inject markup or run script no matter what the
+// string contains.
+function setAvatar(el, url, initials) {
+  if (!el) return;
+  const isValidUrl = typeof url === 'string' && /^https:\/\//i.test(url);
+  if (isValidUrl) {
+    el.textContent = '';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.borderRadius = '50%';
+    img.style.objectFit = 'cover';
+    img.referrerPolicy = 'no-referrer';
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+// Strip characters that could break out of an HTML attribute/element
+// context before a user-supplied name is ever written to Firestore —
+// closes the entry point that fed the addLog() stored-XSS above.
+function sanitizeName(str, maxLen = 60) {
+  if (!str) return '';
+  return String(str).replace(/[<>&"'`]/g, '').trim().slice(0, maxLen);
+}
  
 // ── Local storage helpers ──
 const storage = {

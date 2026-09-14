@@ -163,13 +163,11 @@ requireAuth().then(async user => {
   // Nav
   document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
   const navAv = document.getElementById('nav-avatar');
-  if (ud.avatar || user.photoURL) navAv.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else navAv.textContent = getInitials(ud.displayName || user.displayName);
+  setAvatar(navAv, ud.avatar || user.photoURL, getInitials(ud.displayName || user.displayName));
 
   // Profile header
   const avatarEl = document.getElementById('profile-avatar');
-  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" />`;
-  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+  setAvatar(avatarEl, ud.avatar || user.photoURL, getInitials(ud.displayName || user.displayName));
 
   document.getElementById('profile-name').textContent = ud.displayName || user.displayName || 'Player';
   document.getElementById('profile-handle').textContent = `@${ud.username||'—'}`;

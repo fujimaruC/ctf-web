@@ -16,8 +16,19 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow get: if isOwner(uid) || isAdmin();
-      allow list: if isAdmin();
+      // NOTE: leaderboard.html, dashboard.html, and profile.html all run
+      // `list`/`where` queries against this collection (top-N by points,
+      // and "how many users rank above me") for every signed-in user, not
+      // just admins. Restricting `list` to admins only — as an earlier
+      // pass of these rules did — silently breaks the leaderboard page
+      // and rank display for every student. Trade-off: this does mean any
+      // signed-in user can list other users' documents, which currently
+      // include `email`. See REFINE_TODO.md ("split public/private
+      // profile fields") for the proper follow-up — splitting public
+      // leaderboard fields (displayName/points/solves) from private ones
+      // (email) into separate documents — rather than quietly shipping a
+      // broken leaderboard today.
+      allow get, list: if signedIn();
 
       allow create: if isOwner(uid)
         && request.resource.data.uid == uid
@@ -29,7 +40,10 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (isOwner(uid)
           && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['displayName', 'username', 'avatar']));
+            .hasOnly(['displayName', 'username', 'avatar'])
+          && (!('avatar' in request.resource.data)
+              || request.resource.data.avatar == null
+              || request.resource.data.avatar.matches('^https://.*')));
 
       allow delete: if isAdmin();
     }
@@ -65,7 +79,10 @@ service cloud.firestore {
     }
 
     match /meta/{docId} {
-      allow get: if signedIn();
+      // index.html (the public landing page) reads meta/stats before the
+      // visitor has signed in — `signedIn()` here would silently break
+      // the live stats display for every anonymous visitor.
+      allow get: if true;
       allow list: if false;
       allow create, update, delete: if isAdmin();
     }

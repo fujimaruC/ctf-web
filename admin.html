@@ -346,8 +346,7 @@ requireAdmin().then(async user => {
   const ud = userDoc.data() || {};
   document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Admin';
   const avatarEl = document.getElementById('nav-avatar');
-  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+  setAvatar(avatarEl, ud.avatar || user.photoURL, getInitials(ud.displayName || user.displayName));
 
   loadAdminData();
 });
@@ -580,7 +579,8 @@ function editChallenge(id) {
   document.getElementById('ch-category').value = ch.category||'Web';
   document.getElementById('ch-difficulty').value = ch.difficulty||'Easy';
   document.getElementById('ch-points').value = ch.points||'';
-  document.getElementById('ch-flag').value = '';\n  document.getElementById('ch-flag').placeholder = ch.flagHash ? 'Enter a new flag only if rotating it' : 'Migrate legacy flag to a hash before publishing';
+  document.getElementById('ch-flag').value = '';
+  document.getElementById('ch-flag').placeholder = ch.flagHash ? 'Enter a new flag only if rotating it' : 'Migrate legacy flag to a hash before publishing';
   document.getElementById('ch-description').value = ch.description||'';
   document.getElementById('ch-author').value = ch.authorName||'';
   publishState = ch.published || false; updatePublishToggle();
@@ -604,7 +604,8 @@ function editChallenge(id) {
 function cancelEdit() { resetForm(); switchPanel('challenges'); }
 function resetForm() {
   document.getElementById('edit-ch-id').value = '';
-  ['ch-title','ch-flag','ch-description','ch-author'].forEach(id => document.getElementById(id).value = '');\n  document.getElementById('ch-flag').placeholder = 'FLAG{example_flag_here}';
+  ['ch-title','ch-flag','ch-description','ch-author'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ch-flag').placeholder = 'FLAG{example_flag_here}';
   document.getElementById('ch-points').value = '';
   document.getElementById('ch-category').value = 'Web';
   document.getElementById('ch-difficulty').value = 'Easy';
@@ -768,8 +769,16 @@ async function fixDatabase() {
   btn.disabled = true;
   log.innerHTML = '';
   
+  // Renders as plain text nodes — never innerHTML — because several of the
+  // values logged here (challenge titles, user display names) are
+  // attacker-controllable via public registration/challenge content.
+  // Previously this used innerHTML +=, which let a crafted displayName
+  // run arbitrary JS in the admin's own session the next time they used
+  // this tool.
   function addLog(msg) {
-    log.innerHTML += `${new Date().toLocaleTimeString()} - ${msg}<br>`;
+    const line = document.createElement('div');
+    line.textContent = `${new Date().toLocaleTimeString()} - ${msg}`;
+    log.appendChild(line);
     log.scrollTop = log.scrollHeight;
   }
   

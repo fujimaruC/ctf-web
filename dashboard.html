@@ -220,9 +220,7 @@ requireAuth().then(async user => {
   // Avatar
   const initials = getInitials(userData.displayName || user.displayName);
   const avatarEl = document.getElementById('nav-avatar');
-  if (userData.avatar || user.photoURL) {
-    avatarEl.innerHTML = `<img src="${userData.avatar || user.photoURL}" />`;
-  } else { avatarEl.textContent = initials; }
+  setAvatar(avatarEl, userData.avatar || user.photoURL, initials);
 
   // Stats
   const points = userData.points || 0;
