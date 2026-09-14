@@ -346,12 +346,16 @@
   }
 
   async function handleRegister() {
-    const fname = document.getElementById('reg-fname').value.trim();
-    const lname = document.getElementById('reg-lname').value.trim();
+    // sanitizeName() strips <>&"'` — this closes the entry point that fed
+    // the stored-XSS in admin.html's "Fix Database Issues" log and the
+    // avatar renderer (a crafted name/avatar previously ran unescaped).
+    const fname = sanitizeName(document.getElementById('reg-fname').value.trim());
+    const lname = sanitizeName(document.getElementById('reg-lname').value.trim());
     const username = document.getElementById('reg-username').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
     if (!fname||!lname||!username||!email||!password) { showError('register-error','Please fill in all fields.'); return; }
+    if (!/^[a-zA-Z0-9 .'-]{1,60}$/.test(fname) || !/^[a-zA-Z0-9 .'-]{1,60}$/.test(lname)) { showError('register-error',"Names can only contain letters, numbers, spaces, and . ' -"); return; }
     if (password.length < 8) { showError('register-error','Password must be at least 8 characters.'); return; }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error','Username can only contain letters, numbers, and underscores.'); return; }
     setLoading('register-btn', true);

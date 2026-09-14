@@ -4,20 +4,14 @@
       "collectionGroup": "challenges",
       "queryScope": "Collection",
       "fields": [
-        {
-          "fieldPath": "unlockDate",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "unlockDate", "order": "DESCENDING" }
       ]
     },
     {
       "collectionGroup": "users",
       "queryScope": "Collection",
       "fields": [
-        {
-          "fieldPath": "score",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "points", "order": "DESCENDING" }
       ]
     }
   ],

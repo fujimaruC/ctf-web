@@ -1,0 +1,94 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      // NOTE: leaderboard.html, dashboard.html, and profile.html all run
+      // `list`/`where` queries against this collection (top-N by points,
+      // and "how many users rank above me") for every signed-in user, not
+      // just admins. Restricting `list` to admins only — as an earlier
+      // pass of these rules did — silently breaks the leaderboard page
+      // and rank display for every student. Trade-off: this does mean any
+      // signed-in user can list other users' documents, which currently
+      // include `email`. See REFINE_TODO.md ("split public/private
+      // profile fields") for the proper follow-up — splitting public
+      // leaderboard fields (displayName/points/solves) from private ones
+      // (email) into separate documents — rather than quietly shipping a
+      // broken leaderboard today.
+      allow get, list: if signedIn();
+
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'student'
+        && request.resource.data.points == 0
+        && request.resource.data.solves == 0
+        && request.resource.data.firstBloods == 0;
+
+      allow update: if isAdmin()
+        || (isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['displayName', 'username', 'avatar'])
+          && (!('avatar' in request.resource.data)
+              || request.resource.data.avatar == null
+              || request.resource.data.avatar.matches('^https://.*')));
+
+      allow delete: if isAdmin();
+    }
+
+    match /usernames/{username} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /challenges/{challengeId} {
+      allow get, list: if isAdmin()
+        || (signedIn()
+          && resource.data.published == true
+          && resource.data.keys().hasAll(['flagHash'])
+          && !resource.data.keys().hasAny(['flag']));
+
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /solves/{solveId} {
+      allow get: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin() || signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /attempts/{attemptId} {
+      allow get: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /meta/{docId} {
+      // index.html (the public landing page) reads meta/stats before the
+      // visitor has signed in — `signedIn()` here would silently break
+      // the live stats display for every anonymous visitor.
+      allow get: if true;
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

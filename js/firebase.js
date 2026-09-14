@@ -105,7 +105,11 @@ function showToast(message, type = 'info', duration = 3500) {
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${icons[type] || icons.info}</span><span>${message}</span>`;
+  const iconEl = document.createElement('span');
+  iconEl.textContent = icons[type] || icons.info;
+  const messageEl = document.createElement('span');
+  messageEl.textContent = message;
+  toast.replaceChildren(iconEl, messageEl);
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, duration);
 }
@@ -129,14 +133,15 @@ function timeAgo(ts) {
 // ── Difficulty color ──
 function difficultyBadge(diff) {
   const map = { Easy: 'easy', Medium: 'medium', Hard: 'hard', Insane: 'insane' };
-  return `<span class="badge badge-${map[diff] || 'misc'}">${diff}</span>`;
+  const safeDiff = sanitize(diff || 'Misc');
+  return `<span class="badge badge-${map[diff] || 'misc'}">${safeDiff}</span>`;
 }
  
 // ── Category badge ──
 function categoryBadge(cat) {
   const map = { Web: 'web', Crypto: 'crypto', Pwn: 'pwn', Forensics: 'forensics', Reversing: 'rev', Misc: 'misc' };
   const key = Object.keys(map).find(k => k.toLowerCase() === cat?.toLowerCase()) || 'misc';
-  return `<span class="badge badge-${map[key]}">${cat}</span>`;
+  return `<span class="badge badge-${map[key]}">${sanitize(cat)}</span>`;
 }
  
 // ── Format points ──
@@ -155,6 +160,39 @@ function setSafeHTML(element, html) {
   const temp = document.createElement('div');
   temp.textContent = html;
   element.textContent = html;
+}
+
+// Safely render a user avatar. Never build an <img> via string
+// concatenation — a crafted `avatar` value like `x" onerror="...` could
+// break out of the src="" attribute when inserted via innerHTML. Only
+// ever accepts http(s) URLs, and sets `.src` via the DOM API, which
+// cannot be used to inject markup or run script no matter what the
+// string contains.
+function setAvatar(el, url, initials) {
+  if (!el) return;
+  const isValidUrl = typeof url === 'string' && /^https:\/\//i.test(url);
+  if (isValidUrl) {
+    el.textContent = '';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.borderRadius = '50%';
+    img.style.objectFit = 'cover';
+    img.referrerPolicy = 'no-referrer';
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+// Strip characters that could break out of an HTML attribute/element
+// context before a user-supplied name is ever written to Firestore —
+// closes the entry point that fed the addLog() stored-XSS above.
+function sanitizeName(str, maxLen = 60) {
+  if (!str) return '';
+  return String(str).replace(/[<>&"'`]/g, '').trim().slice(0, maxLen);
 }
  
 // ── Local storage helpers ──
