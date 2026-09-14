@@ -528,12 +528,18 @@ async function saveChallenge() {
     showToast('Points must be between 1 and 10,000.', 'error');
     return;
   }
-  if (flag.length < 7 || flag.length > 512) {
+  const existingChallenge = id ? allChallengesAdmin.find(ch => ch.id === id) : null;
+  const existingHash = existingChallenge?.flagHash || '';
+  if (flag && (flag.length < 7 || flag.length > 512)) {
     showToast('Flag length is invalid.', 'error');
     return;
   }
+  if (!flag && !existingHash) {
+    showToast('Enter the flag to migrate this legacy challenge to flagHash.', 'error');
+    return;
+  }
 
-  const flagHash = await hashFlag(flag);
+  const flagHash = flag ? await hashFlag(flag) : existingHash;
   const data = {
     title, category, difficulty, points, flagHash, description,
     authorName, published: publishState,
