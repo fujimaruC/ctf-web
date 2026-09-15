@@ -1,30 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Terms of Service</title>
-  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    .doc-body {
+      margin: 0 var(--ff-space-8) var(--ff-space-8);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      padding: var(--ff-space-8);
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ff-space-4);
+    }
+    .doc-body h2 { font-size: var(--ff-text-lg); margin-top: var(--ff-space-4); }
+    .doc-body p { font-size: var(--ff-text-base); line-height: 1.75; color: var(--ff-text-secondary); }
+    .doc-body a { color: var(--ff-amber); }
+    .doc-body ul { list-style: disc; padding-left: var(--ff-space-6); color: var(--ff-text-secondary); font-size: var(--ff-text-base); line-height: 1.75; }
+    @media (max-width: 700px) {
+      .doc-body { margin: 0 var(--ff-space-4) var(--ff-space-4); padding: var(--ff-space-5); }
+    }
+  .mobile-topbar { display: none; }
+  @media (max-width: 900px) { .mobile-topbar { display: flex; } .main-content { padding-top: var(--ff-topbar-height); } }
+  </style>
 </head>
 <body>
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a></div>
-      <nav class="sidebar-nav">
-        <a href="index.html" class="nav-item">Home</a>
-        <a href="challenges.html" class="nav-item">Challenges</a>
-        <a href="leaderboard.html" class="nav-item">Leaderboard</a>
-        <a href="login.html" class="nav-item">Sign In</a>
-      </nav>
-    </aside>
-    <main class="main-content">
-      <div class="page-header"><h1>Terms of Service</h1></div>
-      <div class="page-body card">
-        <p>By using FlagForge, you agree to follow all community rules and use the platform ethically. Any abusive or malicious use may result in account suspension.</p>
-        <p>All content on the platform is provided “as is”. FlagForge is not responsible for challenge content accuracy or user-generated submissions.</p>
-      </div>
-    </main>
-  </div>
-  <script src="js/firebase.js"></script>
+
+<div class="mobile-topbar" style="position:fixed;top:0;left:0;right:0;z-index:1002;height:var(--ff-topbar-height);align-items:center;justify-content:space-between;padding:0 var(--ff-space-4);background:var(--ff-bg-2);border-bottom:1px solid var(--ff-border);">
+  <span class="mobile-title">FlagForge</span>
+  <a href="index.html" style="font-family:var(--ff-font-display);font-size:var(--ff-text-xs);font-weight:600;color:var(--ff-text-secondary);text-decoration:none;">Home</a>
+</div> data-page="contact">
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Platform</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M3 12h18"/><path d="M12 3a15 15 0 010 18"/><path d="M12 3a15 15 0 000 18"/></svg></span> Home</a>
+      <a href="login.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Sign In</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Terms of Service</h1>
+      <p>The rules of engagement.</p>
+    </div>
+    <div class="doc-body">
+      <p>By using FlagForge, you agree to follow all community rules and use the platform ethically. Any abusive or malicious use may result in account suspension.</p>
+      <h2>Acceptable Conduct</h2>
+      <ul>
+        <li>Attempting to access challenge infrastructure beyond the stated scope is prohibited.</li>
+        <li>Brute-forcing flag submissions is disallowed and rate-limited.</li>
+        <li>Sharing flags outside your team during a live competition violates the spirit of the event.</li>
+      </ul>
+      <h2>Content</h2>
+      <p>All content on the platform is provided "as is". FlagForge is not responsible for challenge content accuracy or user-generated submissions.</p>
+      <p>Admins may remove challenges, accounts, or scores at their discretion to protect competition integrity.</p>
+    </div>
+  </main>
+</div>
 </body>
 </html>

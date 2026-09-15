@@ -1,35 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Contact</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      margin: 0 var(--ff-space-8) var(--ff-space-8);
+      overflow: hidden;
+      background: var(--ff-bg-2);
+    }
+    .contact-item {
+      padding: var(--ff-space-6);
+      border-left: 1px solid var(--ff-border);
+      border-bottom: 1px solid var(--ff-border);
+    }
+    .contact-item:nth-child(odd) { border-left: none; }
+    .contact-item h3 {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: var(--ff-space-2);
+    }
+    .contact-item .value { font-size: var(--ff-text-md); color: var(--ff-text); }
+    .contact-item .value a { color: var(--ff-amber); }
+    @media (max-width: 700px) {
+      .contact-grid { grid-template-columns: 1fr; margin: 0 var(--ff-space-4) var(--ff-space-4); }
+      .contact-item { border-left: none !important; }
+    }
+  .mobile-topbar { display: none; }
+  @media (max-width: 900px) { .mobile-topbar { display: flex; } .main-content { padding-top: var(--ff-topbar-height); } }
+  </style>
 </head>
 <body>
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a></div>
-      <nav class="sidebar-nav">
-        <a href="index.html" class="nav-item">Home</a>
-        <a href="challenges.html" class="nav-item">Challenges</a>
-        <a href="leaderboard.html" class="nav-item">Leaderboard</a>
-        <a href="login.html" class="nav-item">Sign In</a>
-      </nav>
-    </aside>
-    <main class="main-content">
-      <div class="page-header"><h1>Contact</h1></div>
-      <div class="page-body card">
-        <p>Need help or want to suggest a challenge? Reach out at:</p>
-        <p>Email: <a href="mailto:support@flagforge.example">support@flagforge.example</a></p>
-        <p>Discord: <strong>FlagForge#1234</strong></p>
+
+<div class="mobile-topbar" style="position:fixed;top:0;left:0;right:0;z-index:1002;height:var(--ff-topbar-height);align-items:center;justify-content:space-between;padding:0 var(--ff-space-4);background:var(--ff-bg-2);border-bottom:1px solid var(--ff-border);">
+  <span class="mobile-title">FlagForge</span>
+  <a href="index.html" style="font-family:var(--ff-font-display);font-size:var(--ff-text-xs);font-weight:600;color:var(--ff-text-secondary);text-decoration:none;">Home</a>
+</div> data-page="contact">
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Platform</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M3 12h18"/><path d="M12 3a15 15 0 010 18"/><path d="M12 3a15 15 0 000 18"/></svg></span> Home</a>
+      <a href="login.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Sign In</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Contact</h1>
+      <p>Need help or want to suggest a challenge?</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-item">
+        <h3>Email</h3>
+        <div class="value"><a href="mailto:support@flagforge.example">support@flagforge.example</a></div>
       </div>
-    </main>
-  </div>
-  <script src="js/firebase.js"></script>
-  <script>
-    lucide.createIcons();
-  </script>
+      <div class="contact-item">
+        <h3>Discord</h3>
+        <div class="value" style="font-family:var(--ff-font-mono);">FlagForge#1234</div>
+      </div>
+    </div>
+  </main>
+</div>
 </body>
 </html>

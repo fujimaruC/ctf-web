@@ -1,0 +1,113 @@
+/* ═══════════════════════════════════════════════
+   FlagForge Base — Reset & Typography
+   ═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--ff-bg);
+  color: var(--ff-text);
+  font-family: var(--ff-font-body);
+  font-size: var(--ff-text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ff-border-strong); border-radius: var(--ff-radius-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--ff-text-muted); }
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ff-font-display);
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--ff-text);
+}
+
+h1 { font-size: var(--ff-text-3xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--ff-text-2xl); letter-spacing: -0.01em; }
+h3 { font-size: var(--ff-text-xl); }
+h4 { font-size: var(--ff-text-lg); }
+h5 { font-size: var(--ff-text-md); }
+
+p { color: var(--ff-text-secondary); line-height: 1.65; }
+
+a { color: var(--ff-amber); text-decoration: none; transition: color var(--ff-duration-fast) var(--ff-ease); }
+a:hover { color: var(--ff-amber-hover); }
+
+code, .mono {
+  font-family: var(--ff-font-mono);
+  font-size: 0.9em;
+}
+
+code {
+  background: var(--ff-bg-3);
+  border: 1px solid var(--ff-border);
+  padding: 2px 6px;
+  border-radius: var(--ff-radius-xs);
+  color: var(--ff-amber);
+}
+
+pre {
+  background: var(--ff-bg-3);
+  border: 1px solid var(--ff-border);
+  border-radius: var(--ff-radius-md);
+  padding: var(--ff-space-4);
+  overflow-x: auto;
+  font-family: var(--ff-font-mono);
+  font-size: var(--ff-text-sm);
+  line-height: 1.7;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  color: var(--ff-text);
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--ff-amber-medium);
+  color: var(--ff-text);
+}
+
+/* ── Focus ── */
+:focus-visible {
+  outline: 2px solid var(--ff-amber);
+  outline-offset: 2px;
+}
+
+/* ── Images ── */
+img { max-width: 100%; display: block; }
+
+/* ── Lists ── */
+ul, ol { list-style: none; }
+
+/* ── Utility: visually hidden ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.hidden { display: none !important; }

@@ -1,31 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FlagForge — Privacy</title>
-  <link rel="stylesheet" href="css/main.css" />
+  <title>FlagForge — Privacy Policy</title>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <style>
+    .doc-body {
+      margin: 0 var(--ff-space-8) var(--ff-space-8);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      padding: var(--ff-space-8);
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ff-space-4);
+    }
+    .doc-body h2 { font-size: var(--ff-text-lg); margin-top: var(--ff-space-4); }
+    .doc-body p { font-size: var(--ff-text-base); line-height: 1.75; color: var(--ff-text-secondary); }
+    .doc-body a { color: var(--ff-amber); }
+    @media (max-width: 700px) {
+      .doc-body { margin: 0 var(--ff-space-4) var(--ff-space-4); padding: var(--ff-space-5); }
+    }
+  .mobile-topbar { display: none; }
+  @media (max-width: 900px) { .mobile-topbar { display: flex; } .main-content { padding-top: var(--ff-topbar-height); } }
+  </style>
 </head>
 <body>
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark">⚑</div> FlagForge</a></div>
-      <nav class="sidebar-nav">
-        <a href="index.html" class="nav-item">Home</a>
-        <a href="challenges.html" class="nav-item">Challenges</a>
-        <a href="leaderboard.html" class="nav-item">Leaderboard</a>
-        <a href="login.html" class="nav-item">Sign In</a>
-      </nav>
-    </aside>
-    <main class="main-content">
-      <div class="page-header"><h1>Privacy Policy</h1></div>
-      <div class="page-body card">
-        <p>FlagForge collects minimal data required for account management and scoring. No personal data is shared without your consent.</p>
-        <p>Usage data is stored in Firebase Firestore for scoreboard and analytics purposes; all passwords are secured through Firebase Auth.</p>
-        <p>Contact us at <a href="mailto:support@flagforge.example">support@flagforge.example</a>.</p>
-      </div>
-    </main>
-  </div>
-  <script src="js/firebase.js"></script>
+
+<div class="mobile-topbar" style="position:fixed;top:0;left:0;right:0;z-index:1002;height:var(--ff-topbar-height);align-items:center;justify-content:space-between;padding:0 var(--ff-space-4);background:var(--ff-bg-2);border-bottom:1px solid var(--ff-border);">
+  <span class="mobile-title">FlagForge</span>
+  <a href="index.html" style="font-family:var(--ff-font-display);font-size:var(--ff-text-xs);font-weight:600;color:var(--ff-text-secondary);text-decoration:none;">Home</a>
+</div> data-page="contact">
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Platform</div>
+      <a href="index.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M3 12h18"/><path d="M12 3a15 15 0 010 18"/><path d="M12 3a15 15 0 000 18"/></svg></span> Home</a>
+      <a href="login.html" class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Sign In</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Privacy Policy</h1>
+      <p>How FlagForge handles your data.</p>
+    </div>
+    <div class="doc-body">
+      <p>FlagForge collects minimal data required for account management and scoring. No personal data is shared without your consent.</p>
+      <p>Usage data is stored in Firebase Firestore for scoreboard and analytics purposes. All passwords are secured through Firebase Auth with industry-standard hashing.</p>
+      <p>Challenge submissions, solve times, and flags are stored to operate the competition and are visible to other participants on the leaderboard.</p>
+      <p>Contact us at <a href="mailto:support@flagforge.example">support@flagforge.example</a> to request data deletion.</p>
+    </div>
+  </main>
+</div>
 </body>
 </html>

@@ -1,11 +1,16 @@
 // Basic Service Worker for PWA functionality
-const CACHE_NAME = 'ctf-daily-v1';
+const CACHE_NAME = 'ctf-daily-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/login.html',
   '/dashboard.html',
-  '/css/main.css',
+  '/css/tokens.css',
+  '/css/base.css',
+  '/css/components.css',
+  '/css/layout.css',
+  '/js/icons.js',
+  '/js/navigation.js',
   '/js/firebase.js',
   '/js/validation.js',
   '/js/rate-limit.js',

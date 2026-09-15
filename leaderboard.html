@@ -4,232 +4,283 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Leaderboard</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
   <style>
-    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin-bottom: 48px; }
-    .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .podium-avatar {
-      width: 64px; height: 64px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-weight: 800; font-size: 22px;
-      position: relative;
+    /* My rank banner */
+    .my-rank {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-5);
+      border: 1px solid rgba(232, 160, 32, 0.25);
+      background: var(--ff-amber-soft);
+      border-radius: var(--ff-radius-md);
+      padding: var(--ff-space-4) var(--ff-space-5);
+      margin-bottom: var(--ff-space-6);
+      flex-wrap: wrap;
     }
-    .podium-slot:nth-child(1) .podium-avatar { border: 2px solid #C0C0C0; background: rgba(192,192,192,0.1); color: #C0C0C0; }
-    .podium-slot:nth-child(2) .podium-avatar { width: 80px; height: 80px; font-size: 28px; border: 3px solid #FFD700; background: rgba(255,215,0,0.1); color: #FFD; }
-    .podium-slot:nth-child(3) .podium-avatar { border: 2px solid #CD7F32; background: rgba(205,127,50,0.1); color: #CD7F32; }
-    .podium-crown { font-size: 28px; line-height: 1; margin-bottom: -4px; }
-    .podium-name { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
-    .podium-pts { font-size: 13px; color: var(--text-muted); }
-    .podium-block {
-      border-radius: var(--radius) var(--radius) 0 0; width: 100px;
-    }
-    .podium-slot:nth-child(1) .podium-block { height: 56px; background: linear-gradient(180deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03)); border: 1px solid rgba(192,192,192,0.15); }
-    .podium-slot:nth-child(2) .podium-block { height: 80px; background: linear-gradient(180deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
-    .podium-slot:nth-child(3) .podium-block { height: 40px; background: linear-gradient(180deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03)); border: 1px solid rgba(205,127,50,0.15); }
-    .podium-rank { font-family: var(--font-display); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 100%; }
+    .my-rank .rn { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-3xl); color: var(--ff-amber); line-height: 1; letter-spacing: -0.02em; }
+    .my-rank .ri { flex: 1; min-width: 140px; }
+    .my-rank .ri .label { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-display); text-transform: uppercase; letter-spacing: 0.8px; }
+    .my-rank .ri .val { font-size: var(--ff-text-md); font-weight: 600; color: var(--ff-text); }
+    .my-rank .rs { text-align: right; }
+    .my-rank .rs .num { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-lg); color: var(--ff-amber); }
+    .my-rank .rs .sub { font-size: var(--ff-text-xs); color: var(--ff-text-muted); }
 
-    .lb-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    /* Podium — structured, no gradient blocks */
+    .podium {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--ff-space-4);
+      margin-bottom: var(--ff-space-8);
+      max-width: 720px;
+    }
+    .podium-slot {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      padding: var(--ff-space-5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ff-space-2);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .podium-slot.first {
+      border-color: rgba(232, 160, 32, 0.4);
+    }
+    .podium-slot .rank-mark {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--ff-space-2);
+    }
+    .podium-slot .rank-mark svg { width: 34px; height: 34px; }
+    .podium-slot.first .rank-mark svg { width: 40px; height: 40px; }
+    .podium-slot .p-name { font-family: var(--ff-font-display); font-weight: 600; font-size: var(--ff-text-md); color: var(--ff-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .podium-slot .p-pts { font-family: var(--ff-font-mono); font-size: var(--ff-text-sm); color: var(--ff-amber); }
+    .podium-slot .p-handle { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
+    .podium-slot .crown {
+      position: absolute;
+      top: var(--ff-space-3);
+      right: var(--ff-space-3);
+      color: var(--ff-amber);
+      width: 20px;
+      height: 20px;
+    }
+    @media (max-width: 700px) {
+      .podium { gap: var(--ff-space-2); }
+      .podium-slot { padding: var(--ff-space-4) var(--ff-space-2); }
+      .podium-slot .p-pts { font-size: var(--ff-text-xs); }
+    }
+
+    /* Table */
+    .lb-table {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      overflow: hidden;
+    }
+    .lb-head {
+      display: grid;
+      grid-template-columns: 64px 1fr 90px 90px 110px;
+      gap: var(--ff-space-4);
+      padding: var(--ff-space-2) var(--ff-space-5);
+      border-bottom: 1px solid var(--ff-border);
+    }
+    .lb-head span {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
     .lb-row {
-      display: grid; grid-template-columns: 60px 1fr auto auto auto;
-      align-items: center; gap: 16px;
-      padding: 14px 20px; border-bottom: 1px solid rgba(42,48,64,0.5);
-      transition: background 0.15s; text-decoration: none; color: inherit;
+      display: grid;
+      grid-template-columns: 64px 1fr 90px 90px 110px;
+      gap: var(--ff-space-4);
+      align-items: center;
+      padding: var(--ff-space-3) var(--ff-space-5);
+      border-bottom: 1px solid var(--ff-border-subtle);
+      transition: background var(--ff-duration-fast) var(--ff-ease);
     }
     .lb-row:last-child { border-bottom: none; }
-    .lb-row:hover { background: var(--surface-2); }
-    .lb-row.current-user { background: var(--accent-dim); }
-    .lb-rank { font-family: var(--font-display); font-weight: 800; font-size: 16px; color: var(--text-muted); text-align: center; }
-    .lb-rank.top { color: var(--accent); }
-    .lb-player { display: flex; align-items: center; gap: 12px; }
-    .lb-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-    .lb-name { font-weight: 600; font-size: 14px; }
-    .lb-username { font-size: 12px; color: var(--text-muted); }
-    .lb-pts { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--accent); text-align: right; }
-    .lb-solves { font-size: 13px; color: var(--text-secondary); text-align: center; }
-    .lb-bloods { font-size: 13px; color: var(--red); text-align: center; }
-
-    .lb-header {
-      display: grid; grid-template-columns: 60px 1fr auto auto auto;
-      gap: 16px; padding: 12px 20px;
-      border-bottom: 1px solid var(--border);
-      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
-      color: var(--text-muted); font-family: var(--font-display);
+    .lb-row:hover { background: var(--ff-surface); }
+    .lb-row.current-user { background: var(--ff-amber-soft); }
+    .lb-rank { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-md); color: var(--ff-text-muted); }
+    .lb-rank.top { color: var(--ff-amber); }
+    .lb-player { display: flex; align-items: center; gap: var(--ff-space-3); min-width: 0; }
+    .lb-avatar {
+      width: 34px; height: 34px;
+      border-radius: var(--ff-radius-sm);
+      background: var(--ff-surface-2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--ff-text-xs); font-weight: 700;
+      flex-shrink: 0; color: var(--ff-text-secondary);
+      overflow: hidden;
     }
-
-    .my-rank-banner {
-      background: var(--accent-dim); border: 1px solid rgba(232,160,32,0.2);
-      border-radius: var(--radius-lg); padding: 16px 20px;
-      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
-    }
-    .my-rank-banner .rank-num { font-family: var(--font-display); font-weight: 800; font-size: 32px; color: var(--accent); }
-    .my-rank-banner .rank-info .label { font-size: 12px; color: var(--text-muted); }
-    .my-rank-banner .rank-info .val { font-size: 15px; font-weight: 600; }
+    .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .lb-name { font-weight: 500; font-size: var(--ff-text-sm); color: var(--ff-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-username { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
+    .lb-solves { font-size: var(--ff-text-sm); color: var(--ff-text-secondary); text-align: center; font-family: var(--ff-font-mono); }
+    .lb-bloods { font-size: var(--ff-text-sm); color: var(--ff-danger); text-align: center; font-family: var(--ff-font-mono); }
+    .lb-pts { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-md); color: var(--ff-amber); text-align: right; }
 
     @media (max-width: 700px) {
-      .lb-row, .lb-header { grid-template-columns: 48px 1fr auto; }
+      .lb-head { display: none; }
+      .lb-row { grid-template-columns: 44px 1fr auto; gap: var(--ff-space-3); padding: var(--ff-space-3) var(--ff-space-4); }
       .lb-solves, .lb-bloods { display: none; }
-      .lb-header span:nth-child(3), .lb-header span:nth-child(4) { display: none; }
-      .podium { gap: 8px; }
-      .podium-block { width: 80px; }
     }
   </style>
 </head>
-<body>
+<body data-page="leaderboard">
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a>
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a>
-      <a href="challenges.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges</a>
-      <a href="leaderboard.html" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard</a>
-      <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile</a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out</button>
-    </nav>
-    <div class="sidebar-footer">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
-        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
-        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);" id="nav-pts">0 pts</div></div>
-      </div>
-    </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar-footer"></div>
   </aside>
 
   <main class="main-content">
-    <div class="page-header anim-fadeup">
-      <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:8px;"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg> Leaderboard</h1>
-      <p>Top performers on FlagForge. Updated in real-time.</p>
+    <div class="page-header">
+      <h1>Leaderboard</h1>
+      <p>Top performers on FlagForge.</p>
     </div>
+
     <div class="page-body">
-      <div id="my-rank-banner"></div>
-      <div id="podium" class="podium anim-fadeup anim-delay-1"></div>
-      <div class="lb-table-wrap anim-fadeup anim-delay-2">
-        <div class="lb-header">
-          <span>Rank</span><span>Player</span>
+      <div id="my-rank" class="my-rank" style="display:none;"></div>
+      <div id="podium" class="podium" style="display:none;"></div>
+      <div class="lb-table">
+        <div class="lb-head">
+          <span>Rank</span>
+          <span>Player</span>
           <span style="text-align:center;">Solves</span>
-          <span style="text-align:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> Bloods</span>
+          <span style="text-align:center;">Bloods</span>
           <span style="text-align:right;">Points</span>
         </div>
         <div id="lb-body">
-          <div style="text-align:center;padding:40px;color:var(--text-muted);">Loading...</div>
+          <div style="padding:var(--ff-space-8);text-align:center;color:var(--ff-text-muted);">Loading…</div>
         </div>
       </div>
     </div>
   </main>
 </div>
+
 <div id="toast-container"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/navigation.js"></script>
 <script>
-lucide.createIcons();
-const MEDAL_COLORS = ['#FFD700','#C0C0C0','#CD7F32'];
-const MEDAL_LABELS = ['🥇','🥈','🥉'];
+  const RANK_COLORS = ['var(--ff-amber)', '#9aa3ad', '#c98a5b'];
+  const ROW_MEDAL = (rank) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-2px;"><circle cx="12" cy="9" r="6"/><path d="M8.5 15l-2 7 5.5-3 5.5 3-2-7"/><text x="12" y="12" text-anchor="middle" font-size="7" font-weight="700" fill="currentColor" stroke="none">${rank}</text></svg>`;
 
-requireAuth().then(async user => {
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  const ud = userDoc.data() || {};
-  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
-  document.getElementById('nav-pts').textContent = (ud.points||0).toLocaleString() + ' pts';
-  const avatarEl = document.getElementById('nav-avatar');
-  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+  requireAuth().then(async user => {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    const ud = userDoc.data() || {};
+    FF.setNavUser(ud, user);
+    if (ud.role === 'admin') FF.setAdminNav();
 
-  const snap = await db.collection('users')
-    .orderBy('points','desc')
-    .orderBy('solves','desc')
-    .limit(50)
-    .get();
+    const snap = await db.collection('users')
+      .orderBy('points', 'desc')
+      .orderBy('solves', 'desc')
+      .limit(50)
+      .get();
 
-  const players = snap.docs.map((d, i) => ({ rank: i+1, uid: d.id, ...d.data() }));
+    const players = snap.docs.map((d, i) => ({ rank: i + 1, uid: d.id, ...d.data() }));
 
-  players.sort((a, b) => {
-    const pa = a.points || 0, pb = b.points || 0;
-    if (pb !== pa) return pb - pa;
-    const sa = a.solves || 0, sb = b.solves || 0;
-    if (sb !== sa) return sb - sa;
-    const fa = a.firstBloods || 0, fb = b.firstBloods || 0;
-    if (fb !== fa) return fb - fa;
-    return (a.displayName || '').localeCompare(b.displayName || '');
-  });
+    players.sort((a, b) => {
+      const pa = a.points || 0, pb = b.points || 0;
+      if (pb !== pa) return pb - pa;
+      const sa = a.solves || 0, sb = b.solves || 0;
+      if (sb !== sa) return sb - sa;
+      const fa = a.firstBloods || 0, fb = b.firstBloods || 0;
+      if (fb !== fa) return fb - fa;
+      return (a.displayName || '').localeCompare(b.displayName || '');
+    });
+    players.forEach((p, idx) => p.rank = idx + 1);
 
-  players.forEach((p, idx) => p.rank = idx + 1);
-
-  let myRank = players.findIndex(p => p.uid === user.uid) + 1;
-  if (!myRank) {
-    const countHigher = await db.collection('users').where('points','>', ud.points || 0).get();
-    myRank = countHigher.size + 1;
-  }
-
-  if (myRank > 0) {
-    const me = players.find(p => p.uid === user.uid) || { displayName: ud.displayName || 'You', points: ud.points || 0, solves: ud.solves || 0 };
-    document.getElementById('my-rank-banner').innerHTML = `
-      <div class="my-rank-banner">
-        <div class="rank-num">#${myRank}</div>
-        <div style="width:1px;height:40px;background:var(--border);"></div>
-        <div class="rank-info"><div class="label">Your Rank</div><div class="val">${sanitize(me.displayName||'You')}</div></div>
-        <div style="margin-left:auto;text-align:right;">
-          <div style="font-family:var(--font-display);font-weight:800;font-size:24px;color:var(--accent);">${(me.points||0).toLocaleString()} pts</div>
-          <div style="font-size:12px;color:var(--text-muted);">${me.solves||0} solves</div>
-        </div>
-      </div>`;
-  }
-
-  const podiumSlots = [
-    { player: players[1], pos: 2 },
-    { player: players[0], pos: 1 },
-    { player: players[2], pos: 3 },
-  ];
-  const podiumHTML = podiumSlots.map(({ player: p, pos }) => {
-    if (!p) {
-      return `<div class="podium-slot" style="opacity:0;pointer-events:none;">
-        <div style="height:36px;"></div>
-        <div class="podium-avatar"></div>
-        <div class="podium-name">—</div>
-        <div class="podium-pts">—</div>
-        <div class="podium-block"></div>
-      </div>`;
+    let myRank = players.findIndex(p => p.uid === user.uid) + 1;
+    if (!myRank) {
+      const countHigher = await db.collection('users').where('points', '>', ud.points || 0).get();
+      myRank = countHigher.size + 1;
     }
-    return `
-      <div class="podium-slot">
-        ${pos===1 ? '<div class="podium-crown">👑</div>' : '<div style="height:36px;"></div>'}
-        <div class="podium-avatar">${getInitials(p.displayName)}</div>
-        <div class="podium-name">${sanitize(p.displayName||'Player')}</div>
-        <div class="podium-pts">${(p.points||0).toLocaleString()} pts</div>
-        <div class="podium-block"><div class="podium-rank" style="color:${MEDAL_COLORS[pos-1]}">${MEDAL_LABELS[pos-1]}</div></div>
-      </div>`;
-  }).join('');
-  if (players.length > 0) {
-    document.getElementById('podium').innerHTML = podiumHTML;
-  } else {
-    document.getElementById('podium').style.display = 'none';
-  }
 
-  if (!players.length) {
-    document.getElementById('lb-body').innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><h3>No players yet</h3><p>Be the first to solve challenges!</p></div>';
-    return;
-  }
-  document.getElementById('lb-body').innerHTML = players.map(p => `
-    <div class="lb-row ${p.uid===user.uid?'current-user':''}">
-      <div class="lb-rank ${p.rank<=3?'top':''}">${p.rank<=3 ? MEDAL_LABELS[p.rank-1] : p.rank}</div>
-      <div class="lb-player">
-        <div class="lb-avatar" style="${p.uid===user.uid?'border:2px solid var(--accent);':''}">${getInitials(p.displayName)}</div>
-        <div>
-          <div class="lb-name">${sanitize(p.displayName||'Player')} ${p.uid===user.uid?'<span style="font-size:10px;color:var(--accent);font-family:var(--font-display);">YOU</span>':''}</div>
-          <div class="lb-username">@${sanitize(p.username||'—')}</div>
-        </div>
+    // My rank banner
+    const me = players.find(p => p.uid === user.uid) || { displayName: ud.displayName || 'You', points: ud.points || 0, solves: ud.solves || 0 };
+    const mr = document.getElementById('my-rank');
+    mr.style.display = 'flex';
+    mr.innerHTML = `
+      <div class="rn">#${myRank}</div>
+      <div class="ri">
+        <div class="label">Your Position</div>
+        <div class="val">${sanitize(me.displayName || 'You')}</div>
       </div>
-      <div class="lb-solves">${p.solves||0}</div>
-      <div class="lb-bloods">${p.firstBloods||0}</div>
-      <div class="lb-pts">${(p.points||0).toLocaleString()}</div>
-    </div>`).join('');
-});
+      <div class="rs">
+        <div class="num">${(me.points || 0).toLocaleString()} pts</div>
+        <div class="sub">${me.solves || 0} solves</div>
+      </div>`;
+
+    // Podium
+    if (players.length >= 3) {
+      const podiumOrder = [
+        { player: players[1], rank: 2 },
+        { player: players[0], rank: 1 },
+        { player: players[2], rank: 3 },
+      ];
+      const medalIcons = { 1: ROW_MEDAL(1), 2: ROW_MEDAL(2), 3: ROW_MEDAL(3) };
+      const p = document.getElementById('podium');
+      p.style.display = 'grid';
+      p.innerHTML = podiumOrder.map(({ player, rank }) => `
+        <div class="podium-slot ${rank === 1 ? 'first' : ''}">
+          ${rank === 1 ? `<span class="crown" aria-hidden="true">${FF.icons.trophy}</span>` : ''}
+          <span class="rank-mark" style="color:${RANK_COLORS[rank - 1]};">${medalIcons[rank]}</span>
+          <div class="p-name">${sanitize(player.displayName || 'Player')}</div>
+          <div class="p-points pts">${(player.points || 0).toLocaleString()} pts</div>
+          <div class="p-handle">@${sanitize(player.username || '—')}</div>
+        </div>`).join('');
+    }
+
+    if (!players.length) {
+      document.getElementById('lb-body').innerHTML = `
+        <div class="empty-state">
+          ${FF.icons.trophy}
+          <h3>No players yet</h3>
+          <p>Be the first to solve challenges.</p>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('lb-body').innerHTML = players.map(p => `
+      <div class="lb-row ${p.uid === user.uid ? 'current-user' : ''}">
+        <div class="lb-rank ${p.rank <= 3 ? 'top' : ''}">${p.rank <= 3 ? ROW_MEDAL(p.rank) : '#' + p.rank}</div>
+        <div class="lb-player">
+          <div class="lb-avatar">${getInitials(p.displayName)}</div>
+          <div style="min-width:0;">
+            <div class="lb-name">${sanitize(p.displayName || 'Player')}${p.uid === user.uid ? ' <span style="font-size:10px;color:var(--ff-amber);font-family:var(--ff-font-display);font-weight:600;">YOU</span>' : ''}</div>
+            <div class="lb-username">@${sanitize(p.username || '—')}</div>
+          </div>
+        </div>
+        <div class="lb-solves">${p.solves || 0}</div>
+        <div class="lb-bloods">${p.firstBloods || 0}</div>
+        <div class="lb-pts">${(p.points || 0).toLocaleString()}</div>
+      </div>`).join('');
+  });
 </script>
 </body>
 </html>

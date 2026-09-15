@@ -4,116 +4,219 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Challenges</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
   <style>
-    .filter-bar {
-      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+    .toolbar {
+      display: flex;
+      gap: var(--ff-space-3);
       align-items: center;
+      margin-bottom: var(--ff-space-5);
+      flex-wrap: wrap;
     }
     .search-wrap { position: relative; flex: 1; min-width: 200px; }
-    .search-wrap input { padding-left: 36px; }
-    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
-    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .search-wrap input { padding-left: 38px; }
+    .search-wrap .search-mark {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ff-text-muted);
+      pointer-events: none;
+      width: 16px;
+      height: 16px;
+    }
+    .sort-select {
+      background: var(--ff-bg-3);
+      border: 1px solid var(--ff-border);
+      color: var(--ff-text);
+      padding: 9px 12px;
+      border-radius: var(--ff-radius-sm);
+      font-size: var(--ff-text-sm);
+      cursor: pointer;
+      font-family: var(--ff-font-body);
+    }
+
+    /* Filter chips — compact rectangular */
+    .filter-chips { display: flex; gap: var(--ff-space-2); flex-wrap: wrap; margin-bottom: var(--ff-space-3); }
+    .chip-row-label {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-right: var(--ff-space-2);
+      align-self: center;
+    }
     .chip {
-      padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 600;
-      cursor: pointer; border: 1px solid var(--border); background: none;
-      color: var(--text-secondary); font-family: var(--font-display);
-      transition: all 0.15s;
+      padding: 5px 12px;
+      border-radius: var(--ff-radius-xs);
+      font-size: var(--ff-text-xs);
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--ff-border);
+      background: none;
+      color: var(--ff-text-secondary);
+      font-family: var(--ff-font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      transition: border-color var(--ff-duration-fast) var(--ff-ease), color var(--ff-duration-fast) var(--ff-ease), background var(--ff-duration-fast) var(--ff-ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .chip:hover { border-color: var(--border-light); color: var(--text-primary); }
-    .chip.active { background: var(--accent-dim); border-color: rgba(232,160,32,0.4); color: var(--accent); }
+    .chip:hover { border-color: var(--ff-border-strong); color: var(--ff-text); }
+    .chip.active { background: var(--ff-amber-soft); border-color: rgba(232, 160, 32, 0.35); color: var(--ff-amber); }
+    .chip svg { width: 13px; height: 13px; }
 
-    .challenges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-    .ch-card-main {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 22px;
-      transition: all 0.2s; cursor: pointer; text-decoration: none; display: block;
-      position: relative; overflow: hidden;
+    .results-info {
+      font-size: var(--ff-text-sm);
+      color: var(--ff-text-muted);
+      margin-bottom: var(--ff-space-3);
+      font-family: var(--ff-font-mono);
     }
-    .ch-card-main:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow); }
-    .ch-card-main.solved { border-color: rgba(45,212,160,0.3); }
-    .ch-card-main.solved::before {
-      content: '✓ SOLVED'; position: absolute; top: 12px; right: 12px;
-      font-size: 10px; font-weight: 700; font-family: var(--font-display);
-      color: var(--green); background: var(--green-dim); padding: 3px 8px; border-radius: 99px;
+
+    /* Challenge list — scannable, density-forward */
+    .ch-table {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      overflow: hidden;
     }
-    .ch-card-main .ch-top { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-    .ch-card-main h3 { font-size: 16px; margin-bottom: 8px; }
-    .ch-card-main p { font-size: 13px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .ch-card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 14px; }
-    .ch-pts-main { font-family: var(--font-display); font-weight: 800; font-size: 20px; color: var(--accent); }
-    .ch-meta-right { text-align: right; }
-    .ch-solves-count { font-size: 12px; color: var(--text-muted); }
-    .ch-author { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .ch-head {
+      display: grid;
+      grid-template-columns: 44px 1fr 90px 70px 60px;
+      gap: var(--ff-space-4);
+      padding: var(--ff-space-2) var(--ff-space-5);
+      border-bottom: 1px solid var(--ff-border);
+    }
+    .ch-head span {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .ch-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 90px 70px 60px;
+      gap: var(--ff-space-4);
+      align-items: center;
+      padding: var(--ff-space-3) var(--ff-space-5);
+      border-bottom: 1px solid var(--ff-border-subtle);
+      text-decoration: none;
+      transition: background var(--ff-duration-fast) var(--ff-ease);
+    }
+    .ch-row:last-child { border-bottom: none; }
+    .ch-row:hover { background: var(--ff-surface); }
+    .ch-row.solved { opacity: 0.72; }
+    .ch-row.solved .ch-title { text-decoration: line-through; text-decoration-color: var(--ff-success); }
 
-    .results-info { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .ch-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--ff-radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ch-icon svg { width: 16px; height: 16px; }
 
-    .sort-select { background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); padding: 7px 12px; border-radius: var(--radius); font-size: 13px; cursor: pointer; font-family: var(--font-body); }
+    .ch-title { min-width: 0; }
+    .ch-title .name {
+      font-weight: 500;
+      font-size: var(--ff-text-sm);
+      color: var(--ff-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ch-title .meta { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: 1px; font-family: var(--ff-font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    @media (max-width: 1100px) { .challenges-grid { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 700px) { .challenges-grid { grid-template-columns: 1fr; } }
+    .ch-diff { text-align: left; }
+    .diff-line {
+      display: inline-block;
+      width: 3px;
+      height: 22px;
+      border-radius: var(--ff-radius-xs);
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .diff-txt { font-size: var(--ff-text-xs); font-family: var(--ff-font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+
+    .ch-points { text-align: right; }
+    .ch-points .num { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-md); color: var(--ff-amber); }
+
+    .ch-state { justify-self: end; position: relative; width: 18px; height: 18px; }
+    .ch-state svg { width: 18px; height: 18px; }
+
+    @media (max-width: 700px) {
+      .ch-head { display: none; }
+      .ch-row {
+        grid-template-columns: 40px 1fr auto;
+        padding: var(--ff-space-3) var(--ff-space-4);
+        gap: var(--ff-space-3);
+      }
+      .ch-diff { display: none; }
+      .ch-state { grid-column: 3; grid-row: 1; }
+      .toolbar { padding: 0 var(--ff-space-1); }
+    }
   </style>
 </head>
-<body>
+<body data-page="challenges">
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a>
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a>
-      <a href="challenges.html" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges</a>
-      <a href="leaderboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard</a>
-      <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile</a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out</button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-card">
-        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
-        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);" id="nav-pts">0 pts</div></div>
-      </div>
-    </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar-footer"></div>
   </aside>
 
   <main class="main-content">
-    <div class="page-header anim-fadeup">
+    <div class="page-header">
       <h1>Challenges</h1>
       <p>Browse and solve challenges across all categories.</p>
     </div>
-    <div class="page-body">
 
-      <!-- Filters -->
-      <div class="filter-bar anim-fadeup anim-delay-1">
+    <div class="page-body">
+      <!-- Search + sort -->
+      <div class="toolbar">
         <div class="search-wrap">
-          <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg></span>
-          <input type="text" class="form-input" id="search-input" placeholder="Search challenges..." oninput="applyFilters()" />
+          <svg class="search-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" class="form-input" id="search-input" placeholder="Search challenges…" oninput="applyFilters()" />
         </div>
-        <select class="sort-select" id="sort-select" onchange="applyFilters()">
-          <option value="points-asc">Points ↑</option>
+        <select class="sort-select" id="sort-select" onchange="applyFilters()" aria-label="Sort challenges">
           <option value="points-desc">Points ↓</option>
+          <option value="points-asc">Points ↑</option>
           <option value="solves-desc">Most Solved</option>
           <option value="newest">Newest</option>
         </select>
       </div>
 
       <!-- Category chips -->
-      <div class="filter-chips anim-fadeup anim-delay-2" id="cat-chips" style="margin-bottom:12px;">
+      <div class="filter-chips" id="cat-chips">
+        <span class="chip-row-label">Category</span>
         <button class="chip active" data-cat="all" onclick="setCategory('all',this)">All</button>
-        <button class="chip" data-cat="Web" onclick="setCategory('Web',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Web</button>
-        <button class="chip" data-cat="Crypto" onclick="setCategory('Crypto',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Crypto</button>
-        <button class="chip" data-cat="Pwn" onclick="setCategory('Pwn',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><path d="M12 1v6m0 6v6"></path><path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"></path><path d="M1 12h6m6 0h6"></path><path d="M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path></svg> Pwn</button>
-        <button class="chip" data-cat="Forensics" onclick="setCategory('Forensics',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> Forensics</button>
-        <button class="chip" data-cat="Reversing" onclick="setCategory('Reversing',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><path d="M12 1v6m0 6v6"></path><path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"></path><path d="M1 12h6m6 0h6"></path><path d="M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path></svg> Reversing</button>
-        <button class="chip" data-cat="Misc" onclick="setCategory('Misc',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h2l.4 2M7 6h2l.175 1M3 9h18M5 12l-2 7h5l2-7M15 12l-2 7h5l2-7M11 6l.9-4.2a2 2 0 1 1 3.861.122L15 6M9 12v7m6-7v7"></path></svg> Misc</button>
+        <button class="chip" data-cat="Web" onclick="setCategory('Web',this)">Web</button>
+        <button class="chip" data-cat="Crypto" onclick="setCategory('Crypto',this)">Crypto</button>
+        <button class="chip" data-cat="Pwn" onclick="setCategory('Pwn',this)">Pwn</button>
+        <button class="chip" data-cat="Forensics" onclick="setCategory('Forensics',this)">Forensics</button>
+        <button class="chip" data-cat="Reversing" onclick="setCategory('Reversing',this)">Reversing</button>
+        <button class="chip" data-cat="Misc" onclick="setCategory('Misc',this)">Misc</button>
       </div>
 
       <!-- Difficulty chips -->
-      <div class="filter-chips anim-fadeup anim-delay-2" id="diff-chips" style="margin-bottom:20px;">
-        <button class="chip active" data-diff="all" onclick="setDifficulty('all',this)">All Difficulties</button>
+      <div class="filter-chips" id="diff-chips">
+        <span class="chip-row-label">Difficulty</span>
+        <button class="chip active" data-diff="all" onclick="setDifficulty('all',this)">All</button>
         <button class="chip" data-diff="Easy" onclick="setDifficulty('Easy',this)">Easy</button>
         <button class="chip" data-diff="Medium" onclick="setDifficulty('Medium',this)">Medium</button>
         <button class="chip" data-diff="Hard" onclick="setDifficulty('Hard',this)">Hard</button>
@@ -121,127 +224,131 @@
       </div>
 
       <div class="results-info" id="results-info"></div>
-      <div class="challenges-grid" id="challenges-grid">
-        <div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--text-muted);">Loading challenges...</div>
+
+      <div class="ch-table" id="ch-list">
+        <div class="ch-head">
+          <span></span>
+          <span>Challenge</span>
+          <span>Difficulty</span>
+          <span style="text-align:right;">Points</span>
+          <span></span>
+        </div>
+        <div id="challenges-body" style="padding:var(--ff-space-8);text-align:center;color:var(--ff-text-muted);">Loading challenges…</div>
       </div>
     </div>
   </main>
 </div>
+
 <div id="toast-container"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/navigation.js"></script>
 <script>
-lucide.createIcons();
-const CAT_ICONS = { 
-  Web: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-  Crypto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  Pwn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
-  Forensics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
-  Reversing: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/></svg>',
-  Misc: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m0-18l9 9m-9-9L3 12m9 9l9-9m-9 9L3 12"/></svg>'
-};
-let allChallenges = [];
-let userSolves = new Set();
-let currentCat = 'all';
-let currentDiff = 'all';
-
-requireAuth().then(async user => {
-  // Load user info
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  const ud = userDoc.data() || {};
-  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
-  document.getElementById('nav-pts').textContent = (ud.points||0).toLocaleString() + ' pts';
-  const avatarEl = document.getElementById('nav-avatar');
-  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`; 
-  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
-
-  // Admin nav
-  if (ud.role === 'admin') {
-    document.querySelector('.sidebar-nav').insertAdjacentHTML('beforeend',
-      `<div class="nav-section-label">Admin</div><a href="admin.html" class="nav-item" style="color:var(--accent);"><span class="nav-icon">⚡</span> Admin Dashboard</a>`);
-  }
-
-  // Load solved challenges for this user
-  const solvesSnap = await db.collection('solves').where('uid','==',user.uid).get();
-  solvesSnap.forEach(d => userSolves.add(d.data().challengeId));
-
-  // Load challenges
-  const snap = await db.collection('challenges').where('published','==',true).get();
-  allChallenges = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  applyFilters();
-});
-
-function setCategory(cat, btn) {
-  currentCat = cat;
-  document.querySelectorAll('#cat-chips .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-function setDifficulty(diff, btn) {
-  currentDiff = diff;
-  document.querySelectorAll('#diff-chips .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function applyFilters() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const sort = document.getElementById('sort-select').value;
-
-  let filtered = allChallenges.filter(ch => {
-    if (currentCat !== 'all' && ch.category !== currentCat) return false;
-    if (currentDiff !== 'all' && ch.difficulty !== currentDiff) return false;
-    if (q && !ch.title?.toLowerCase().includes(q) && !ch.description?.toLowerCase().includes(q)) return false;
-    return true;
+  // Replace chip placeholders with real SVGs
+  document.querySelectorAll('#cat-chips .chip[data-cat]').forEach(el => {
+    const cat = el.dataset.cat;
+    if (cat !== 'all') {
+      const label = el.textContent.trim();
+      el.textContent = '';
+      el.innerHTML = FF.catIcon(cat, 13) + ' ' + label;
+    }
   });
 
-  filtered.sort((a,b) => {
-    if (sort === 'points-asc') return (a.points||0)-(b.points||0);
-    if (sort === 'points-desc') return (b.points||0)-(a.points||0);
-    if (sort === 'solves-desc') return (b.solveCount||0)-(a.solveCount||0);
-    if (sort === 'newest') return (b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0);
-    return 0;
+  const DIFF_COLORS = {
+    Easy: 'var(--ff-success)', Medium: 'var(--ff-warning)', Hard: 'var(--ff-danger)', Insane: 'var(--ff-info)'
+  };
+
+  let allChallenges = [];
+  let userSolves = new Set();
+  let currentCat = 'all';
+  let currentDiff = 'all';
+
+  requireAuth().then(async user => {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    const ud = userDoc.data() || {};
+    FF.setNavUser(ud, user);
+    if (ud.role === 'admin') FF.setAdminNav();
+
+    const solvesSnap = await db.collection('solves').where('uid', '==', user.uid).get();
+    solvesSnap.forEach(d => userSolves.add(d.data().challengeId));
+
+    const snap = await db.collection('challenges').where('published', '==', true).get();
+    allChallenges = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    applyFilters();
   });
 
-  document.getElementById('results-info').textContent = `Showing ${filtered.length} challenge${filtered.length!==1?'s':''}`;
-
-  if (!filtered.length) {
-    document.getElementById('challenges-grid').innerHTML = `
-      <div style="grid-column:1/-1;" class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <h3>No challenges found</h3>
-        <p>Try adjusting your filters or search term.</p>
-      </div>`;
-    return;
+  function setCategory(cat, btn) {
+    currentCat = cat;
+    document.querySelectorAll('#cat-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+  function setDifficulty(diff, btn) {
+    currentDiff = diff;
+    document.querySelectorAll('#diff-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
   }
 
-  const html = filtered.map(ch => {
-    const solved = userSolves.has(ch.id);
-    const cat = ch.category || 'Misc';
-    return `
-      <a href="challenge.html?id=${ch.id}" class="ch-card-main ${solved?'solved':''}">
-        <div class="ch-top">
-          ${categoryBadge(cat)} ${difficultyBadge(ch.difficulty||'Easy')}
-        </div>
-        <h3>${sanitize(ch.title)}</h3>
-        <p>${sanitize(ch.description)}</p>
-        <div class="ch-card-footer">
-          <div>
-            <div class="ch-pts-main">${ch.points || 0} pts</div>
+  function applyFilters() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sort = document.getElementById('sort-select').value;
+
+    let filtered = allChallenges.filter(ch => {
+      if (currentCat !== 'all' && ch.category !== currentCat) return false;
+      if (currentDiff !== 'all' && ch.difficulty !== currentDiff) return false;
+      if (q && !ch.title?.toLowerCase().includes(q) && !ch.description?.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      if (sort === 'points-asc') return (a.points || 0) - (b.points || 0);
+      if (sort === 'points-desc') return (b.points || 0) - (a.points || 0);
+      if (sort === 'solves-desc') return (b.solveCount || 0) - (a.solveCount || 0);
+      if (sort === 'newest') return (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0);
+      return 0;
+    });
+
+    document.getElementById('results-info').textContent = `${filtered.length} challenge${filtered.length !== 1 ? 's' : ''}`;
+
+    if (!filtered.length) {
+      document.getElementById('challenges-body').innerHTML = `
+        <div class="empty-state">
+          ${FF.icons.search}
+          <h3>No challenges found</h3>
+          <p>Try adjusting your filters or search term.</p>
+        </div>`;
+      return;
+    }
+
+    const html = filtered.map(ch => {
+      const solved = userSolves.has(ch.id);
+      const cat = ch.category || 'Misc';
+      const diff = ch.difficulty || 'Easy';
+      const diffColor = DIFF_COLORS[diff] || 'var(--ff-text-muted)';
+      return `
+        <a href="challenge.html?id=${ch.id}" class="ch-row ${solved ? 'solved' : ''}">
+          <div class="ch-icon" style="background:${FF.catColorSoft(cat)};color:${FF.catColor(cat)};">${FF.catIcon(cat, 16)}</div>
+          <div class="ch-title">
+            <div class="name">${sanitize(ch.title)}</div>
+            <div class="meta">${cat} · ${ch.solveCount || 0} solves ${ch.authorName ? '· by ' + sanitize(ch.authorName) : ''}</div>
           </div>
-          <div class="ch-meta-right">
-            <div class="ch-solves-count">🏁 ${ch.solveCount||0} solves</div>
-            <div class="ch-author">by ${sanitize(ch.authorName||'Admin')}</div>
+          <div class="ch-diff">
+            <span class="diff-line" style="background:${diffColor};"></span>
+            <span class="diff-txt" style="color:${diffColor};">${diff}</span>
           </div>
-        </div>
-      </a>`;
-  }).join('');
-  document.getElementById('challenges-grid').innerHTML = html;
-}
+          <div class="ch-points"><span class="num">${ch.points || 0}</span><span style="font-size:var(--ff-text-xs);color:var(--ff-text-muted);"> pts</span></div>
+          <div class="ch-state" style="color:${solved ? 'var(--ff-success)' : 'var(--ff-text-muted)'};" title="${solved ? 'Solved' : 'Unsolved'}">
+            ${solved ? FF.icons.solved : FF.icons.unsolved}
+          </div>
+        </a>`;
+    }).join('');
+    document.getElementById('challenges-body').innerHTML = html;
+  }
 </script>
 </body>
 </html>

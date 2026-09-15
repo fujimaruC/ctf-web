@@ -4,326 +4,388 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Dashboard</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
   <style>
-    .avatar-circle {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: var(--accent-dim); border: 2px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--accent);
-      flex-shrink: 0; overflow: hidden;
+    .page-head {
+      padding: var(--ff-space-8) var(--ff-space-8) 0;
+      margin-bottom: var(--ff-space-6);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--ff-space-4);
+      flex-wrap: wrap;
     }
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-    .user-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius); }
-    .user-card .name { font-weight: 600; font-size: 14px; line-height: 1.2; }
-    .user-card .role { font-size: 11px; color: var(--text-muted); }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-    .recent-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .section-header h2 { font-size: 17px; }
-
-    .challenge-list-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px; border-radius: var(--radius); margin-bottom: 4px;
-      transition: background 0.15s; cursor: pointer; text-decoration: none;
-      border: 1px solid transparent;
+    .page-head h1 { font-size: var(--ff-text-2xl); letter-spacing: -0.02em; }
+    .page-head .greet { color: var(--ff-text-secondary); font-size: var(--ff-text-sm); margin-top: var(--ff-space-1); }
+    .rank-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-sm);
+      padding: 6px 14px;
+      font-family: var(--ff-font-display);
+      font-size: var(--ff-text-sm);
+      font-weight: 600;
+      color: var(--ff-amber);
+      background: var(--ff-amber-soft);
     }
-    .challenge-list-item:hover { background: var(--surface-2); border-color: var(--border); }
-    .ch-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .ch-info { flex: 1; min-width: 0; }
-    .ch-info .ch-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ch-info .ch-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; align-items: center; }
-    .ch-pts { font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 15px; flex-shrink: 0; }
+    .rank-chip svg { width: 16px; height: 16px; }
 
-    .activity-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
+    /* Stats: structured row with dividers — no floating cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      margin: 0 var(--ff-space-8) var(--ff-space-8);
+      overflow: hidden;
     }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
-    .activity-content .title { font-size: 13px; font-weight: 500; }
-    .activity-content .time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-    .rank-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--accent-dim); border: 1px solid rgba(232,160,32,0.2);
-      border-radius: 99px; padding: 3px 12px;
-      font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--accent);
+    .stat {
+      padding: var(--ff-space-5) var(--ff-space-6);
+      border-left: 1px solid var(--ff-border);
     }
+    .stat:first-child { border-left: none; }
+    .stat .lbl {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 500;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+    }
+    .stat .val {
+      font-family: var(--ff-font-display);
+      font-weight: 700;
+      font-size: var(--ff-text-2xl);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-top: var(--ff-space-1);
+    }
+    .stat .sub { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: var(--ff-space-1); }
 
-    .category-progress-item { margin-bottom: 14px; }
-    .category-progress-item .cat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .category-progress-item .cat-name { font-size: 13px; font-weight: 500; }
-    .category-progress-item .cat-count { font-size: 12px; color: var(--text-muted); }
+    /* Content grid */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 0;
+      margin: 0 var(--ff-space-8) var(--ff-space-8);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      overflow: hidden;
+    }
+    .dash-col { min-width: 0; }
+    .dash-col:first-child { border-right: 1px solid var(--ff-border); }
+    .dash-panel {
+      padding: var(--ff-space-6);
+    }
+    .dash-panel + .dash-panel { border-top: 1px solid var(--ff-border); }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--ff-space-4);
+    }
+    .panel-head h2 {
+      font-size: var(--ff-text-md);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-secondary);
+      letter-spacing: 0.2px;
+    }
+    .panel-head a { font-size: var(--ff-text-sm); }
 
-    @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
-    @media (max-width: 800px) { .recent-grid { grid-template-columns: 1fr; } }
+    /* Recent challenge list */
+    .ch-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      padding: var(--ff-space-3) 0;
+      border-bottom: 1px solid var(--ff-border-subtle);
+      text-decoration: none;
+    }
+    .ch-item:last-child { border-bottom: none; }
+    .ch-item .ch-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--ff-radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ch-item .ch-icon svg { width: 16px; height: 16px; }
+    .ch-item .ch-body { flex: 1; min-width: 0; }
+    .ch-item .ch-name {
+      font-weight: 500;
+      font-size: var(--ff-text-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--ff-text);
+    }
+    .ch-item .ch-meta { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: 1px; font-family: var(--ff-font-mono); }
+    .ch-item .ch-pts { font-family: var(--ff-font-display); font-weight: 600; color: var(--ff-amber); font-size: var(--ff-text-sm); flex-shrink: 0; }
+
+    /* Category progress */
+    .cat-prog { margin-bottom: var(--ff-space-4); }
+    .cat-prog:last-child { margin-bottom: 0; }
+    .cat-prog .cat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--ff-space-1);
+    }
+    .cat-prog .cat-name {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 500;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .cat-prog .cat-name svg { width: 14px; height: 14px; }
+    .cat-prog .cat-count { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
+
+    /* Activity */
+    .act-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ff-space-3);
+      padding: var(--ff-space-3) 0;
+      border-bottom: 1px solid var(--ff-border-subtle);
+    }
+    .act-item:last-child { border-bottom: none; }
+    .act-item .act-mark {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--ff-radius-xs);
+      margin-top: 5px;
+      flex-shrink: 0;
+      background: var(--ff-success);
+    }
+    .act-item .act-title { font-size: var(--ff-text-sm); color: var(--ff-text); }
+    .act-item .act-title b { font-weight: 600; }
+    .act-item .act-title .pts { color: var(--ff-amber); font-family: var(--ff-font-mono); font-size: var(--ff-text-xs); }
+    .act-item .act-time { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: 1px; }
+
+    @media (max-width: 1100px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .stats-row .stat:nth-child(3) { border-left: none; } .stats-row .stat:nth-child(n+3) { border-top: 1px solid var(--ff-border); } }
+    @media (max-width: 900px) {
+      .page-head { padding: var(--ff-space-5) var(--ff-space-4) 0; margin-bottom: var(--ff-space-4); }
+      .stats-row { margin: 0 var(--ff-space-4) var(--ff-space-4); }
+      .dash-grid { margin: 0 var(--ff-space-4) var(--ff-space-4); grid-template-columns: 1fr; }
+      .dash-col:first-child { border-right: none; border-bottom: 1px solid var(--ff-border); }
+    }
   </style>
 </head>
-<body>
+<body data-page="dashboard">
 <div class="app-layout">
-
-  <!-- ── Sidebar ── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <a href="index.html" class="nav-logo">
-        <div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
       </a>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item active">
-        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard
-      </a>
-      <a href="challenges.html" class="nav-item">
-        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges
-      </a>
-      <a href="leaderboard.html" class="nav-item">
-        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard
-      </a>
-      <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item">
-        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile
-      </a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);">
-        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-card" id="user-card">
-        <div class="avatar-circle" id="nav-avatar">?</div>
-        <div>
-          <div class="name" id="nav-name">Loading...</div>
-          <div class="role" id="nav-role">Student</div>
-        </div>
-      </div>
-    </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar-footer"></div>
   </aside>
 
-  <!-- ── Main ── -->
   <main class="main-content">
-    <div class="page-header anim-fadeup">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h1 id="welcome-msg">Welcome back 👋</h1>
-          <p>Here's your progress at a glance.</p>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="rank-badge" id="rank-badge">— Rank</div>
-          <a href="challenges.html" class="btn btn-primary btn-sm">Browse Challenges →</a>
-        </div>
+    <div class="page-head">
+      <div>
+        <h1 id="welcome-msg">Welcome back</h1>
+        <p class="greet">Here's your progress at a glance.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:var(--ff-space-3);flex-wrap:wrap;">
+        <span class="rank-chip" id="rank-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 4h12l-1.5 6H7.5L6 4z"/><path d="M6 4V2h12v2"/><path d="M7.5 10v3h9v-3"/></svg>
+          <span id="rank-badge">#—</span>
+        </span>
+        <a href="challenges.html" class="btn btn-primary btn-sm">Browse Challenges</a>
       </div>
     </div>
 
-    <div class="page-body">
-
-      <!-- Stats grid -->
-      <div class="stats-grid anim-fadeup anim-delay-1">
-        <div class="stat-card">
-          <div class="stat-label">Total Points</div>
-          <div class="stat-value" id="stat-points" style="color:var(--accent);">—</div>
-          <div class="stat-sub" id="stat-pts-sub">—</div>
+    <div class="page-body" style="padding-top:0;">
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat">
+          <div class="lbl">Total Points</div>
+          <div class="val" id="stat-points" style="color:var(--ff-amber);">—</div>
+          <div class="sub" id="stat-pts-sub">—</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Challenges Solved</div>
-          <div class="stat-value" id="stat-solves">—</div>
-          <div class="stat-sub" id="stat-solves-sub">of — available</div>
+        <div class="stat">
+          <div class="lbl">Challenges Solved</div>
+          <div class="val" id="stat-solves">—</div>
+          <div class="sub" id="stat-solves-sub">of — available</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Global Rank</div>
-          <div class="stat-value" id="stat-rank" style="color:var(--green);">#—</div>
-          <div class="stat-sub" id="stat-rank-sub">among all players</div>
+        <div class="stat">
+          <div class="lbl">Global Rank</div>
+          <div class="val" id="stat-rank" style="color:var(--ff-success);">#—</div>
+          <div class="sub">among all players</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">First Bloods <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg></div>
-          <div class="stat-value" id="stat-bloods" style="color:var(--red);">—</div>
-          <div class="stat-sub">First to solve a challenge</div>
+        <div class="stat">
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;" aria-hidden="true"><path d="M12 2c.8 0 1.5.6 1.8 1.5.5 1.5 1.2 3 1.2 4.5 0 1.5-.7 3-1.2 4.5.5 1.5 1.2 3 1.2 4.5 0 1.5-.7 3-1.2 4.5-.3.9-1 1.5-1.8 1.5s-1.5-.6-1.8-1.5c-.5-1.5-1.2-3-1.2-4.5 0-1.5.7-3 1.2-4.5-.5-1.5-1.2-3-1.2-4.5 0-1.5.7-3 1.2-4.5C10.5 2.6 11.2 2 12 2z"/></svg> First Bloods</div>
+          <div class="val" id="stat-bloods" style="color:var(--ff-danger);">—</div>
+          <div class="sub">first to solve</div>
         </div>
       </div>
 
-      <!-- Recent + activity -->
-      <div class="recent-grid anim-fadeup anim-delay-2">
-
-        <!-- Recent challenges -->
-        <div class="card">
-          <div class="section-header">
-            <h2>Recent Challenges</h2>
-            <a href="challenges.html" class="btn btn-ghost btn-sm">View All</a>
+      <!-- Content grid -->
+      <div class="dash-grid">
+        <!-- Left column -->
+        <div class="dash-col">
+          <div class="dash-panel">
+            <div class="panel-head">
+              <h2>Recent Solves</h2>
+              <a href="challenges.html">View all</a>
+            </div>
+            <div id="recent-challenges">
+              <div class="empty-state" style="padding:var(--ff-space-6) 0;">
+                <h3>No solves yet</h3>
+                <p>Go solve your first challenge.</p>
+              </div>
+            </div>
           </div>
-          <div id="recent-challenges">
-            <div class="empty-state" style="padding:30px 0;">
-              <div class="empty-icon">⚑</div>
-              <h3>No solves yet</h3>
-              <p>Go solve your first challenge!</p>
+          <div class="dash-panel">
+            <div class="panel-head">
+              <h2>Recent Activity</h2>
+            </div>
+            <div id="activity-feed">
+              <p style="font-size:var(--ff-text-sm);color:var(--ff-text-muted);">No recent activity.</p>
             </div>
           </div>
         </div>
 
         <!-- Right column -->
-        <div style="display:flex;flex-direction:column;gap:20px;">
-
-          <!-- Category breakdown -->
-          <div class="card">
-            <div class="section-header"><h2>Category Progress</h2></div>
+        <div class="dash-col">
+          <div class="dash-panel">
+            <div class="panel-head">
+              <h2>Category Progress</h2>
+            </div>
             <div id="category-progress">
-              <div style="color:var(--text-muted);font-size:13px;">Loading...</div>
+              <div style="color:var(--ff-text-muted);font-size:var(--ff-text-sm);">Loading…</div>
             </div>
           </div>
-
-          <!-- Recent activity -->
-          <div class="card">
-            <div class="section-header"><h2>Activity Feed</h2></div>
-            <div id="activity-feed">
-              <div style="color:var(--text-muted);font-size:13px;">No recent activity.</div>
-            </div>
-          </div>
-
         </div>
       </div>
-
-    </div><!-- /page-body -->
+    </div>
   </main>
 </div>
 
 <div id="toast-container"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/navigation.js"></script>
 <script>
-lucide.createIcons();
-const CATEGORIES = ['Web','Crypto','Pwn','Forensics','Reversing','Misc'];
-const CAT_ICONS = { 
-  Web: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-  Crypto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  Pwn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
-  Forensics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
-  Reversing: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/></svg>',
-  Misc: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m0-18l9 9m-9-9L3 12m9 9l9-9m-9 9L3 12"/></svg>'
-};
-const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
+  const CATEGORIES = ['Web', 'Crypto', 'Pwn', 'Forensics', 'Reversing', 'Misc'];
 
-requireAuth().then(async user => {
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  const userData = userDoc.data() || {};
+  requireAuth().then(async user => {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    const userData = userDoc.data() || {};
 
-  // Update nav
-  document.getElementById('nav-name').textContent = userData.displayName || user.displayName || 'Player';
-  document.getElementById('nav-role').textContent = userData.role === 'admin' ? '⚡ Admin' : 'Student';
-  document.getElementById('welcome-msg').textContent = `Welcome back, ${(userData.displayName || user.displayName || 'Player').split(' ')[0]} 👋`;
+    FF.setNavUser(userData, user);
 
-  // Avatar
-  const initials = getInitials(userData.displayName || user.displayName);
-  const avatarEl = document.getElementById('nav-avatar');
-  if (userData.avatar || user.photoURL) {
-    avatarEl.innerHTML = `<img src="${userData.avatar || user.photoURL}" />`;
-  } else { avatarEl.textContent = initials; }
+    const points = userData.points || 0;
+    const solves = userData.solves || 0;
+    const bloods = userData.firstBloods || 0;
 
-  // Stats
-  const points = userData.points || 0;
-  const solves = userData.solves || 0;
-  const bloods = userData.firstBloods || 0;
-  document.getElementById('stat-points').textContent = points.toLocaleString();
-  document.getElementById('stat-solves').textContent = solves;
-  document.getElementById('stat-bloods').textContent = bloods;
+    document.getElementById('welcome-msg').textContent = `Welcome back, ${(userData.displayName || user.displayName || 'Player').split(' ')[0]}`;
+    document.getElementById('stat-points').textContent = points.toLocaleString();
+    document.getElementById('stat-solves').textContent = solves;
+    document.getElementById('stat-bloods').textContent = bloods;
 
-  // Total challenges
-  db.collection('challenges').where('published','==',true).get().then(snap => {
-    document.getElementById('stat-solves-sub').textContent = `of ${snap.size} available`;
-  });
+    if (userData.role === 'admin') FF.setAdminNav();
 
-  // Rank
-  db.collection('users').where('points','>',points).get().then(snap => {
-    const rank = snap.size + 1;
+    // Total challenges
+    const publishedSnap = await db.collection('challenges').where('published', '==', true).get();
+    document.getElementById('stat-solves-sub').textContent = `of ${publishedSnap.size} available`;
+
+    // Rank
+    const rankSnap = await db.collection('users').where('points', '>', points).get();
+    const rank = rankSnap.size + 1;
     document.getElementById('stat-rank').textContent = `#${rank}`;
-    document.getElementById('rank-badge').textContent = `#${rank} Rank`;
-    document.getElementById('stat-rank-sub').textContent = `among all players`;
-    document.getElementById('stat-pts-sub').textContent = rank === 1 ? '🏆 Top scorer!' : `Rank #${rank}`;
-  });
+    document.getElementById('rank-badge').textContent = `#${rank}`;
+    document.getElementById('stat-pts-sub').textContent = rank === 1 ? 'Top scorer' : `Rank #${rank}`;
 
-  // Recent solves
-  const solvesSnap = await db.collection('solves')
-    .where('uid','==',user.uid)
-    .orderBy('solvedAt','desc').limit(6).get();
+    // Recent solves
+    const solvesSnap = await db.collection('solves')
+      .where('uid', '==', user.uid)
+      .orderBy('solvedAt', 'desc').limit(6).get();
 
-  if (!solvesSnap.empty) {
-    let html = '';
-    for (const doc of solvesSnap.docs) {
-      const s = doc.data();
-      const cat = s.category || 'Misc';
-      html += `
-        <a href="challenge.html?id=${s.challengeId}" class="challenge-list-item">
-          <div class="ch-icon" style="background:${CAT_BG[cat]||CAT_BG.Misc}">${CAT_ICONS[cat]||'🧩'}</div>
-          <div class="ch-info">
-            <div class="ch-name">${sanitize(s.challengeName)}</div>
-            <div class="ch-meta">
-              <span class="badge badge-${cat.toLowerCase()}">${cat}</span>
-              <span>${timeAgo(s.solvedAt)}</span>
+    if (!solvesSnap.empty) {
+      let html = '';
+      for (const doc of solvesSnap.docs) {
+        const s = doc.data();
+        const cat = s.category || 'Misc';
+        html += `
+          <a href="challenge.html?id=${s.challengeId}" class="ch-item">
+            <div class="ch-icon" style="background:${FF.catColorSoft(cat)};color:${FF.catColor(cat)};">${FF.catIcon(cat, 16)}</div>
+            <div class="ch-body">
+              <div class="ch-name">${sanitize(s.challengeName)}</div>
+              <div class="ch-meta">${cat} · ${timeAgo(s.solvedAt)}</div>
             </div>
-          </div>
-          <div class="ch-pts">+${s.points}</div>
-        </a>`;
+            <div class="ch-pts">+${s.points}</div>
+          </a>`;
+      }
+      document.getElementById('recent-challenges').innerHTML = html;
     }
-    document.getElementById('recent-challenges').innerHTML = html;
-  }
 
-  // Category progress
-  const catSnap = await db.collection('solves').where('uid','==',user.uid).get();
-  const catCounts = {};
-  catSnap.forEach(d => { const c = d.data().category || 'Misc'; catCounts[c] = (catCounts[c]||0) + 1; });
+    // Category progress
+    const catSnap = await db.collection('solves').where('uid', '==', user.uid).get();
+    const catCounts = {};
+    catSnap.forEach(d => { const c = d.data().category || 'Misc'; catCounts[c] = (catCounts[c] || 0) + 1; });
 
-  const totalSnap = await db.collection('challenges').where('published','==',true).get();
-  const totalCounts = {};
-  totalSnap.forEach(d => { const c = d.data().category || 'Misc'; totalCounts[c] = (totalCounts[c]||0) + 1; });
+    const totalCounts = {};
+    publishedSnap.forEach(d => { const c = d.data().category || 'Misc'; totalCounts[c] = (totalCounts[c] || 0) + 1; });
 
-  let catHTML = '';
-  for (const cat of CATEGORIES) {
-    const solved = catCounts[cat] || 0;
-    const total = totalCounts[cat] || 0;
-    const pct = total ? Math.round((solved/total)*100) : 0;
-    catHTML += `
-      <div class="category-progress-item">
-        <div class="cat-row">
-          <span class="cat-name">${CAT_ICONS[cat]} ${cat}</span>
-          <span class="cat-count">${solved}/${total}</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      </div>`;
-  }
-  document.getElementById('category-progress').innerHTML = catHTML || '<div style="color:var(--text-muted);font-size:13px;">No data yet.</div>';
-
-  // Activity feed (last 5 solves as activity)
-  if (!solvesSnap.empty) {
-    let actHTML = '';
-    solvesSnap.docs.slice(0,5).forEach(doc => {
-      const s = doc.data();
-      actHTML += `
-        <div class="activity-item">
-          <div class="activity-dot" style="background:var(--green)"></div>
-          <div class="activity-content">
-            <div class="title">Solved <strong>${sanitize(s.challengeName)}</strong> <span style="color:var(--accent)">+${s.points}pts</span></div>
-            <div class="time">${timeAgo(s.solvedAt)}</div>
+    let catHTML = '';
+    for (const cat of CATEGORIES) {
+      const solved = catCounts[cat] || 0;
+      const total = totalCounts[cat] || 0;
+      const pct = total ? Math.round((solved / total) * 100) : 0;
+      catHTML += `
+        <div class="cat-prog">
+          <div class="cat-row">
+            <span class="cat-name" style="color:${FF.catColor(cat)};">${FF.catIcon(cat, 14)} ${cat}</span>
+            <span class="cat-count">${solved}/${total}</span>
           </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         </div>`;
-    });
-    document.getElementById('activity-feed').innerHTML = actHTML;
-  }
+    }
+    document.getElementById('category-progress').innerHTML = catHTML || '<div style="color:var(--ff-text-muted);font-size:var(--ff-text-sm);">No data yet.</div>';
 
-  // Redirect admin to admin dashboard
-  if (userData.role === 'admin') {
-    document.querySelector('.sidebar-nav').insertAdjacentHTML('beforeend',
-      `<div class="nav-section-label">Admin</div>
-       <a href="admin.html" class="nav-item" style="color:var(--accent);">
-         <span class="nav-icon">⚡</span> Admin Dashboard
-       </a>`
-    );
-  }
-});
+    // Activity feed
+    if (!solvesSnap.empty) {
+      let actHTML = '';
+      solvesSnap.docs.slice(0, 5).forEach(doc => {
+        const s = doc.data();
+        actHTML += `
+          <div class="act-item">
+            <div class="act-mark"></div>
+            <div>
+              <div class="act-title">Solved <b>${sanitize(s.challengeName)}</b> <span class="pts">+${s.points} pts</span></div>
+              <div class="act-time">${timeAgo(s.solvedAt)}</div>
+            </div>
+          </div>`;
+      });
+      document.getElementById('activity-feed').innerHTML = actHTML;
+    }
+  });
 </script>
 </body>
 </html>
