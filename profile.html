@@ -4,255 +4,361 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — My Profile</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
   <style>
-    .profile-header {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px;
-      display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap;
-      position: relative; overflow: hidden;
+    /* Identity header */
+    .identity {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      padding: var(--ff-space-8);
+      margin-bottom: var(--ff-space-6);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--ff-space-6);
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
     }
-    .profile-header::before {
-      content: ''; position: absolute; top: -50px; right: -50px;
-      width: 250px; height: 250px; border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+    .identity::after {
+      content: '';
+      position: absolute;
+      right: 0; bottom: 0;
+      width: 96px;
+      height: 96px;
+      border-top: 1px solid var(--ff-border);
+      border-left: 1px solid var(--ff-border);
+      pointer-events: none;
     }
-    .profile-avatar-lg {
-      width: 88px; height: 88px; border-radius: 50%;
-      background: var(--accent-dim); border: 3px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-weight: 800; font-size: 32px; color: var(--accent);
-      flex-shrink: 0; overflow: hidden; position: relative; z-index: 1;
+    .identity-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-amber-soft);
+      border: 1px solid rgba(232, 160, 32, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--ff-font-display);
+      font-weight: 700;
+      font-size: var(--ff-text-2xl);
+      color: var(--ff-amber);
+      flex-shrink: 0;
+      overflow: hidden;
     }
-    .profile-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
-    .profile-info h2 { font-size: 26px; margin-bottom: 4px; }
-    .profile-info .handle { color: var(--text-muted); font-size: 14px; margin-bottom: 12px; }
-    .profile-stats-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .pstat { text-align: center; }
-    .pstat .num { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
-    .pstat .lbl { font-size: 11px; color: var(--text-muted); }
+    .identity-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .identity-info { flex: 1; min-width: 220px; }
+    .identity-info .name { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-2xl); letter-spacing: -0.02em; }
+    .identity-info .handle { color: var(--ff-text-muted); font-size: var(--ff-text-sm); font-family: var(--ff-font-mono); margin-top: 2px; }
+    .identity-info .joined { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: var(--ff-space-1); }
+    .identity-badges { display: flex; gap: var(--ff-space-2); flex-wrap: wrap; margin-top: var(--ff-space-3); }
 
-    .profile-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
-    .solve-history-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 12px; border-radius: var(--radius); margin-bottom: 4px;
-      border: 1px solid transparent; text-decoration: none; color: inherit;
-      transition: all 0.15s;
+    /* Competition stats strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      overflow: hidden;
+      margin-bottom: var(--ff-space-6);
     }
-    .solve-history-item:hover { background: var(--surface-2); border-color: var(--border); }
-    .solve-cat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-    .solve-info { flex: 1; min-width: 0; }
-    .solve-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .solve-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; }
-    .solve-pts { font-family: var(--font-display); font-weight: 700; color: var(--green); font-size: 14px; }
+    .stats-strip .stat {
+      padding: var(--ff-space-4) var(--ff-space-5);
+      border-left: 1px solid var(--ff-border);
+    }
+    .stats-strip .stat:first-child { border-left: none; }
+    .stats-strip .stat .lbl { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-display); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: var(--ff-space-2); }
+    .stats-strip .stat .num { font-family: var(--ff-font-display); font-weight: 700; font-size: var(--ff-text-xl); letter-spacing: -0.02em; margin-top: 2px; }
 
-    @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
+    .prof-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: var(--ff-space-6); align-items: start; }
+
+    /* Solve history frame */
+    .panel {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: var(--ff-space-4) var(--ff-space-6);
+      border-bottom: 1px solid var(--ff-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-head h2 { font-size: var(--ff-text-md); font-family: var(--ff-font-display); font-weight: 600; color: var(--ff-text-secondary); }
+    .panel-head .count { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
+    .panel-body { padding: var(--ff-space-4) var(--ff-space-6); }
+
+    .solve-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      padding: var(--ff-space-3) 0;
+      border-bottom: 1px solid var(--ff-border-subtle);
+      text-decoration: none;
+    }
+    .solve-item:last-child { border-bottom: none; }
+    .solve-item .si-icon { width: 32px; height: 32px; border-radius: var(--ff-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .solve-item .si-icon svg { width: 15px; height: 15px; }
+    .solve-item .si-info { flex: 1; min-width: 0; }
+    .solve-item .si-name { font-weight: 500; font-size: var(--ff-text-sm); color: var(--ff-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .solve-item .si-meta { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: 1px; font-family: var(--ff-font-mono); display: flex; gap: var(--ff-space-3); align-items: center; }
+    .solve-item .si-pts { font-family: var(--ff-font-display); font-weight: 600; color: var(--ff-success); font-size: var(--ff-text-sm); flex-shrink: 0; }
+    .fb-tag { display: inline-flex; align-items: center; gap: 4px; color: var(--ff-danger); font-weight: 600; }
+    .fb-tag svg { width: 12px; height: 12px; }
+
+    /* Settings */
+    .settings-section {
+      padding: var(--ff-space-5) var(--ff-space-6);
+    }
+    .settings-section + .settings-section { border-top: 1px solid var(--ff-border); }
+    .settings-section h3 { font-size: var(--ff-text-xs); font-family: var(--ff-font-display); font-weight: 600; color: var(--ff-text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--ff-space-4); }
+    .note { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: var(--ff-space-1); }
+
+    @media (max-width: 900px) {
+      .prof-grid { grid-template-columns: 1fr; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .stats-strip .stat:nth-child(3) { border-left: none; }
+      .stats-strip .stat:nth-child(n+3) { border-top: 1px solid var(--ff-border); }
+    }
   </style>
 </head>
-<body>
+<body data-page="profile">
 <div class="app-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo"><a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a></div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a>
-      <a href="challenges.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges</a>
-      <a href="leaderboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard</a>
-      <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile</a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out</button>
-    </nav>
-    <div class="sidebar-footer">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
-        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
-        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);">My Account</div></div>
-      </div>
+    <div class="sidebar-logo">
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
     </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar-footer"></div>
   </aside>
 
   <main class="main-content">
-    <div class="page-header anim-fadeup"><h1>My Profile</h1><p>View your stats and solve history.</p></div>
-    <div class="page-body">
+    <div class="page-header">
+      <h1>My Profile</h1>
+      <p>Player identity, competition record, and account controls.</p>
+    </div>
 
-      <!-- Profile header -->
-      <div class="profile-header anim-fadeup anim-delay-1" id="profile-header">
-        <div class="profile-avatar-lg" id="profile-avatar">?</div>
-        <div class="profile-info">
-          <h2 id="profile-name">—</h2>
+    <div class="page-body">
+      <!-- Identity -->
+      <div class="identity">
+        <div class="identity-avatar" id="profile-avatar">?</div>
+        <div class="identity-info">
+          <div class="name" id="profile-name">—</div>
           <div class="handle" id="profile-handle">@—</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="profile-badges"></div>
-          <div class="profile-stats-row">
-            <div class="pstat"><div class="num" id="p-pts" style="color:var(--accent);">—</div><div class="lbl">Points</div></div>
-            <div class="pstat"><div class="num" id="p-solves">—</div><div class="lbl">Solves</div></div>
-            <div class="pstat"><div class="num" id="p-rank" style="color:var(--green);">#—</div><div class="lbl">Rank</div></div>
-            <div class="pstat"><div class="num" id="p-bloods" style="color:var(--red);">—</div><div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline;margin-right:2px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Bloods</div></div>
-          </div>
+          <div class="joined" id="profile-joined"></div>
+          <div class="identity-badges" id="profile-badges"></div>
         </div>
         <div style="position:relative;z-index:1;">
-          <button class="btn btn-ghost btn-sm" onclick="openModal('edit-profile-modal')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> Edit Profile</button>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('edit-profile-modal')">Edit Profile</button>
         </div>
       </div>
 
-      <div class="profile-grid">
+      <!-- Stats strip -->
+      <div class="stats-strip">
+        <div class="stat">
+          <div class="lbl">Points</div>
+          <div class="num" id="p-pts" style="color:var(--ff-amber);">—</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Solves</div>
+          <div class="num" id="p-solves">—</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Rank</div>
+          <div class="num" id="p-rank" style="color:var(--ff-success);">#—</div>
+        </div>
+        <div class="stat">
+          <div class="lbl"><svg viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;" aria-hidden="true"><path d="M12 2c.8 0 1.5.6 1.8 1.5.5 1.5 1.2 3 1.2 4.5 0 1.5-.7 3-1.2 4.5.5 1.5 1.2 3 1.2 4.5 0 1.5-.7 3-1.2 4.5-.3.9-1 1.5-1.8 1.5s-1.5-.6-1.8-1.5c-.5-1.5-1.2-3-1.2-4.5 0-1.5.7-3 1.2-4.5-.5-1.5-1.2-3-1.2-4.5 0-1.5.7-3 1.2-4.5C10.5 2.6 11.2 2 12 2z"/></svg> First Bloods</div>
+          <div class="num" id="p-bloods" style="color:var(--ff-danger);">—</div>
+        </div>
+      </div>
+
+      <div class="prof-grid">
         <!-- Solve history -->
-        <div class="card anim-fadeup anim-delay-2">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-            <h2 style="font-size:17px;">Solve History</h2>
-            <span id="solve-count-label" style="font-size:13px;color:var(--text-muted);"></span>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Solve History</h2>
+            <span class="count" id="solve-count-label"></span>
           </div>
-          <div id="solve-history">
-            <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px 0;">Loading...</div>
+          <div class="panel-body" id="solve-history">
+            <div style="color:var(--ff-text-muted);font-size:var(--ff-text-sm);text-align:center;padding:var(--ff-space-8) 0;">Loading…</div>
           </div>
         </div>
 
-        <!-- Edit profile form -->
-        <div>
-          <div class="card anim-fadeup anim-delay-3">
-            <h2 style="font-size:17px;margin-bottom:16px;">Account Settings</h2>
+        <!-- Account settings -->
+        <div class="panel">
+          <div class="settings-section">
+            <h3>Account Settings</h3>
             <div class="form-group">
-              <label class="form-label">Display Name</label>
+              <label class="form-label" for="edit-name">Display Name</label>
               <input type="text" class="form-input" id="edit-name" />
             </div>
             <div class="form-group">
-              <label class="form-label">Username</label>
+              <label class="form-label" for="edit-username">Username</label>
               <input type="text" class="form-input" id="edit-username" />
             </div>
             <div class="form-group">
-              <label class="form-label">Email</label>
+              <label class="form-label" for="edit-email">Email</label>
               <input type="email" class="form-input" id="edit-email" disabled style="opacity:0.5;cursor:not-allowed;" />
-              <span style="font-size:11px;color:var(--text-muted);">Email cannot be changed here.</span>
+              <span class="note">Email cannot be changed here.</span>
             </div>
             <button class="btn btn-primary" onclick="saveProfile()" style="width:100%;justify-content:center;">Save Changes</button>
-            <hr class="divider" />
-            <h3 style="font-size:14px;margin-bottom:14px;">Change Password</h3>
+          </div>
+          <div class="settings-section">
+            <h3>Change Password</h3>
             <div class="form-group">
-              <label class="form-label">New Password</label>
+              <label class="form-label" for="new-password">New Password</label>
               <input type="password" class="form-input" id="new-password" placeholder="Min. 8 characters" />
             </div>
             <button class="btn btn-ghost" onclick="changePassword()" style="width:100%;justify-content:center;">Update Password</button>
           </div>
         </div>
       </div>
-
     </div>
   </main>
 </div>
+
 <div id="toast-container"></div>
+
+<!-- Edit profile modal -->
+<div class="modal-overlay hidden" id="edit-profile-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Profile</div>
+      <button class="modal-close" onclick="closeModal('edit-profile-modal')" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="modal-edit-name">Display Name</label>
+      <input type="text" class="form-input" id="modal-edit-name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="modal-edit-username">Username</label>
+      <input type="text" class="form-input" id="modal-edit-username" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('edit-profile-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProfile(true)">Save</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/navigation.js"></script>
 <script>
-const CAT_ICONS = { 
-  Web: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-  Crypto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  Pwn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
-  Forensics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
-  Reversing: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/></svg>',
-  Misc: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m0-18l9 9m-9-9L3 12m9 9l9-9m-9 9L3 12"/></svg>'
-};
-const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
+  requireAuth().then(async user => {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    const ud = userDoc.data() || {};
+    FF.setNavUser(ud, user);
+    if (ud.role === 'admin') FF.setAdminNav();
 
-requireAuth().then(async user => {
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  const ud = userDoc.data() || {};
+    const avatarEl = document.getElementById('profile-avatar');
+    if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar || user.photoURL}" alt="" />`;
+    else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
 
-  // Nav
-  document.getElementById('nav-name').textContent = ud.displayName || user.displayName || 'Player';
-  const navAv = document.getElementById('nav-avatar');
-  if (ud.avatar || user.photoURL) navAv.innerHTML = `<img src="${ud.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else navAv.textContent = getInitials(ud.displayName || user.displayName);
+    document.getElementById('profile-name').textContent = ud.displayName || user.displayName || 'Player';
+    document.getElementById('profile-handle').textContent = `@${ud.username || '—'}`;
+    document.getElementById('p-pts').textContent = (ud.points || 0).toLocaleString();
+    document.getElementById('p-solves').textContent = ud.solves || 0;
+    document.getElementById('p-bloods').textContent = ud.firstBloods || 0;
 
-  // Profile header
-  const avatarEl = document.getElementById('profile-avatar');
-  if (ud.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${ud.avatar||user.photoURL}" />`;
-  else avatarEl.textContent = getInitials(ud.displayName || user.displayName);
+    if (ud.createdAt) {
+      document.getElementById('profile-joined').textContent = 'joined ' + new Date(ud.createdAt.toMillis()).toLocaleDateString();
+    }
 
-  document.getElementById('profile-name').textContent = ud.displayName || user.displayName || 'Player';
-  document.getElementById('profile-handle').textContent = `@${ud.username||'—'}`;
-  document.getElementById('p-pts').textContent = (ud.points||0).toLocaleString();
-  document.getElementById('p-solves').textContent = ud.solves||0;
-  document.getElementById('p-bloods').textContent = ud.firstBloods||0;
+    const rankSnap = await db.collection('users').where('points', '>', ud.points || 0).get();
+    const rank = rankSnap.size + 1;
+    document.getElementById('p-rank').textContent = `#${rank}`;
 
-  // Rank
-  const rankSnap = await db.collection('users').where('points','>',ud.points||0).get();
-  const rank = rankSnap.size + 1;
-  document.getElementById('p-rank').textContent = `#${rank}`;
+    // Badges — first blood, top 3, admin
+    const badges = [];
+    if (ud.role === 'admin') badges.push(`<span class="badge" style="background:var(--ff-amber-soft);color:var(--ff-amber);">${FF.icons.admin} Admin</span>`);
+    if ((ud.firstBloods || 0) > 0) badges.push(`<span class="badge" style="background:var(--ff-danger-soft);color:var(--ff-danger);">${FF.icons.firstBlood} ${ud.firstBloods} × First Blood</span>`);
+    if (rank <= 3) badges.push(`<span class="badge" style="background:var(--ff-warning-soft);color:var(--ff-warning);">${FF.icons.trophy} Top 3</span>`);
+    document.getElementById('profile-badges').innerHTML = badges.join('');
 
-  // Badges
-  const badges = [];
-  if (ud.role === 'admin') badges.push('<span class="badge" style="background:var(--accent-dim);color:var(--accent);">⚡ Admin</span>');
-  if ((ud.firstBloods||0)>0) badges.push(`<span class="badge" style="background:var(--red-dim);color:var(--red);"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline;vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> ${ud.firstBloods} First Bloods</span>`);
-  if (rank<=3) badges.push('<span class="badge" style="background:rgba(255,215,0,0.1);color:#FFD700;">🏆 Top 3</span>');
-  document.getElementById('profile-badges').innerHTML = badges.join('');
+    // Prefill edit forms
+    document.getElementById('edit-name').value = ud.displayName || user.displayName || '';
+    document.getElementById('edit-username').value = ud.username || '';
+    document.getElementById('edit-email').value = user.email || '';
 
-  // Edit form prefill
-  document.getElementById('edit-name').value = ud.displayName || user.displayName || '';
-  document.getElementById('edit-username').value = ud.username || '';
-  document.getElementById('edit-email').value = user.email || '';
+    // Solve history
+    const solvesSnap = await db.collection('solves').where('uid', '==', user.uid).orderBy('solvedAt', 'desc').get();
+    document.getElementById('solve-count-label').textContent = `${solvesSnap.size} total solve${solvesSnap.size !== 1 ? 's' : ''}`;
 
-  // Solve history
-  const solvesSnap = await db.collection('solves').where('uid','==',user.uid).orderBy('solvedAt','desc').get();
-  document.getElementById('solve-count-label').textContent = `${solvesSnap.size} total solve${solvesSnap.size!==1?'s':''}`;
+    if (solvesSnap.empty) {
+      document.getElementById('solve-history').innerHTML = `
+        <div class="empty-state">
+          ${FF.icons.flag}
+          <h3>No solves yet</h3>
+          <p>Go solve some challenges.</p>
+        </div>`;
+      return;
+    }
 
-  if (solvesSnap.empty) {
-    document.getElementById('solve-history').innerHTML = `
-      <div class="empty-state"><div class="empty-icon">⚑</div><h3>No solves yet</h3><p>Go solve some challenges!</p></div>`;
-    return;
-  }
-
-  document.getElementById('solve-history').innerHTML = solvesSnap.docs.map(d => {
-    const s = d.data();
-    const cat = s.category || 'Misc';
-    return `
-      <a href="challenge.html?id=${s.challengeId}" class="solve-history-item">
-        <div class="solve-cat-icon" style="background:${CAT_BG[cat]||CAT_BG.Misc}">${CAT_ICONS[cat]||'🧩'}</div>
-        <div class="solve-info">
-          <div class="solve-name">${sanitize(s.challengeName)}</div>
-          <div class="solve-meta">
-            ${categoryBadge(cat)} ${difficultyBadge(s.difficulty||'Easy')}
-            <span>${timeAgo(s.solvedAt)}</span>
-            ${s.isFirstBlood ? '<span style="color:var(--red);font-weight:700;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline;vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood!</span>' : ''}
+    document.getElementById('solve-history').innerHTML = solvesSnap.docs.map(d => {
+      const s = d.data();
+      const cat = s.category || 'Misc';
+      return `
+        <a href="challenge.html?id=${s.challengeId}" class="solve-item">
+          <div class="si-icon" style="background:${FF.catColorSoft(cat)};color:${FF.catColor(cat)};">${FF.catIcon(cat, 15)}</div>
+          <div class="si-info">
+            <div class="si-name">${sanitize(s.challengeName)}</div>
+            <div class="si-meta">
+              <span>${cat}</span>
+              <span>${s.difficulty || 'Easy'}</span>
+              <span>${timeAgo(s.solvedAt)}</span>
+            </div>
           </div>
-        </div>
-        <div class="solve-pts">+${s.points}</div>
-      </a>`;
-  }).join('');
-});
+          <div class="si-pts">+${s.points}</div>
+        </a>`;
+    }).join('');
+  });
 
-async function saveProfile() {
-  const user = auth.currentUser;
-  if (!user) return;
-  const name = document.getElementById('edit-name').value.trim();
-  const username = document.getElementById('edit-username').value.trim();
-  if (!name || !username) { showToast('Name and username are required.', 'error'); return; }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) { showToast('Username can only contain letters, numbers, and underscores.', 'error'); return; }
+  async function saveProfile(fromModal) {
+    const user = auth.currentUser;
+    if (!user) return;
+    const name = (fromModal ? document.getElementById('modal-edit-name') : document.getElementById('edit-name')).value.trim();
+    const username = (fromModal ? document.getElementById('modal-edit-username') : document.getElementById('edit-username')).value.trim();
+    if (!name || !username) { showToast('Name and username are required.', 'error'); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) { showToast('Username can only contain letters, numbers, and underscores.', 'error'); return; }
 
-  try {
-    await user.updateProfile({ displayName: name });
-    await db.collection('users').doc(user.uid).update({ displayName: name, username });
-    document.getElementById('profile-name').textContent = name;
-    document.getElementById('profile-handle').textContent = `@${username}`;
-    document.getElementById('nav-name').textContent = name;
-    showToast('Profile updated!', 'success');
-  } catch(e) { showToast('Failed to update profile.', 'error'); }
-}
-
-async function changePassword() {
-  const newPw = document.getElementById('new-password').value;
-  if (newPw.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
-  try {
-    await auth.currentUser.updatePassword(newPw);
-    document.getElementById('new-password').value = '';
-    showToast('Password updated!', 'success');
-  } catch(e) {
-    if (e.code === 'auth/requires-recent-login') showToast('Please sign out and back in, then try again.', 'error');
-    else showToast('Failed to update password.', 'error');
+    try {
+      await user.updateProfile({ displayName: name });
+      await db.collection('users').doc(user.uid).update({ displayName: name, username });
+      document.getElementById('profile-name').textContent = name;
+      document.getElementById('profile-handle').textContent = `@${username}`;
+      closeModal('edit-profile-modal');
+      showToast('Profile updated!', 'success');
+    } catch(e) { showToast('Failed to update profile.', 'error'); }
   }
-}
+
+  async function changePassword() {
+    const newPw = document.getElementById('new-password').value;
+    if (newPw.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+    try {
+      await auth.currentUser.updatePassword(newPw);
+      document.getElementById('new-password').value = '';
+      showToast('Password updated!', 'success');
+    } catch(e) {
+      if (e.code === 'auth/requires-recent-login') showToast('Please sign out and back in, then try again.', 'error');
+      else showToast('Failed to update password.', 'error');
+    }
+  }
 </script>
 </body>
 </html>

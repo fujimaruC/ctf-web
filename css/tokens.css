@@ -1,0 +1,126 @@
+/* ═══════════════════════════════════════════════
+   FlagForge Design Tokens
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces ── */
+  --ff-bg: #0c0e10;
+  --ff-bg-2: #111418;
+  --ff-bg-3: #181c22;
+  --ff-surface: #1e232c;
+  --ff-surface-2: #252b36;
+  --ff-surface-3: #2c3340;
+
+  /* ── Borders ── */
+  --ff-border: #2a3040;
+  --ff-border-strong: #353d4d;
+  --ff-border-subtle: #222830;
+
+  /* ── Brand ── */
+  --ff-amber: #e8a020;
+  --ff-amber-hover: #f0b030;
+  --ff-amber-soft: rgba(232, 160, 32, 0.10);
+  --ff-amber-medium: rgba(232, 160, 32, 0.18);
+  --ff-amber-strong: rgba(232, 160, 32, 0.30);
+
+  /* ── Semantic ── */
+  --ff-success: #2dd4a0;
+  --ff-success-soft: rgba(45, 212, 160, 0.10);
+  --ff-danger: #f05252;
+  --ff-danger-soft: rgba(240, 82, 82, 0.10);
+  --ff-info: #4a9eff;
+  --ff-info-soft: rgba(74, 158, 255, 0.10);
+  --ff-violet: #a04aff;
+  --ff-violet-soft: rgba(160, 74, 255, 0.10);
+  --ff-warning: #e8a020;
+  --ff-warning-soft: rgba(232, 160, 32, 0.10);
+
+  /* ── Category Colors ── */
+  --ff-cat-web: #4a9eff;
+  --ff-cat-web-soft: rgba(74, 158, 255, 0.10);
+  --ff-cat-crypto: #2dd4a0;
+  --ff-cat-crypto-soft: rgba(45, 212, 160, 0.10);
+  --ff-cat-pwn: #f05252;
+  --ff-cat-pwn-soft: rgba(240, 82, 82, 0.10);
+  --ff-cat-forensics: #e8a020;
+  --ff-cat-forensics-soft: rgba(232, 160, 32, 0.10);
+  --ff-cat-reversing: #a04aff;
+  --ff-cat-reversing-soft: rgba(160, 74, 255, 0.10);
+  --ff-cat-misc: #8a95a3;
+  --ff-cat-misc-soft: rgba(138, 149, 163, 0.08);
+
+  /* ── Text ── */
+  --ff-text: #e8eaed;
+  --ff-text-secondary: #8a95a3;
+  --ff-text-muted: #4d5a6b;
+  --ff-text-inverse: #0c0e10;
+
+  /* ── Typography ── */
+  --ff-font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --ff-font-body: 'Inter', -apple-system, sans-serif;
+  --ff-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Type Scale ── */
+  --ff-text-xs: 0.6875rem;
+  --ff-text-sm: 0.8125rem;
+  --ff-text-base: 0.9375rem;
+  --ff-text-md: 1rem;
+  --ff-text-lg: 1.125rem;
+  --ff-text-xl: 1.3125rem;
+  --ff-text-2xl: 1.625rem;
+  --ff-text-3xl: 2rem;
+  --ff-text-4xl: 2.75rem;
+  --ff-text-5xl: 3.5rem;
+
+  /* ── Spacing Scale ── */
+  --ff-space-1: 4px;
+  --ff-space-2: 8px;
+  --ff-space-3: 12px;
+  --ff-space-4: 16px;
+  --ff-space-5: 20px;
+  --ff-space-6: 24px;
+  --ff-space-8: 32px;
+  --ff-space-10: 40px;
+  --ff-space-12: 48px;
+  --ff-space-16: 64px;
+  --ff-space-20: 80px;
+  --ff-space-24: 96px;
+
+  /* ── Geometry ── */
+  --ff-radius-xs: 3px;
+  --ff-radius-sm: 5px;
+  --ff-radius-md: 8px;
+  --ff-radius-lg: 12px;
+  --ff-radius-xl: 16px;
+  --ff-radius-pill: 999px;
+
+  /* ── Shadows ── */
+  --ff-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --ff-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --ff-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --ff-shadow-amber: 0 0 32px rgba(232, 160, 32, 0.12);
+
+  /* ── Motion ── */
+  --ff-duration-fast: 120ms;
+  --ff-duration-normal: 200ms;
+  --ff-duration-slow: 350ms;
+  --ff-duration-emphasis: 450ms;
+  --ff-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ff-ease-emphasis: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Layout ── */
+  --ff-sidebar-width: 220px;
+  --ff-topbar-height: 52px;
+  --ff-bottomnav-height: 60px;
+  --ff-max-content: 1200px;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ff-duration-fast: 0ms;
+    --ff-duration-normal: 0ms;
+    --ff-duration-slow: 0ms;
+    --ff-duration-emphasis: 0ms;
+  }
+}

@@ -4,423 +4,636 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Challenge</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
   <style>
-    .ch-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
-
-    .ch-header-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 28px; margin-bottom: 20px;
-      position: relative; overflow: hidden;
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+      color: var(--ff-text-muted);
+      text-decoration: none;
+      font-size: var(--ff-text-sm);
+      margin: var(--ff-space-6) 0 var(--ff-space-4);
+      transition: color var(--ff-duration-fast) var(--ff-ease);
     }
-    .ch-header-card::before {
-      content: ''; position: absolute; top: -40px; right: -40px;
-      width: 200px; height: 200px; border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-dim), transparent 70%);
-      pointer-events: none;
+    .back-link:hover { color: var(--ff-amber); }
+    .back-link svg { width: 14px; height: 14px; }
+
+    .ch-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: var(--ff-space-6);
+      align-items: start;
     }
-    .ch-title-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-    .ch-icon-lg {
-      width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 26px;
+
+    /* ── Mission header ── */
+    .mission-head {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      position: relative;
+      overflow: hidden;
     }
-    .ch-title-info { flex: 1; }
-    .ch-title-info h1 { font-size: 26px; margin-bottom: 8px; }
-    .ch-badges-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .ch-pts-display { font-family: var(--font-display); font-weight: 800; font-size: 36px; color: var(--accent); line-height: 1; }
-    .ch-pts-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-
-    .ch-meta-strip {
-      display: flex; gap: 24px; flex-wrap: wrap;
-      padding: 16px 0; border-top: 1px solid var(--border); margin-top: 16px;
+    .mission-head::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--ff-amber);
+      opacity: 0.8;
     }
-    .ch-meta-item { display: flex; flex-direction: column; gap: 3px; }
-    .ch-meta-item .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--font-display); font-weight: 600; }
-    .ch-meta-item .val { font-size: 14px; font-weight: 500; }
+    .mission-head-inner {
+      padding: var(--ff-space-6);
+    }
+    .mission-kicker {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+      font-family: var(--ff-font-display);
+      font-size: var(--ff-text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ff-text-muted);
+      margin-bottom: var(--ff-space-2);
+    }
+    .mission-kicker .cat-meta { display: flex; align-items: center; gap: var(--ff-space-2); color: var(--ff-amber); }
+    .mission-kicker .cat-meta svg { width: 14px; height: 14px; }
+    .mission-title {
+      font-size: clamp(24px, 3.5vw, 34px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .mission-by {
+      font-size: var(--ff-text-sm);
+      color: var(--ff-text-muted);
+      margin-top: var(--ff-space-2);
+    }
+    .mission-meta {
+      display: flex;
+      gap: var(--ff-space-6);
+      padding: var(--ff-space-4) var(--ff-space-6);
+      border-top: 1px solid var(--ff-border);
+      background: var(--ff-bg-3);
+      flex-wrap: wrap;
+    }
+    .mission-meta .mm { display: flex; flex-direction: column; gap: 1px; }
+    .mission-meta .mm .lbl { font-size: 10px; color: var(--ff-text-muted); font-family: var(--ff-font-display); text-transform: uppercase; letter-spacing: 0.8px; }
+    .mission-meta .mm .val { font-size: var(--ff-text-sm); font-weight: 500; color: var(--ff-text); }
+    .mission-meta .mm .val.mono { font-family: var(--ff-font-mono); }
 
-    .desc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; }
-    .desc-card h3 { font-size: 15px; margin-bottom: 14px; color: var(--text-secondary); font-family: var(--font-display); }
-    .desc-body { font-size: 14px; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; }
-    .desc-body code { background: var(--bg-3); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px; color: var(--accent); }
+    /* ── Main content ── */
+    .mission-body {
+      margin-top: var(--ff-space-6);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+    }
+    .mission-section {
+      padding: var(--ff-space-6);
+    }
+    .mission-section + .mission-section {
+      border-top: 1px solid var(--ff-border);
+    }
+    .mission-section h3 {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--ff-space-3);
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+    }
+    .mission-section h3 svg { width: 14px; height: 14px; }
+    .desc-body {
+      font-size: var(--ff-text-base);
+      line-height: 1.8;
+      color: var(--ff-text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
 
-    /* Sidebar */
-    .sidebar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 16px; }
-    .sidebar-card h3 { font-size: 14px; margin-bottom: 16px; color: var(--text-secondary); font-family: var(--font-display); }
+    /* File links */
+    .file-link {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-sm);
+      background: var(--ff-bg-3);
+      padding: var(--ff-space-3) var(--ff-space-4);
+      text-decoration: none;
+      color: var(--ff-text);
+      font-size: var(--ff-text-sm);
+      margin-bottom: var(--ff-space-2);
+      transition: border-color var(--ff-duration-fast) var(--ff-ease);
+    }
+    .file-link:last-child { margin-bottom: 0; }
+    .file-link:hover { border-color: var(--ff-amber); }
+    .file-link .file-ico { color: var(--ff-amber); width: 18px; height: 18px; display: flex; flex-shrink: 0; }
+    .file-link .file-ico svg { width: 18px; height: 18px; }
+    .file-link .file-info { flex: 1; min-width: 0; }
+    .file-link .file-name { font-weight: 500; font-size: var(--ff-text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-link .file-type { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
+    .file-link .file-go { color: var(--ff-text-muted); width: 14px; height: 14px; display: flex; flex-shrink: 0; }
+    .file-link .file-go svg { width: 14px; height: 14px; }
 
-    .flag-input-wrap { position: relative; }
-    .flag-input-wrap input { font-family: monospace; font-size: 14px; padding-right: 56px; letter-spacing: 0.5px; }
-    .flag-submit-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 6px 12px; font-size: 12px; }
+    /* ── Solve panel ── */
+    .solve-panel {
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-md);
+      background: var(--ff-bg-2);
+      position: sticky;
+      top: var(--ff-space-6);
+      overflow: hidden;
+    }
+    .solve-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px;
+      height: 100%;
+      background: var(--ff-border-strong);
+    }
+    .solve-panel.solved-panel::before { background: var(--ff-success); }
+    .solve-top {
+      padding: var(--ff-space-5);
+      border-bottom: 1px solid var(--ff-border);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .solve-top .pts-num {
+      font-family: var(--ff-font-display);
+      font-weight: 700;
+      font-size: var(--ff-text-3xl);
+      letter-spacing: -0.02em;
+      color: var(--ff-amber);
+      line-height: 1;
+    }
+    .solve-top .pts-lbl { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-display); text-transform: uppercase; letter-spacing: 0.8px; }
+
+    .solve-body {
+      padding: var(--ff-space-5);
+    }
+    .solve-label {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: var(--ff-space-2);
+    }
+    .flag-input-wrap { display: flex; gap: var(--ff-space-2); }
+    .flag-input-wrap input {
+      font-family: var(--ff-font-mono);
+      font-size: var(--ff-text-sm);
+      letter-spacing: 0.3px;
+      flex: 1;
+    }
+    .attempts-counter {
+      font-size: var(--ff-text-xs);
+      color: var(--ff-text-muted);
+      text-align: center;
+      margin-top: var(--ff-space-2);
+      font-family: var(--ff-font-mono);
+    }
 
     .solved-banner {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--green-dim); border: 1px solid rgba(45,212,160,0.3);
-      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      background: var(--ff-success-soft);
+      border: 1px solid rgba(45, 212, 160, 0.25);
+      border-radius: var(--ff-radius-sm);
+      padding: var(--ff-space-3) var(--ff-space-4);
+      margin-bottom: var(--ff-space-4);
     }
-    .solved-banner .icon { font-size: 24px; }
-    .solved-banner .text .title { font-weight: 700; font-size: 15px; color: var(--green); font-family: var(--font-display); }
-    .solved-banner .text .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .solved-banner .sb-ico { color: var(--ff-success); width: 22px; height: 22px; flex-shrink: 0; display: flex; }
+    .solved-banner .sb-ico svg { width: 22px; height: 22px; }
+    .solved-banner .sb-title { font-weight: 700; font-size: var(--ff-text-sm); color: var(--ff-success); font-family: var(--ff-font-display); }
+    .solved-banner .sb-sub { font-size: var(--ff-text-xs); color: var(--ff-text-secondary); }
 
-    .attempts-counter { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+    .solve-section {
+      padding: var(--ff-space-5);
+      border-top: 1px solid var(--ff-border);
+    }
+    .solve-section h4 {
+      font-size: var(--ff-text-xs);
+      font-family: var(--ff-font-display);
+      font-weight: 600;
+      color: var(--ff-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: var(--ff-space-3);
+    }
 
+    /* First blood */
+    .fb-line {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      border: 1px solid rgba(240, 82, 82, 0.3);
+      background: var(--ff-danger-soft);
+      border-radius: var(--ff-radius-sm);
+      padding: var(--ff-space-3) var(--ff-space-4);
+      margin-bottom: var(--ff-space-4);
+    }
+    .fb-line .fb-ico { color: var(--ff-danger); width: 18px; height: 18px; display: flex; flex-shrink: 0; }
+    .fb-line .fb-ico svg { width: 18px; height: 18px; }
+    .fb-line .fb-txt { font-size: var(--ff-text-sm); color: var(--ff-text); }
+    .fb-line .fb-txt .fb-name { font-weight: 600; }
+
+    .fb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ff-danger);
+      font-family: var(--ff-font-display);
+      font-size: var(--ff-text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .fb-badge svg { width: 13px; height: 13px; }
+
+    /* Hints */
     .hint-item {
-      background: var(--bg-3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px;
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-sm);
+      background: var(--ff-bg-3);
+      margin-bottom: var(--ff-space-2);
+      overflow: hidden;
     }
-    .hint-item .hint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; cursor: pointer; }
-    .hint-item .hint-body { display: none; margin-top: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding-top: 10px; border-top: 1px solid var(--border); }
-    .hint-item.open .hint-body { display: block; }
-    .hint-cost { font-size: 11px; color: var(--accent); font-weight: 600; }
-
-    .file-link {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--bg-3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px;
-      text-decoration: none; color: var(--text-primary); font-size: 14px;
-      transition: border-color 0.2s;
+    .hint-item:last-child { margin-bottom: 0; }
+    .hint-item .hint-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--ff-space-3) var(--ff-space-4);
+      cursor: pointer;
+      font-size: var(--ff-text-sm);
+      font-weight: 500;
+      color: var(--ff-text);
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
     }
-    .file-link:hover { border-color: var(--accent); }
-    .file-link .file-icon { font-size: 20px; }
-    .file-link .file-info { flex: 1; }
-    .file-link .file-name { font-weight: 500; font-size: 13px; }
-    .file-link .file-type { font-size: 11px; color: var(--text-muted); }
-
-    .first-blood-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--red-dim); border: 1px solid rgba(240,82,82,0.2);
-      border-radius: 99px; padding: 3px 10px;
-      font-size: 11px; font-weight: 700; color: var(--red); font-family: var(--font-display);
+    .hint-item .hint-head:hover { color: var(--ff-amber); }
+    .hint-cost { font-size: var(--ff-text-xs); color: var(--ff-amber); font-family: var(--ff-font-display); font-weight: 600; }
+    .hint-item .hint-body-copy {
+      display: none;
+      padding: 0 var(--ff-space-4) var(--ff-space-3);
+      font-size: var(--ff-text-sm);
+      color: var(--ff-text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid var(--ff-border);
+      padding-top: var(--ff-space-3);
     }
+    .hint-item.open .hint-body-copy { display: block; }
 
-    .recent-solvers { display: flex; flex-direction: column; gap: 10px; }
-    .solver-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-    .solver-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    /* Recent solvers */
+    .solver-item {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      padding: var(--ff-space-2) 0;
+      font-size: var(--ff-text-sm);
+    }
+    .solver-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--ff-radius-sm);
+      background: var(--ff-surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--ff-text-xs);
+      font-weight: 700;
+      flex-shrink: 0;
+      color: var(--ff-text-secondary);
+    }
+    .solver-item .sv-name { font-weight: 500; color: var(--ff-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .solver-item .sv-time { font-size: var(--ff-text-xs); color: var(--ff-text-muted); font-family: var(--ff-font-mono); }
 
-    @media (max-width: 900px) { .ch-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) {
+      .ch-layout { grid-template-columns: 1fr; }
+      .solve-panel { position: static; }
+    }
   </style>
 </head>
-<body>
+<body data-page="challenges">
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <a href="index.html" class="nav-logo"><div class="logo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></div> FlagForge</a>
+      <a href="index.html" aria-label="FlagForge home">
+        <span class="ff-logo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="ff-wordmark">Flag<span style="color:var(--ff-amber);">Forge</span></span>
+      </a>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> Dashboard</a>
-      <a href="challenges.html" class="nav-item active"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 5-1 5.357.468 9 1M4 22v-7a6 6 0 0 1 9-5.5"/></svg></span> Challenges</a>
-      <a href="leaderboard.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h12M6 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2M6 9v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9M9 5a3 3 0 0 1 6 0"></path></svg></span> Leaderboard</a>
-      <div class="nav-section-label">Account</div>
-      <a href="profile.html" class="nav-item"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> My Profile</a>
-      <button class="nav-item" onclick="signOut()" style="color:var(--red);"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Sign Out</button>
-    </nav>
-    <div class="sidebar-footer">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px;">
-        <div id="nav-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--accent);flex-shrink:0;">?</div>
-        <div><div style="font-weight:600;font-size:14px;" id="nav-name">—</div><div style="font-size:11px;color:var(--text-muted);" id="nav-pts">0 pts</div></div>
-      </div>
-    </div>
+    <nav class="sidebar-nav"></nav>
+    <div class="sidebar-footer"></div>
   </aside>
 
   <main class="main-content">
-    <div class="page-header anim-fadeup" style="padding-bottom:8px;">
-      <a href="challenges.html" style="color:var(--text-muted);text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;">← Back to Challenges</a>
-    </div>
-    <div class="page-body">
+    <div class="page-body" style="padding-top:0;">
+      <a href="challenges.html" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Challenges
+      </a>
       <div id="ch-content">
-        <div style="text-align:center;padding:80px 0;color:var(--text-muted);">Loading challenge...</div>
+        <div style="text-align:center;padding:var(--ff-space-16) 0;color:var(--ff-text-muted);">Loading challenge…</div>
       </div>
     </div>
   </main>
 </div>
+
 <div id="toast-container"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/navigation.js"></script>
 <script>
-lucide.createIcons();
-const CAT_ICONS = { 
-  Web: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-  Crypto: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  Pwn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/></svg>',
-  Forensics: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
-  Reversing: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/></svg>',
-  Misc: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18m0-18l9 9m-9-9L3 12m9 9l9-9m-9 9L3 12"/></svg>'
-};
-const CAT_BG = { Web:'rgba(74,158,255,0.12)', Crypto:'rgba(45,212,160,0.12)', Pwn:'rgba(240,82,82,0.12)', Forensics:'rgba(232,160,32,0.12)', Reversing:'rgba(160,74,255,0.12)', Misc:'rgba(255,255,255,0.06)' };
+  const chId = new URLSearchParams(window.location.search).get('id');
+  let currentUser, userData, challenge, isSolved = false, attempts = 0;
 
-const chId = new URLSearchParams(window.location.search).get('id');
-let currentUser, userData, challenge, isSolved = false, attempts = 0;
+  requireAuth().then(async user => {
+    currentUser = user;
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    userData = userDoc.data() || {};
 
-requireAuth().then(async user => {
-  currentUser = user;
-  const userDoc = await db.collection('users').doc(user.uid).get();
-  userData = userDoc.data() || {};
+    FF.setNavUser(userData, user);
+    if (userData.role === 'admin') FF.setAdminNav();
 
-  document.getElementById('nav-name').textContent = userData.displayName || user.displayName || 'Player';
-  document.getElementById('nav-pts').textContent = (userData.points||0).toLocaleString() + ' pts';
-  const avatarEl = document.getElementById('nav-avatar');
-  if (userData.avatar || user.photoURL) avatarEl.innerHTML = `<img src="${userData.avatar||user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-  else avatarEl.textContent = getInitials(userData.displayName || user.displayName);
-
-  if (!chId) { document.getElementById('ch-content').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Challenge not found</h3></div>'; return; }
-
-  // Load challenge
-  const chDoc = await db.collection('challenges').doc(chId).get();
-  if (!chDoc.exists || !chDoc.data().published) { document.getElementById('ch-content').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Challenge not found</h3></div>'; return; }
-  challenge = { id: chDoc.id, ...chDoc.data() };
-  document.title = `FlagForge — ${challenge.title}`;
-
-  // Check if solved
-  const solveDoc = await db.collection('solves').doc(`${user.uid}_${chId}`).get();
-  isSolved = solveDoc.exists;
-
-  // Attempts
-  const attDoc = await db.collection('attempts').doc(`${user.uid}_${chId}`).get();
-  attempts = attDoc.exists ? (attDoc.data().count || 0) : 0;
-
-  // Recent solvers
-  const solversSnap = await db.collection('solves').where('challengeId','==',chId).orderBy('solvedAt','asc').limit(5).get();
-
-  renderChallenge(solversSnap);
-});
-
-function renderChallenge(solversSnap) {
-  const cat = challenge.category || 'Misc';
-  const solvers = solversSnap.docs.map(d => d.data());
-
-  const solverHTML = solvers.length ? solvers.map((s,i) => `
-    <div class="solver-item">
-      <div class="solver-avatar">${getInitials(s.playerName)}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sanitize(s.playerName)}</div>
-        <div style="font-size:11px;color:var(--text-muted);">${i===0?'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood · ':''}${timeAgo(s.solvedAt)}</div>
-      </div>
-    </div>`).join('') : '<div style="font-size:13px;color:var(--text-muted);">No solves yet. Be first!</div>';
-
-  const filesHTML = (challenge.files||[]).map(f => `
-    <a href="${f.url}" target="_blank" rel="noopener" class="file-link">
-      <span class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></span>
-      <div class="file-info">
-        <div class="file-name">${sanitize(f.name)}</div>
-        <div class="file-type">${sanitize(f.type||'Download')}</div>
-      </div>
-      <span style="color:var(--accent);font-size:13px;">↗</span>
-    </a>`).join('');
-
-  const hintsHTML = (challenge.hints||[]).map((h,i) => `
-    <div class="hint-item" id="hint-${i}">
-      <div class="hint-header" onclick="toggleHint(${i})">
-        <span style="font-size:13px;font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:6px;vertical-align:text-bottom;"><circle cx="12" cy="12" r="1"/><path d="M8 16s2.9-5 4-5 4 5 4 5"/><path d="M22 12c0-6.627-1.343-12-3-12S14.656 5.373 12 12s5.343 12 7 12 3-5.373 3-12z"/><rect x="2" y="5" width="4" height="14" rx="2"/></svg> Hint ${i+1}</span>
-        <span class="hint-cost">${h.cost ? `-${h.cost} pts` : 'Free'}</span>
-      </div>
-      <div class="hint-body">${sanitize(h.text)}</div>
-    </div>`).join('');
-
-  document.getElementById('ch-content').innerHTML = `
-    <div class="ch-layout">
-      <!-- Main -->
-      <div>
-        <div class="ch-header-card anim-fadeup">
-          <div class="ch-title-row">
-            <div class="ch-icon-lg" style="background:${CAT_BG[cat]||CAT_BG.Misc}">${CAT_ICONS[cat]||'🧩'}</div>
-            <div class="ch-title-info">
-              <div class="ch-badges-row">
-                ${categoryBadge(cat)} ${difficultyBadge(challenge.difficulty||'Easy')}
-                ${challenge.solveCount===0 ? '<span class="first-blood-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin-right:4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> Unsolved</span>' : ''}
-              </div>
-              <h1>${sanitize(challenge.title)}</h1>
-              <span style="font-size:13px;color:var(--text-muted);">by ${sanitize(challenge.authorName||'Admin')}</span>
-            </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <div class="ch-pts-display">${challenge.points}</div>
-              <div class="ch-pts-label">points</div>
-            </div>
-          </div>
-          <div class="ch-meta-strip">
-            <div class="ch-meta-item"><span class="lbl">Category</span><span class="val">${cat}</span></div>
-            <div class="ch-meta-item"><span class="lbl">Difficulty</span><span class="val">${challenge.difficulty||'Easy'}</span></div>
-            <div class="ch-meta-item"><span class="lbl">Solves</span><span class="val">${challenge.solveCount||0}</span></div>
-            <div class="ch-meta-item"><span class="lbl">Added</span><span class="val">${challenge.createdAt ? new Date(challenge.createdAt.toMillis()).toLocaleDateString() : '—'}</span></div>
-          </div>
-        </div>
-
-        <div class="desc-card anim-fadeup anim-delay-1">
-          <h3>Challenge Description</h3>
-          <div class="desc-body" id="desc-body"></div>
-        </div>
-
-        ${challenge.files?.length ? `
-        <div class="desc-card anim-fadeup anim-delay-2">
-          <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:text-bottom;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> Challenge Files</h3>
-          ${filesHTML}
-        </div>` : ''}
-      </div>
-
-      <!-- Sidebar -->
-      <div>
-        <!-- Flag submit -->
-        <div class="sidebar-card anim-fadeup anim-delay-1">
-          <h3>Submit Flag</h3>
-          ${isSolved ? `
-            <div class="solved-banner">
-              <div class="icon">✅</div>
-              <div class="text">
-                <div class="title">Challenge Solved!</div>
-                <div class="sub">You earned ${challenge.points} points.</div>
-              </div>
-            </div>` : ''}
-          <div class="flag-input-wrap" ${isSolved?'style="opacity:0.5;pointer-events:none;"':''}>
-            <input type="text" class="form-input" id="flag-input" placeholder="FLAG{...}" autocomplete="off" onkeydown="if(event.key==='Enter')submitFlag()" />
-            <button class="btn btn-primary flag-submit-btn" onclick="submitFlag()">Submit</button>
-          </div>
-          ${!isSolved ? `<div class="attempts-counter" id="attempts-counter">${attempts} attempt${attempts!==1?'s':''} made</div>` : ''}
-        </div>
-
-        <!-- Hints -->
-        ${challenge.hints?.length ? `
-        <div class="sidebar-card anim-fadeup anim-delay-2">
-          <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:text-bottom;"><polyline points="21 8 21 21 3 21 3 8 21 8"/><path d="M1 8h22"/><path d="M3 8v-2a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/></svg> Hints</h3>
-          ${hintsHTML}
-        </div>` : ''}
-
-        <!-- Solvers -->
-        <div class="sidebar-card anim-fadeup anim-delay-3">
-          <h3>🏁 Recent Solvers</h3>
-          <div class="recent-solvers">${solverHTML}</div>
-        </div>
-      </div>
-    </div>`;
-
-  // Render description safely
-  document.getElementById('desc-body').textContent = challenge.description || '';
-}
-
-function toggleHint(i) {
-  document.getElementById(`hint-${i}`).classList.toggle('open');
-}
-
-async function submitFlag() {
-  if (isSolved) return;
-  const flag = document.getElementById('flag-input').value.trim();
-  if (!flag) { showToast('Please enter a flag.', 'error'); return; }
-
-  const btn = document.querySelector('.flag-submit-btn');
-  btn.textContent = '...'; btn.disabled = true;
-
-  const correctFlag = challenge.flag?.trim();
-  const isCorrect = challenge.caseInsensitive
-    ? flag.toLowerCase() === correctFlag?.toLowerCase()
-    : flag === correctFlag;
-
-  attempts++;
-  try {
-    await db.collection('attempts').doc(`${currentUser.uid}_${chId}`)
-      .set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
-  } catch(e) {}
-
-  const counterEl = document.getElementById('attempts-counter');
-  if (counterEl) counterEl.textContent = `${attempts} attempt${attempts!==1?'s':''} made`;
-
-  if (isCorrect) {
-    let firstBloodAwarded = false;
-
-    try {
-      await db.runTransaction(async t => {
-        const chRef = db.collection('challenges').doc(chId);
-        const chSnap = await t.get(chRef);
-        if (!chSnap.exists) throw new Error('Challenge not available');
-
-        const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
-        const existingSolveSnap = await t.get(existingSolveRef);
-        if (existingSolveSnap.exists) throw new Error('Already solved');
-
-        const chData = chSnap.data();
-        const currentSolveCount = chData.solveCount || 0;
-        
-        // FIXED: First blood should only go to the solver who makes solveCount go from 0->1
-        // AND only if firstBloodUid is still not set (atomic safety)
-        const isFirstBlood = currentSolveCount === 0 && !chData.firstBloodUid;
-
-        const now = firebase.firestore.FieldValue.serverTimestamp();
-        
-        t.set(existingSolveRef, {
-          uid: currentUser.uid,
-          challengeId: chId,
-          challengeName: challenge.title,
-          category: challenge.category,
-          points: challenge.points,
-          difficulty: challenge.difficulty,
-          playerName: userData.displayName || currentUser.displayName || 'Player',
-          solvedAt: now,
-          isFirstBlood
-        });
-
-        const updates = { solveCount: currentSolveCount + 1 };
-        
-        // Only set first blood if this is the first solve AND field is still empty
-        if (isFirstBlood) {
-          updates.firstBloodUid = currentUser.uid;
-          updates.firstBloodName = userData.displayName || currentUser.displayName || 'Player';
-          updates.firstBloodTimestamp = now;
-        }
-        
-        t.update(chRef, updates);
-
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const userSnap = await t.get(userRef);
-        if (!userSnap.exists) throw new Error('User not found');
-
-        const userPoints = (userSnap.data().points || 0) + challenge.points;
-        const userSolves = (userSnap.data().solves || 0) + 1;
-        const userFirstBloods = (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0);
-
-        t.update(userRef, {
-          points: userPoints,
-          solves: userSolves,
-          firstBloods: userFirstBloods
-        });
-
-        challenge.solveCount = currentSolveCount + 1;
-        if (isFirstBlood) {
-          challenge.firstBloods = (challenge.firstBloods||0) + 1;
-          firstBloodAwarded = true;
-        }
-      });
-
-      isSolved = true;
-      showToast(`🏁 Correct! +${challenge.points} points!`, 'success', 5000);
-
-      // Animate solved
-      document.querySelector('.flag-input-wrap').style.opacity = '0.5';
-      document.querySelector('.flag-input-wrap').style.pointerEvents = 'none';
-      document.querySelector('.flag-input-wrap').insertAdjacentHTML('beforebegin', `
-        <div class="solved-banner">
-          <div class="icon">✅</div>
-          <div class="text">
-            <div class="title">Challenge Solved!${firstBloodAwarded ? ' <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="color:var(--red);vertical-align:text-bottom;margin:0 4px;"><path d="M12 2c1.1 0 2 .9 2 2 0 2.3-1.5 4.3-2 6 .5 1.7 2 3.7 2 6 0 1.1-.9 2-2 2s-2-.9-2-2c0-2.3 1.5-4.3 2-6-.5-1.7-2-3.7-2-6 0-1.1.9-2 2-2"/></svg> First Blood!' : ''}</div>
-            <div class="sub">You earned ${challenge.points} points.</div>
-          </div>
-        </div>`);
-
-    } catch (err) {
-      console.error(err);
-      showToast(err.message || 'Solve transaction failed.', 'error');
+    if (!chId) {
+      document.getElementById('ch-content').innerHTML = `<div class="empty-state">${FF.icons.search}<h3>Challenge not found</h3><p>The challenge you're looking for doesn't exist.</p></div>`;
+      return;
     }
 
-  } else {
-    showToast('Incorrect flag. Keep trying!', 'error');
-    const inp = document.getElementById('flag-input');
-    inp.style.borderColor = 'var(--red)';
-    inp.style.boxShadow = '0 0 0 3px rgba(240,82,82,0.12)';
-    setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
+    const chDoc = await db.collection('challenges').doc(chId).get();
+    if (!chDoc.exists || !chDoc.data().published) {
+      document.getElementById('ch-content').innerHTML = `<div class="empty-state">${FF.icons.search}<h3>Challenge not found</h3><p>The challenge you're looking for doesn't exist.</p></div>`;
+      return;
+    }
+    challenge = { id: chDoc.id, ...chDoc.data() };
+    document.title = `FlagForge — ${challenge.title}`;
+
+    const solveDoc = await db.collection('solves').doc(`${user.uid}_${chId}`).get();
+    isSolved = solveDoc.exists;
+
+    const attDoc = await db.collection('attempts').doc(`${user.uid}_${chId}`).get();
+    attempts = attDoc.exists ? (attDoc.data().count || 0) : 0;
+
+    const solversSnap = await db.collection('solves').where('challengeId', '==', chId).orderBy('solvedAt', 'asc').limit(5).get();
+    renderChallenge(solversSnap);
+  });
+
+  function renderChallenge(solversSnap) {
+    const cat = challenge.category || 'Misc';
+    const solvers = solversSnap.docs.map(d => d.data());
+    const hasFirstBlood = !!challenge.firstBloodName;
+
+    const solverHTML = solvers.length ? solvers.map((s, i) => `
+      <div class="solver-item">
+        <div class="solver-avatar">${getInitials(s.playerName)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sv-name">${sanitize(s.playerName)}${i === 0 && s.isFirstBlood ? ' <span class="fb-badge">' + FF.icons.firstBlood + ' First Blood</span>' : ''}</div>
+          <div class="sv-time">${timeAgo(s.solvedAt)}</div>
+        </div>
+      </div>`).join('') : '<p style="font-size:var(--ff-text-sm);color:var(--ff-text-muted);">No solves yet. Be first.</p>';
+
+    const filesHTML = (challenge.files || []).map(f => `
+      <a href="${f.url}" target="_blank" rel="noopener" class="file-link">
+        <span class="file-ico">${FF.icons.file}</span>
+        <span class="file-info">
+          <span class="file-name">${sanitize(f.name)}</span>
+          <span class="file-type">${sanitize(f.type || 'Download')}</span>
+        </span>
+        <span class="file-go">${FF.icons.externalLink}</span>
+      </a>`).join('');
+
+    const hintsHTML = (challenge.hints || []).map((h, i) => `
+      <div class="hint-item" id="hint-${i}">
+        <button class="hint-head" onclick="toggleHint(${i})" aria-expanded="false">
+          <span>Hint ${i + 1}</span>
+          <span class="hint-cost">${h.cost ? `−${h.cost} pts` : 'Free'}</span>
+        </button>
+        <div class="hint-body-copy">${sanitize(h.text)}</div>
+      </div>`).join('');
+
+    const fbHTML = hasFirstBlood
+      ? `<div class="fb-line">
+          <span class="fb-ico">${FF.icons.firstBlood}</span>
+          <span class="fb-txt"><span class="fb-name">${sanitize(challenge.firstBloodName)}</span> hit first blood</span>
+        </div>`
+      : '';
+
+    document.getElementById('ch-content').innerHTML = `
+      <div class="ch-layout">
+        <!-- Main -->
+        <div>
+          <div class="mission-head">
+            <div class="mission-head-inner">
+              <div class="mission-kicker">
+                <span class="cat-meta">${FF.catIcon(cat, 14)} ${cat}</span>
+                <span>·</span>
+                <span style="color:var(--ff-text-muted);">${challenge.difficulty || 'Easy'}</span>
+                ${!challenge.solveCount ? `<span>·</span><span class="fb-badge">${FF.icons.firstBlood} Up for first blood</span>` : ''}
+              </div>
+              <h1 class="mission-title">${sanitize(challenge.title)}</h1>
+              <div class="mission-by">authored by ${sanitize(challenge.authorName || 'Admin')}</div>
+            </div>
+            <div class="mission-meta">
+              <div class="mm"><span class="lbl">Solved</span><span class="val mono">${challenge.solveCount || 0}×</span></div>
+              <div class="mm"><span class="lbl">Added</span><span class="val mono">${challenge.createdAt ? new Date(challenge.createdAt.toMillis()).toLocaleDateString() : '—'}</span></div>
+              ${challenge.points ? `<div class="mm"><span class="lbl">Value</span><span class="val mono" style="color:var(--ff-amber);">${challenge.points} pts</span></div>` : ''}
+              ${challenge.category ? `<div class="mm"><span class="lbl">Category</span><span class="val">${cat}</span></div>` : ''}
+            </div>
+          </div>
+
+          <div class="mission-body">
+            <div class="mission-section">
+              <h3>${FF.icons.file} Statement</h3>
+              <div class="desc-body" id="desc-body"></div>
+            </div>
+
+            ${challenge.files?.length ? `
+            <div class="mission-section">
+              <h3>${FF.icons.download} Challenge Files</h3>
+              ${filesHTML}
+            </div>` : ''}
+          </div>
+        </div>
+
+        <!-- Solve panel -->
+        <aside class="solve-panel ${isSolved ? 'solved-panel' : ''}">
+          <div class="solve-top">
+            <span class="pts-num">${challenge.points || 0}</span>
+            <span class="pts-lbl">points</span>
+          </div>
+          <div class="solve-body">
+            <div class="solve-label">Submit Flag</div>
+            ${isSolved ? `
+              <div class="solved-banner">
+                <span class="sb-ico">${FF.icons.solved}</span>
+                <div>
+                  <div class="sb-title">Challenge Solved</div>
+                  <div class="sb-sub">+${challenge.points} points earned</div>
+                </div>
+              </div>` : ''}
+            <div class="flag-input-wrap" ${isSolved ? 'style="opacity:0.45;pointer-events:none;"' : ''}>
+              <input type="text" class="form-input" id="flag-input" placeholder="FLAG{…}" autocomplete="off" aria-label="Flag input" onkeydown="if(event.key==='Enter')submitFlag()" />
+              <button class="btn btn-primary btn-sm" id="flag-submit-btn" onclick="submitFlag()">Submit</button>
+            </div>
+            ${!isSolved ? `<div class="attempts-counter" id="attempts-counter">${attempts} attempt${attempts !== 1 ? 's' : ''} made</div>` : ''}
+          </div>
+
+          ${fbHTML ? `<div class="solve-section">${fbHTML}</div>` : ''}
+
+          ${challenge.hints?.length ? `
+          <div class="solve-section">
+            <h4>Hints</h4>
+            ${hintsHTML}
+          </div>` : ''}
+
+          <div class="solve-section">
+            <h4>Recent Solvers</h4>
+            <div>${solverHTML}</div>
+          </div>
+        </aside>
+      </div>`;
+
+    document.getElementById('desc-body').textContent = challenge.description || '';
   }
 
-  btn.textContent = 'Submit'; btn.disabled = false;
-}
+  function toggleHint(i) {
+    const item = document.getElementById(`hint-${i}`);
+    const btn = item.querySelector('.hint-head');
+    item.classList.toggle('open');
+    btn.setAttribute('aria-expanded', item.classList.contains('open'));
+  }
+
+  async function submitFlag() {
+    if (isSolved) return;
+    const flag = document.getElementById('flag-input').value.trim();
+    if (!flag) { showToast('Please enter a flag.', 'error'); return; }
+
+    const btn = document.getElementById('flag-submit-btn');
+    btn.disabled = true;
+    btn.textContent = '…';
+    const prevText = 'Submit';
+
+    const correctFlag = challenge.flag?.trim();
+    const isCorrect = challenge.caseInsensitive
+      ? flag.toLowerCase() === correctFlag?.toLowerCase()
+      : flag === correctFlag;
+
+    attempts++;
+    try {
+      await db.collection('attempts').doc(`${currentUser.uid}_${chId}`)
+        .set({ count: attempts, uid: currentUser.uid, challengeId: chId }, { merge: true });
+    } catch(e) {}
+
+    const counterEl = document.getElementById('attempts-counter');
+    if (counterEl) counterEl.textContent = `${attempts} attempt${attempts !== 1 ? 's' : ''} made`;
+
+    if (isCorrect) {
+      let firstBloodAwarded = false;
+      try {
+        await db.runTransaction(async t => {
+          const chRef = db.collection('challenges').doc(chId);
+          const chSnap = await t.get(chRef);
+          if (!chSnap.exists) throw new Error('Challenge not available');
+
+          const existingSolveRef = db.collection('solves').doc(`${currentUser.uid}_${chId}`);
+          const existingSolveSnap = await t.get(existingSolveRef);
+          if (existingSolveSnap.exists) throw new Error('Already solved');
+
+          const chData = chSnap.data();
+          const currentSolveCount = chData.solveCount || 0;
+          const isFirstBlood = currentSolveCount === 0 && !chData.firstBloodUid;
+
+          const now = firebase.firestore.FieldValue.serverTimestamp();
+
+          t.set(existingSolveRef, {
+            uid: currentUser.uid,
+            challengeId: chId,
+            challengeName: challenge.title,
+            category: challenge.category,
+            points: challenge.points,
+            difficulty: challenge.difficulty,
+            playerName: userData.displayName || currentUser.displayName || 'Player',
+            solvedAt: now,
+            isFirstBlood
+          });
+
+          const updates = { solveCount: currentSolveCount + 1 };
+          if (isFirstBlood) {
+            updates.firstBloodUid = currentUser.uid;
+            updates.firstBloodName = userData.displayName || currentUser.displayName || 'Player';
+            updates.firstBloodTimestamp = now;
+          }
+          t.update(chRef, updates);
+
+          const userRef = db.collection('users').doc(currentUser.uid);
+          const userSnap = await t.get(userRef);
+          if (!userSnap.exists) throw new Error('User not found');
+
+          t.update(userRef, {
+            points: (userSnap.data().points || 0) + challenge.points,
+            solves: (userSnap.data().solves || 0) + 1,
+            firstBloods: (userSnap.data().firstBloods || 0) + (isFirstBlood ? 1 : 0)
+          });
+
+          challenge.solveCount = currentSolveCount + 1;
+          firstBloodAwarded = isFirstBlood;
+        });
+
+        isSolved = true;
+        showToast(`Correct! +${challenge.points} points${firstBloodAwarded ? ' — First Blood!' : ''}`, 'success', 5000);
+
+        const wrap = document.querySelector('.solve-panel');
+        if (wrap) wrap.classList.add('solved-panel');
+
+        const inputWrap = document.querySelector('.flag-input-wrap');
+        if (inputWrap) { inputWrap.style.opacity = '0.45'; inputWrap.style.pointerEvents = 'none'; }
+
+        inputWrap?.insertAdjacentHTML('beforebegin', `
+          <div class="solved-banner">
+            <span class="sb-ico">${FF.icons.solved}</span>
+            <div>
+              <div class="sb-title">Challenge Solved${firstBloodAwarded ? ' — First Blood' : ''}</div>
+              <div class="sb-sub">+${challenge.points} points earned</div>
+            </div>
+          </div>`);
+
+      } catch (err) {
+        console.error(err);
+        showToast(err.message || 'Solve transaction failed.', 'error');
+      }
+    } else {
+      showToast('Incorrect flag. Keep trying!', 'error');
+      const inp = document.getElementById('flag-input');
+      inp.style.borderColor = 'var(--ff-danger)';
+      setTimeout(() => { inp.style.borderColor = ''; }, 1200);
+    }
+
+    btn.textContent = prevText;
+    btn.disabled = false;
+  }
 </script>
 </body>
 </html>

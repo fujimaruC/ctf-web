@@ -4,109 +4,178 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlagForge — Sign In</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/style.min.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
   <style>
     body { display: flex; min-height: 100vh; }
 
     /* ── Left panel ── */
     .auth-left {
-      flex: 1; background: var(--bg-2); border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; justify-content: space-between;
-      padding: 40px; position: relative; overflow: hidden;
+      flex: 1;
+      background: var(--ff-bg-2);
+      border-right: 1px solid var(--ff-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: var(--ff-space-10);
+      position: relative;
+      overflow: hidden;
     }
-    .auth-left-bg {
-      position: absolute; inset: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 60% at 20% 20%, rgba(232,160,32,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 60% at 80% 80%, rgba(45,212,160,0.05) 0%, transparent 60%);
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-3);
+      font-family: var(--ff-font-display);
+      font-weight: 700;
+      font-size: var(--ff-text-lg);
+      color: var(--ff-text);
+      text-decoration: none;
     }
-    .auth-left-grid {
-      position: absolute; inset: 0; opacity: 0.15;
-      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
-    .auth-brand { position: relative; z-index: 1; }
+    .auth-brand .ff-accent { color: var(--ff-amber); }
+    .auth-brand svg { width: 30px; height: 30px; }
     .auth-quote {
-      position: relative; z-index: 1;
-      border-left: 3px solid var(--accent); padding-left: 20px;
+      position: relative;
+      border-left: 3px solid var(--ff-amber);
+      padding-left: var(--ff-space-5);
+      max-width: 440px;
     }
-    .auth-quote p { font-size: 20px; font-family: var(--font-display); font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
-    .auth-quote span { font-size: 13px; color: var(--text-muted); }
-    .auth-bottom-badges { position: relative; z-index: 1; display: flex; gap: 10px; flex-wrap: wrap; }
+    .auth-quote p {
+      font-size: var(--ff-text-xl);
+      font-family: var(--ff-font-display);
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--ff-text);
+      margin-bottom: var(--ff-space-3);
+    }
+    .auth-quote .attrib { font-size: var(--ff-text-sm); color: var(--ff-text-muted); font-family: var(--ff-font-display); text-transform: uppercase; letter-spacing: 0.8px; }
+    .auth-platform-badges { display: flex; gap: var(--ff-space-3); flex-wrap: wrap; }
     .auth-badge {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 14px;
-      font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;
+      display: flex;
+      align-items: center;
+      gap: var(--ff-space-2);
+      padding: 6px 12px;
+      border: 1px solid var(--ff-border);
+      border-radius: var(--ff-radius-sm);
+      font-size: var(--ff-text-xs);
+      color: var(--ff-text-secondary);
+      font-family: var(--ff-font-mono);
+    }
+    .auth-badge svg { width: 14px; height: 14px; color: var(--ff-amber); }
+
+    /* Fine-line decoration */
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 140px;
+      height: 140px;
+      border-top: 1px solid var(--ff-border);
+      border-left: 1px solid var(--ff-border);
     }
 
     /* ── Right panel ── */
     .auth-right {
-      width: 480px; flex-shrink: 0;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 48px 48px;
+      width: 460px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--ff-space-12);
     }
-    .auth-tabs { display: flex; gap: 0; margin-bottom: 36px; background: var(--surface); border-radius: var(--radius); padding: 4px; }
+    .auth-tabs {
+      display: flex;
+      margin-bottom: var(--ff-space-8);
+      border-bottom: 1px solid var(--ff-border);
+      gap: var(--ff-space-6);
+    }
     .auth-tab {
-      flex: 1; padding: 9px; text-align: center; border-radius: 7px;
-      font-family: var(--font-display); font-size: 14px; font-weight: 600;
-      cursor: pointer; border: none; background: none; color: var(--text-muted);
-      transition: all 0.2s;
+      padding: var(--ff-space-2) 0 var(--ff-space-3);
+      font-family: var(--ff-font-display);
+      font-size: var(--ff-text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--ff-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: color var(--ff-duration-fast) var(--ff-ease), border-color var(--ff-duration-fast) var(--ff-ease);
+      margin-bottom: -1px;
     }
-    .auth-tab.active { background: var(--bg-2); color: var(--text-primary); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .auth-tab.active { color: var(--ff-amber); border-bottom-color: var(--ff-amber); }
+    .auth-tab:hover { color: var(--ff-text); }
 
-    .auth-form { display: none; animation: fadeUp 0.3s ease; }
+    .auth-form { display: none; }
     .auth-form.active { display: block; }
-    .auth-form h2 { font-size: 26px; margin-bottom: 6px; }
-    .auth-form .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
-
-    .divider-or {
-      display: flex; align-items: center; gap: 14px;
-      color: var(--text-muted); font-size: 12px; margin: 20px 0;
-    }
-    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    .google-btn {
-      width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
-      padding: 11px; border-radius: var(--radius);
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-primary); font-size: 14px; font-weight: 500; font-family: var(--font-body);
-      cursor: pointer; transition: all 0.2s; margin-bottom: 8px;
-    }
-    .google-btn:hover { border-color: var(--border-light); background: var(--surface-2); }
-
-    .submit-btn { width: 100%; justify-content: center; margin-top: 4px; padding: 13px; font-size: 15px; }
-
-    .auth-footer-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
-    .auth-footer-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .auth-form h2 { font-size: var(--ff-text-2xl); margin-bottom: var(--ff-space-2); letter-spacing: -0.01em; }
+    .auth-form .subtitle { color: var(--ff-text-secondary); font-size: var(--ff-text-sm); margin-bottom: var(--ff-space-6); }
 
     .password-wrap { position: relative; }
-    .password-toggle {
-      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; color: var(--text-muted); cursor: pointer;
-      padding: 4px; transition: color 0.2s; display: flex; align-items: center; justify-content: center;
-    }
-    .password-toggle:hover { color: var(--text-primary); }
-    .password-toggle svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; }
     .password-wrap .form-input { padding-right: 40px; }
-    
-    /* ── Lucide Icon Styles ── */
-    .auth-badge svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
-    .logo-mark svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; }
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--ff-text-muted);
+      cursor: pointer;
+      padding: var(--ff-space-1);
+      transition: color var(--ff-duration-fast) var(--ff-ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .password-toggle:hover { color: var(--ff-text); }
+    .password-toggle svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
-    .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
-    .strength-seg { flex: 1; height: 3px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
-    .strength-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .strength-bar { display: flex; gap: 4px; margin-top: var(--ff-space-2); }
+    .strength-seg { flex: 1; height: 3px; border-radius: var(--ff-radius-pill); background: var(--ff-border); transition: background var(--ff-duration-normal) var(--ff-ease); }
+    .strength-label { font-size: var(--ff-text-xs); color: var(--ff-text-muted); margin-top: var(--ff-space-1); font-family: var(--ff-font-display); }
 
-    .error-msg { background: var(--red-dim); border: 1px solid rgba(240,82,82,0.2); border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 16px; display: none; }
+    .error-msg {
+      background: var(--ff-danger-soft);
+      border: 1px solid rgba(240, 82, 82, 0.2);
+      border-radius: var(--ff-radius-sm);
+      padding: var(--ff-space-2) var(--ff-space-4);
+      font-size: var(--ff-text-sm);
+      color: var(--ff-danger);
+      margin-bottom: var(--ff-space-4);
+      display: none;
+    }
     .error-msg.show { display: block; }
 
-    .loading-spinner { width: 16px; height: 16px; border: 2px solid rgba(12,14,16,0.3); border-top-color: #0c0e10; border-radius: 50%; animation: spin 0.6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: var(--ff-text-xs);
+      color: var(--ff-text-muted);
+      text-decoration: none;
+      margin: var(--ff-space-1) 0 var(--ff-space-5);
+    }
+    .forgot-link:hover { color: var(--ff-amber); }
+
+    .submit-btn { width: 100%; justify-content: center; padding: 12px; font-size: var(--ff-text-sm); }
+
+    .auth-footer-link { text-align: center; margin-top: var(--ff-space-5); font-size: var(--ff-text-sm); color: var(--ff-text-muted); }
+    .auth-footer-link a { color: var(--ff-amber); font-weight: 500; }
+
+    .register-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ff-space-3); }
+
+    .terms-note {
+      font-size: var(--ff-text-xs);
+      color: var(--ff-text-muted);
+      text-align: center;
+      margin-top: var(--ff-space-4);
+      line-height: 1.6;
+    }
+    .terms-note a { color: var(--ff-text-secondary); }
 
     @media (max-width: 900px) {
       .auth-left { display: none; }
-      .auth-right { width: 100%; padding: 32px 24px; }
+      .auth-right { width: 100%; padding: var(--ff-space-8) var(--ff-space-5); }
     }
   </style>
 </head>
@@ -114,139 +183,89 @@
 
 <!-- ── Left panel ── -->
 <div class="auth-left">
-  <div class="auth-left-bg"></div>
-  <div class="auth-left-grid"></div>
-  <div class="auth-brand">
-    <a href="index.html" class="nav-logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 15s1-1 5-1c5.7 0 8 3 10 5.5M4 4v7c0 1 .904 2 2.927 2c2.023 0 4.5-1 7.5-3.5S19 5 21 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      FlagForge
-    </a>
-  </div>
+  <a href="index.html" class="auth-brand">
+    <svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="6" fill="#e8a020"/><path d="M8 8v12l4-3.5V8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16.5L20 20V8l-8 3.5" stroke="#0c0e10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="20" y2="8" stroke="#0c0e10" stroke-width="2" stroke-linecap="round"/></svg>
+    Flag<span class="ff-accent">Forge</span>
+  </a>
   <div class="auth-quote">
-    <p>"The best hackers don't break things — they understand them better than anyone else."</p>
-    <span>FlagForge Community</span>
+    <p>“The best hackers don't break things — they understand them better than anyone else.”</p>
+    <span class="attrib">FlagForge Community</span>
   </div>
-  <div class="auth-bottom-badges">
-    <div class="auth-badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 15s1-1 5-1c5.7 0 8 3 10 5.5M4 4v7c0 1 .904 2 2.927 2c2.023 0 4.5-1 7.5-3.5S19 5 21 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      248 Challenges
-    </div>
-    <div class="auth-badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      1.2k Players
-    </div>
-    <div class="auth-badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Firebase Secured
-    </div>
-    <div class="auth-badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="20.84 4.61 15.17 10.29 10 5.12 3.29 11.83 9 17.5 20.84 4.61" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="15.17" y1="10.29" x2="21" y2="16.12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Free to Join
-    </div>
+  <div class="auth-platform-badges">
+    <div class="auth-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 1 8 1 4-1 4-1V3s-1 1-4 1-5-1-8-1-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> 248 Challenges</div>
+    <div class="auth-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg> 1.2k Players</div>
+    <div class="auth-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Firebase Secured</div>
   </div>
 </div>
 
 <!-- ── Right panel ── -->
 <div class="auth-right">
   <!-- Tabs -->
-  <div class="auth-tabs">
-    <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
-    <button class="auth-tab" onclick="switchTab('register')">Register</button>
+  <div class="auth-tabs" role="tablist">
+    <button class="auth-tab active" role="tab" aria-selected="true" onclick="switchTab('login')">Sign In</button>
+    <button class="auth-tab" role="tab" aria-selected="false" onclick="switchTab('register')">Register</button>
   </div>
 
   <!-- ── Login Form ── -->
-  <div class="auth-form active" id="form-login">
+  <div class="auth-form active" id="form-login" role="tabpanel">
     <h2>Welcome back.</h2>
     <p class="subtitle">Sign in to your FlagForge account to continue competing.</p>
-    <div class="error-msg" id="login-error"></div>
+    <div class="error-msg" id="login-error" role="alert"></div>
 
     <div class="form-group">
-      <label class="form-label">Email Address</label>
+      <label class="form-label" for="login-email">Email Address</label>
       <input type="email" class="form-input" id="login-email" placeholder="you@example.com" autocomplete="email" />
     </div>
     <div class="form-group">
-      <label class="form-label">Password</label>
+      <label class="form-label" for="login-password">Password</label>
       <div class="password-wrap">
         <input type="password" class="form-input" id="login-password" placeholder="Your password" autocomplete="current-password" />
         <button class="password-toggle" onclick="togglePassword('login-password', this)" type="button" aria-label="Toggle password visibility">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-icon">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" style="display:none;">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <svg viewBox="0 0 24 24" class="eye-icon" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg viewBox="0 0 24 24" class="eye-off-icon" style="display:none;" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </button>
       </div>
     </div>
-    <div style="text-align:right;margin-bottom:20px;margin-top:-10px;">
-      <a href="forgot-password.html" onclick="forgotPassword(); return false;" style="font-size:12px;color:var(--text-muted);text-decoration:none;">Forgot password?</a>
-    </div>
+    <a href="forgot-password.html" onclick="forgotPassword(); return false;" class="forgot-link">Forgot password?</a>
 
-    <button class="btn btn-primary submit-btn" id="login-btn" onclick="handleLogin()">
-      Sign In
-    </button>
+    <button class="btn btn-primary submit-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
     <div class="auth-footer-link">Don't have an account? <a href="login.html?tab=register" onclick="switchTab('register'); return false;">Register free</a></div>
   </div>
 
   <!-- ── Register Form ── -->
-  <div class="auth-form" id="form-register">
+  <div class="auth-form" id="form-register" role="tabpanel">
     <h2>Join FlagForge.</h2>
     <p class="subtitle">Create your account and start solving challenges today.</p>
-    <div class="error-msg" id="register-error"></div>
+    <div class="error-msg" id="register-error" role="alert"></div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="register-grid">
       <div class="form-group">
-        <label class="form-label">First Name</label>
+        <label class="form-label" for="reg-fname">First Name</label>
         <input type="text" class="form-input" id="reg-fname" placeholder="Alex" />
       </div>
       <div class="form-group">
-        <label class="form-label">Last Name</label>
+        <label class="form-label" for="reg-lname">Last Name</label>
         <input type="text" class="form-input" id="reg-lname" placeholder="Smith" />
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Username</label>
-      <input type="text" class="form-input" id="reg-username" placeholder="h4ck3r_alex" autocomplete="username" />
+      <label class="form-label" for="reg-username">Username</label>
+      <input type="text" class="form-input" id="reg-username" placeholder="handle" autocomplete="username" />
     </div>
     <div class="form-group">
-      <label class="form-label">Email Address</label>
+      <label class="form-label" for="reg-email">Email Address</label>
       <input type="email" class="form-input" id="reg-email" placeholder="you@example.com" autocomplete="email" />
     </div>
     <div class="form-group">
-      <label class="form-label">Password</label>
+      <label class="form-label" for="reg-password">Password</label>
       <div class="password-wrap">
         <input type="password" class="form-input" id="reg-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password" />
         <button class="password-toggle" onclick="togglePassword('reg-password', this)" type="button" aria-label="Toggle password visibility">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-icon">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-off-icon" style="display:none;">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <svg viewBox="0 0 24 24" class="eye-icon" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg viewBox="0 0 24 24" class="eye-off-icon" style="display:none;" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </button>
       </div>
-      <div class="strength-bar">
+      <div class="strength-bar" aria-hidden="true">
         <div class="strength-seg" id="s1"></div>
         <div class="strength-seg" id="s2"></div>
         <div class="strength-seg" id="s3"></div>
@@ -255,11 +274,9 @@
       <div class="strength-label" id="strength-label"></div>
     </div>
 
-    <button class="btn btn-primary submit-btn" id="register-btn" onclick="handleRegister()">
-      Create Account
-    </button>
-    <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:14px;line-height:1.6;">
-      By registering you agree to our <a href="terms.html" style="color:var(--text-secondary);">Terms of Service</a> and <a href="privacy.html" style="color:var(--text-secondary);">Privacy Policy</a>.
+    <button class="btn btn-primary submit-btn" id="register-btn" onclick="handleRegister()">Create Account</button>
+    <p class="terms-note">
+      By registering you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.
     </p>
     <div class="auth-footer-link">Already have an account? <a href="login.html?tab=login" onclick="switchTab('login'); return false;">Sign in</a></div>
   </div>
@@ -267,7 +284,6 @@
 
 <div id="toast-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -281,9 +297,13 @@
   if (urlParams.get('tab') === 'register') switchTab('register');
 
   function switchTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
-    document.getElementById('form-login').classList.toggle('active', tab==='login');
-    document.getElementById('form-register').classList.toggle('active', tab==='register');
+    const tabs = document.querySelectorAll('.auth-tab');
+    tabs[0].classList.toggle('active', tab === 'login');
+    tabs[0].setAttribute('aria-selected', tab === 'login');
+    tabs[1].classList.toggle('active', tab === 'register');
+    tabs[1].setAttribute('aria-selected', tab === 'register');
+    document.getElementById('form-login').classList.toggle('active', tab === 'login');
+    document.getElementById('form-register').classList.toggle('active', tab === 'register');
     document.title = tab === 'login' ? 'FlagForge — Sign In' : 'FlagForge — Register';
   }
 
@@ -294,10 +314,10 @@
     if (inp.type === 'password') {
       inp.type = 'text';
       eyeIcon.style.display = 'none';
-      eyeOffIcon.style.display = 'flex';
+      eyeOffIcon.style.display = 'inline-flex';
     } else {
       inp.type = 'password';
-      eyeIcon.style.display = 'flex';
+      eyeIcon.style.display = 'inline-flex';
       eyeOffIcon.style.display = 'none';
     }
   }
@@ -308,40 +328,45 @@
     if (/[A-Z]/.test(pw)) score++;
     if (/[0-9]/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
-    const colors = ['', '#f05252','#e8a020','#4a9eff','#2dd4a0'];
-    const labels = ['', 'Weak','Fair','Good','Strong'];
-    for (let i=1;i<=4;i++) {
-      document.getElementById(`s${i}`).style.background = i<=score ? colors[score] : 'var(--border)';
+    const colors = ['', 'var(--ff-danger)', 'var(--ff-warning)', 'var(--ff-info)', 'var(--ff-success)'];
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById(`s${i}`).style.background = i <= score ? colors[score] : 'var(--ff-border)';
     }
     document.getElementById('strength-label').textContent = pw.length ? labels[score] : '';
-    document.getElementById('strength-label').style.color = colors[score];
+    document.getElementById('strength-label').style.color = pw.length && score ? colors[score] : '';
   }
 
   function showError(id, msg) {
     const el = document.getElementById(id);
-    el.textContent = msg; el.classList.add('show');
+    el.textContent = msg;
+    el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 4000);
   }
 
   function setLoading(btnId, loading) {
     const btn = document.getElementById(btnId);
-    if (loading) { btn.innerHTML = '<div class="loading-spinner"></div> Please wait...'; btn.disabled = true; }
-    else { btn.disabled = false; }
+    if (loading) {
+      btn.disabled = true;
+      btn.textContent = 'Please wait…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = btnId === 'login-btn' ? 'Sign In' : 'Create Account';
+    }
   }
 
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-    if (!email || !password) { showError('login-error','Please fill in all fields.'); return; }
+    if (!email || !password) { showError('login-error', 'Please fill in all fields.'); return; }
     setLoading('login-btn', true);
     try {
       await auth.signInWithEmailAndPassword(email, password);
       window.location.href = 'dashboard.html';
     } catch(e) {
-      const msgs = { 'auth/user-not-found':'No account found with this email.','auth/wrong-password':'Incorrect password.','auth/too-many-requests':'Too many attempts. Try again later.' };
+      const msgs = { 'auth/user-not-found': 'No account found with this email.', 'auth/wrong-password': 'Incorrect password.', 'auth/too-many-requests': 'Too many attempts. Try again later.' };
       showError('login-error', msgs[e.code] || 'Sign in failed. Please try again.');
-      document.getElementById('login-btn').innerHTML = 'Sign In';
-      document.getElementById('login-btn').disabled = false;
+      setLoading('login-btn', false);
     }
   }
 
@@ -351,19 +376,17 @@
     const username = document.getElementById('reg-username').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
-    if (!fname||!lname||!username||!email||!password) { showError('register-error','Please fill in all fields.'); return; }
-    if (password.length < 8) { showError('register-error','Password must be at least 8 characters.'); return; }
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error','Username can only contain letters, numbers, and underscores.'); return; }
+    if (!fname || !lname || !username || !email || !password) { showError('register-error', 'Please fill in all fields.'); return; }
+    if (password.length < 8) { showError('register-error', 'Password must be at least 8 characters.'); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('register-error', 'Username can only contain letters, numbers, and underscores.'); return; }
     setLoading('register-btn', true);
     try {
-      // Check username taken
       const usernameSnap = await db.collection('usernames').doc(username.toLowerCase()).get();
-      if (usernameSnap.exists) { showError('register-error','Username already taken. Please choose another.'); document.getElementById('register-btn').innerHTML='Create Account'; document.getElementById('register-btn').disabled=false; return; }
+      if (usernameSnap.exists) { showError('register-error', 'Username already taken. Please choose another.'); setLoading('register-btn', false); return; }
 
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       await cred.user.updateProfile({ displayName: `${fname} ${lname}` });
 
-      // Save user profile
       await db.collection('users').doc(cred.user.uid).set({
         uid: cred.user.uid, firstName: fname, lastName: lname,
         displayName: `${fname} ${lname}`, username, email,
@@ -375,20 +398,19 @@
 
       window.location.href = 'dashboard.html';
     } catch(e) {
-      const msgs = { 'auth/email-already-in-use':'Email already registered.','auth/invalid-email':'Invalid email address.','auth/weak-password':'Password is too weak.' };
+      const msgs = { 'auth/email-already-in-use': 'Email already registered.', 'auth/invalid-email': 'Invalid email address.', 'auth/weak-password': 'Password is too weak.' };
       showError('register-error', msgs[e.code] || 'Registration failed. Try again.');
-      document.getElementById('register-btn').innerHTML = 'Create Account';
-      document.getElementById('register-btn').disabled = false;
+      setLoading('register-btn', false);
     }
   }
 
   async function forgotPassword() {
     const email = document.getElementById('login-email').value.trim();
-    if (!email) { showError('login-error','Enter your email first, then click forgot password.'); return; }
+    if (!email) { showError('login-error', 'Enter your email first, then click forgot password.'); return; }
     try {
       await auth.sendPasswordResetEmail(email);
       showToast('Password reset email sent!', 'success');
-    } catch(e) { showError('login-error','Could not send reset email. Check the address.'); }
+    } catch(e) { showError('login-error', 'Could not send reset email. Check the address.'); }
   }
 
   // Enter key submit
@@ -397,9 +419,6 @@
     if (document.getElementById('form-login').classList.contains('active')) handleLogin();
     else handleRegister();
   });
-
-  // Initialize Lucide icons
-  if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
 </html>
