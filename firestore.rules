@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function active() { return signedIn() && profile().suspended == false; }
+    function admin() { return active() && profile().role == 'admin'; }
+    match /users/{uid} { allow read: if signedIn() && (request.auth.uid == uid || admin()); }
+    match /challenges/{id} {
+      allow get: if active() && (!exists(/databases/$(database)/documents/challenges/$(id)) || resource.data.published == true || admin());
+      allow list: if active() && (resource.data.published == true || admin());
+    }
+    match /players/{uid} { allow read: if active(); }
+    match /solves/{id} { allow read: if active(); }
+    match /attempts/{id} { allow read: if active() && (!exists(/databases/$(database)/documents/attempts/$(id)) || resource.data.uid == request.auth.uid || admin()); }
+    match /meta/settings { allow read: if admin(); }
+    match /meta/control { allow read: if signedIn(); }
+    // All client writes, flags, reservations, request IDs, and audits are denied.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

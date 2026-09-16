@@ -1,22 +1,30 @@
 {
   "indexes": [
     {
-      "collectionGroup": "challenges",
-      "queryScope": "Collection",
+      "collectionGroup": "solves",
+      "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "unlockDate",
+          "fieldPath": "uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "solvedAt",
           "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "users",
-      "queryScope": "Collection",
+      "collectionGroup": "solves",
+      "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "score",
-          "order": "DESCENDING"
+          "fieldPath": "challengeId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "solvedAt",
+          "order": "ASCENDING"
         }
       ]
     }

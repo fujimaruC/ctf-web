@@ -1,10 +1,140 @@
 [build]
-  publish = "."
-  command = "echo 'No build step required'"
+  publish = "dist"
+  command = "npm ci && npm run build && npm run test:budget"
 
-# SPA routing — redirect all requests to index.html
+[build.environment]
+  NODE_VERSION = "22"
+  VITE_DATA_MODE = "demo"
+
+[context.production.environment]
+  VITE_DATA_MODE = "firebase"
+
+[context.deploy-preview.environment]
+  VITE_DATA_MODE = "demo"
+
+# React owns known routes. Legacy adapters preserve query parameters.
 [[redirects]]
-  from = "/*"
+  from = "/challenges/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/forgot-password"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/challenges"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/leaderboard"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/index.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/login.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/forgot-password.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/challenges.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/challenge.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/leaderboard.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms.html"
   to = "/index.html"
   status = 200
 
@@ -14,6 +144,21 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https: data:; script-src 'self' https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://firebaseinstallations.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net; frame-src https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-store"

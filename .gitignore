@@ -1,3 +1,22 @@
-.node_modules
-public/
-Critical.txt
+# Dependencies and build output
+node_modules/
+dist/
+functions/lib/
+/public/
+/Critical.txt
+
+# Local configuration and generated diagnostics
+.env
+.env.local
+.env.*.local
+*-debug.log
+.firebase/
+__pycache__/
+.local-tools/
+artifacts/
+
+# Local agent and editor configuration
+.agents/
+.claude/
+.codex/
+skills-lock.json
