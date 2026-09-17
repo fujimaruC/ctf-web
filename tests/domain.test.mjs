@@ -6,7 +6,7 @@ import {
   flagMatches,
   safeUrl,
   username,
-} from "../functions/lib/domain.js";
+} from "../netlify/lib/server/domain.js";
 
 test("flag normalization preserves case-sensitive and legacy insensitive behavior", () => {
   assert.ok(flagMatches("  FLAG{one}  ", "FLAG{one}"));

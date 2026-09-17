@@ -322,6 +322,12 @@ export const demo: Academy = {
       users: profiles.length,
       solves: solves.length,
       applied: !!apply,
+      processed: solves.length,
+      repaired: 0,
+      remaining: 0,
+      hasMore: false,
+      continuation: null,
+      phase: "complete",
     };
   },
 };

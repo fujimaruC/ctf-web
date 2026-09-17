@@ -10,7 +10,6 @@ if (env.VITE_DATA_MODE === "firebase") {
     "VITE_FIREBASE_AUTH_DOMAIN",
     "VITE_FIREBASE_PROJECT_ID",
     "VITE_FIREBASE_APP_ID",
-    "VITE_FIREBASE_REGION",
   ];
   if (env.CONTEXT === "production")
     required.push("VITE_SUPPORT_EMAIL", "FLAGFORGE_RELEASE_READY");

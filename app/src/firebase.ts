@@ -16,11 +16,6 @@ import type {
   DocumentSnapshot,
   Timestamp,
 } from "firebase/firestore";
-import {
-  getFunctions,
-  httpsCallable,
-  connectFunctionsEmulator,
-} from "firebase/functions";
 import type {
   Academy,
   Profile,
@@ -51,11 +46,9 @@ const app = initializeApp({
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
   appId: env.VITE_FIREBASE_APP_ID,
 });
-const auth = getAuth(app),
-  functions = getFunctions(app, env.VITE_FIREBASE_REGION || "us-central1");
+const auth = getAuth(app);
 if (env.VITE_USE_EMULATORS === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 let storePromise: ReturnType<typeof loadStore> | undefined;
 let TimestampClass: typeof Timestamp;
@@ -97,9 +90,21 @@ function record<T>(s: DocumentSnapshot): T {
   return { id: s.id, ...convert(s.data()) } as T;
 }
 async function call<T>(name: string, data: unknown = {}): Promise<T> {
-  return (
-    await httpsCallable<unknown, T>(functions, name, { timeout: 600000 })(data)
-  ).data;
+  const user = auth.currentUser;
+  const response = await fetch("/api/academy", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(user ? { authorization: `Bearer ${await user.getIdToken()}` } : {}),
+    },
+    body: JSON.stringify({ action: name, data }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = payload.error || { code: "unavailable", message: "Try again shortly." };
+    throw Object.assign(new Error(error.message), { code: `academy/${error.code}` });
+  }
+  return payload.data as T;
 }
 async function list<T>(name: string, constraints: QueryConstraint[]) {
   const { db, getDocs, query, collection } = await store();
@@ -314,7 +319,11 @@ export const firebase: Academy = {
   async maintenance(enabled) {
     await call("maintenance", { enabled });
   },
-  reconcile(apply = false, digest) {
-    return call<Repair>("reconcile", { apply, ...(digest ? { digest } : {}) });
+  reconcile(apply = false, digest, token) {
+    return call<Repair>("reconcile", {
+      apply,
+      ...(digest ? { digest } : {}),
+      ...(token ? { token } : {}),
+    });
   },
 };

@@ -20,7 +20,8 @@ export function errorMessage(error: unknown): string {
     return "Connection unavailable. Check your connection and retry.";
   if (e.code === "failed-precondition")
     return "This view is not ready. Please contact your instructor.";
-  return e.code?.startsWith("functions/") && e.code !== "functions/internal"
+  return (e.code?.startsWith("functions/") || e.code?.startsWith("academy/")) &&
+    e.code !== "functions/internal" && e.code !== "academy/internal"
     ? e.message || "The request could not finish. Retry."
     : error instanceof Error && !e.code
       ? error.message

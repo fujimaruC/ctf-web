@@ -8,19 +8,17 @@ import {
 } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth as adminAuth } from "firebase-admin/auth";
+import { Timestamp } from "firebase-admin/firestore";
 import { initializeApp, deleteApp } from "firebase/app";
 import {
   getAuth,
   connectAuthEmulator,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import {
-  getFunctions,
-  connectFunctionsEmulator,
-  httpsCallable,
-} from "firebase/functions";
+import academy from "../netlify/lib/netlify/functions/academy.js";
+import { resetAdminForTests } from "../netlify/lib/netlify/functions/admin.js";
 
-test("callable auth, scoring races, idempotency, roles, suspension, and repair", async () => {
+test("Netlify API auth, scoring races, idempotency, roles, suspension, and paginated repair", async () => {
   assert.ok(
     process.env.FIRESTORE_EMULATOR_HOST &&
       process.env.FIREBASE_AUTH_EMULATOR_HOST,
@@ -31,6 +29,12 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
     accounts = adminAuth(admin),
     apps = [];
   try {
+    const anonymous = await academy(new Request("http://localhost/api/academy", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "submitFlag", data: {} }),
+    }));
+    assert.equal(anonymous.status, 401);
     await db.recursiveDelete(db.collection("users"));
     await db.recursiveDelete(db.collection("solves"));
     await db.recursiveDelete(db.collection("attempts"));
@@ -65,15 +69,25 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
         `${uid}@example.test`,
         "ExamplePass123!",
       );
-      const functions = getFunctions(app);
-      connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-      clients[uid] = (name, data = {}) =>
-        httpsCallable(functions, name, { timeout: 600000 })(data).then(
-          (r) => r.data,
-        );
+      clients[uid] = async (action, data = {}) => {
+        const token = await auth.currentUser.getIdToken();
+        const response = await academy(new Request("http://localhost/api/academy", {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+          body: JSON.stringify({ action, data }),
+        }));
+        const body = await response.json();
+        if (!response.ok)
+          throw Object.assign(new Error(body.error.message), { code: `academy/${body.error.code}` });
+        return body.data;
+      };
       await clients[uid]("saveProfile", { displayName: uid, username: uid });
     }
     await db.doc("users/instructor").update({ role: "admin" });
+    await assert.rejects(
+      clients.alice("reconcile"),
+      (e) => e.code === "academy/permission-denied",
+    );
     const challenge = {
       title: "Test boundary",
       description: "An exercise for server-side verification.",
@@ -97,7 +111,7 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
     );
     await assert.rejects(
       clients.alice("adminChallenge", { action: "delete", id }),
-      (e) => e.code === "functions/permission-denied",
+      (e) => e.code === "academy/permission-denied",
     );
     const race = await Promise.all(
       ["alice", "bob"].map((uid) =>
@@ -157,7 +171,7 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
         flag: "FLAG{server}",
         requestId: "limited",
       }),
-      (e) => e.code === "functions/resource-exhausted",
+      (e) => e.code === "academy/resource-exhausted",
     );
     const insensitive = await clients.bob("submitFlag", {
       challengeId: second,
@@ -167,7 +181,7 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
     assert.equal(insensitive.outcome, "correct");
     await assert.rejects(
       clients.bob("saveProfile", { displayName: "Bob", username: "alice" }),
-      (e) => e.code === "functions/already-exists",
+      (e) => e.code === "academy/already-exists",
     );
     await clients.bob("saveProfile", {
       displayName: "Bob renamed",
@@ -181,8 +195,8 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
     await assert.rejects(
       clients.alice("getLeaderboard"),
       (e) =>
-        e.code === "functions/permission-denied" ||
-        e.code === "functions/unauthenticated",
+        e.code === "academy/permission-denied" ||
+        e.code === "academy/unauthenticated",
     );
     assert.equal((await db.doc("users/alice").get()).get("points"), 100);
     await clients.instructor("adminAccount", {
@@ -218,21 +232,47 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
         flag: "FLAG{server}",
         requestId: "maintenance",
       }),
-      (e) => e.code === "functions/unavailable",
+      (e) => e.code === "academy/unavailable",
     );
     await db.doc("users/bob").update({ points: 999 });
-    const plan = await clients.instructor("reconcile");
-    assert.ok(plan.writes > 0);
+    const extras = db.batch();
+    for (let index = 0; index < 55; index++)
+      extras.set(db.doc(`solves/reconcile_${index}`), {
+        uid: "bob", challengeId: second, challengeName: "Test boundary", category: "Web",
+        difficulty: "Easy", points: 0, playerName: "bob", solvedAt: Timestamp.fromMillis(2_000 + index), isFirstBlood: false,
+      });
+    await extras.commit();
+    let plan = await clients.instructor("reconcile");
+    assert.equal(plan.phase, "scan");
     await assert.rejects(
-      clients.instructor("reconcile", { apply: true, digest: "wrong" }),
-      (e) => e.code === "functions/failed-precondition",
+      clients.instructor("reconcile", { token: "bad-token" }),
+      (e) => e.code === "academy/invalid-argument",
     );
-    const result = await clients.instructor("reconcile", {
+    while (plan.phase === "scan") plan = await clients.instructor("reconcile", { token: plan.continuation });
+    assert.equal(plan.phase, "ready");
+    assert.ok(plan.writes >= 0);
+    await assert.rejects(
+      clients.instructor("reconcile", { apply: true, digest: "wrong", token: plan.continuation }),
+      (e) => e.code === "academy/failed-precondition",
+    );
+    let result = await clients.instructor("reconcile", {
       apply: true,
       digest: plan.digest,
+      token: plan.continuation,
     });
+    const retry = await clients.instructor("reconcile", { apply: true, digest: plan.digest, token: plan.continuation });
+    assert.equal(retry.continuation, result.continuation);
+    while (result.hasMore)
+      result = await clients.instructor("reconcile", { apply: true, digest: plan.digest, token: result.continuation });
     assert.equal(result.applied, true);
     assert.equal((await db.doc("users/bob").get()).get("points"), 200);
+    assert.equal((await db.doc("users/bob").get()).get("solves"), 57);
+    assert.equal((await db.doc(`challenges/${second}`).get()).get("solveCount"), 56);
+    assert.equal(
+      (await db.doc("users/alice").get()).get("firstBloods") +
+        (await db.doc("users/bob").get()).get("firstBloods"),
+      2,
+    );
     await clients.instructor("maintenance", { enabled: false });
     const board = await clients.bob("getLeaderboard");
     assert.equal(board.me.rank, 1);
@@ -245,7 +285,7 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
         flag: "FLAG{server}",
         requestId: "removed",
       }),
-      (e) => e.code === "functions/not-found",
+      (e) => e.code === "academy/not-found",
     );
     // Rehearse the real migration against legacy public flags and existing awards.
     await clients.instructor("maintenance", { enabled: true });
@@ -285,6 +325,7 @@ test("callable auth, scoring races, idempotency, roles, suspension, and repair",
     assert.equal((await db.doc("meta/control").get()).get("maintenance"), true);
     assert.deepEqual(JSON.parse((await migrate()).stdout).issues, []);
   } finally {
+    await resetAdminForTests();
     for (const app of apps) await deleteApp(app);
     await deleteAdmin(admin);
   }

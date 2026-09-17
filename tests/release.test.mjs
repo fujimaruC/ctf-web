@@ -11,7 +11,6 @@ test("production release rejects fixtures, missing configuration, and emulators"
     VITE_FIREBASE_AUTH_DOMAIN: "localhost",
     VITE_FIREBASE_PROJECT_ID: "demo-flagforge",
     VITE_FIREBASE_APP_ID: "demo-app",
-    VITE_FIREBASE_REGION: "us-central1",
     VITE_SUPPORT_EMAIL: "instructor@example.test",
     FLAGFORGE_RELEASE_READY: "reviewed",
     VITE_USE_EMULATORS: "false",

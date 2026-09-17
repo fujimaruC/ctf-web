@@ -881,7 +881,7 @@ function Settings() {
             enabled and preview again.
           </p>
           <button
-            disabled={action.busy || !session.maintenance}
+              disabled={action.busy || !session.maintenance || !!repair}
             onClick={() =>
               action.run(async () => {
                 setRepair(await (await academy).reconcile());
@@ -898,25 +898,35 @@ function Settings() {
           {repair && (
             <div className="notice">
               <p>
-                {repair.writes} planned document writes · {repair.solves} solves
-                · {repair.users} accounts
+                {repair.phase === "ready" ? "Preview ready" : `Phase: ${repair.phase}`} · {repair.processed} processed · {repair.remaining} remaining · {repair.repaired} repaired
               </p>
-              <details>
-                <summary>Review proposed changes</summary>
-                <pre className="repair-report">
-                  {JSON.stringify(repair.changes || [], null, 2)}
-                </pre>
-              </details>
+              <p className="help">Each continuation processes at most 50 records. Continue deliberately; the page never runs an unbounded repair loop.</p>
               <p className="help">
                 Download a verified backup before applying. This changes
                 historical aggregates and first-blood attribution.
               </p>
-              <button
-                disabled={action.busy || !repair.writes}
-                onClick={() => setConfirm(true)}
-              >
-                Review and apply
-              </button>
+              {repair.phase === "scan" && repair.continuation && (
+                <button
+                  disabled={action.busy}
+                  onClick={() => action.run(async () => setRepair(await (await academy).reconcile(false, undefined, repair.continuation!)))}
+                >
+                  Continue preview
+                </button>
+              )}
+              {repair.phase === "ready" && (
+                <button disabled={action.busy} onClick={() => setConfirm(true)}>
+                  Review and apply
+                </button>
+              )}
+              {["solves", "challenges", "users"].includes(repair.phase) && repair.continuation && (
+                <button
+                  disabled={action.busy}
+                  onClick={() => action.run(async () => setRepair(await (await academy).reconcile(true, repair.digest, repair.continuation!)))}
+                >
+                  Continue repair
+                </button>
+              )}
+              {repair.phase === "complete" && <p className="help">Reconciliation completed. Verify results before reopening.</p>}
             </div>
           )}
         </section>
@@ -939,10 +949,9 @@ function Settings() {
           disabled={action.busy}
           onClick={() =>
             action.run(async () => {
-              await (await academy).reconcile(true, repair!.digest);
+              setRepair(await (await academy).reconcile(true, repair!.digest, repair!.continuation!));
               setConfirm(false);
-              setRepair(null);
-            }, "Reconciliation completed. Verify the results before reopening.")
+            }, "Reconciliation started. Continue each batch after reviewing progress.")
           }
         >
           Apply reconciliation

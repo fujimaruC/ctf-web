@@ -2,7 +2,7 @@
 
 ## Scope
 
-React application, callable functions, rules, migration script, and deployment configuration. No live Firebase project was accessed or deployed. Legacy pages and existing unrelated changes remain intact.
+React application, legacy callable reference, rules, migration script, and deployment configuration. No live Firebase project was accessed or deployed. Legacy pages and existing unrelated changes remain intact.
 
 ## Dependency review
 
@@ -21,12 +21,12 @@ Application code does not import UUID. No attacker-controlled path to the affect
 
 Local tests do not establish production capacity, real-device performance, screen-reader usability, hosted CSP behavior, deployed indexes, or correct operator configuration. Those remain explicit gates in [ROLLOUT.md](ROLLOUT.md).
 
-## Completed local gates — 2026-09-16
+## Historical local gates — 2026-09-16
 
 - Preview and Firebase-configured production bundles compiled with strict TypeScript.
 - Domain and release-configuration checks passed.
 - Firestore emulator access matrix passed, including missing/deleted records, draft privacy, suspension, and denial of all direct writes.
-- Auth/Firestore/Functions emulator tests passed for concurrent first blood, idempotent correct/incorrect submissions, rate limits, username reservations, explicit role changes, suspension/reinstatement, maintenance, digest-gated reconciliation, and retained solve history after deletion.
+- The former Auth/Firestore/Functions emulator test results applied to the legacy callable implementation. Rerun the Netlify API emulator gate before release.
 - Migration rehearsal passed: default dry run, stale-digest refusal, private backup, flag relocation, historical point preservation, and a clean subsequent dry run.
 - Real Firebase browser adapter passed signup/profile creation, initial missing-attempt reads, incorrect and correct submissions, solve persistence after reload, and leaderboard retrieval.
 - Firebase bundle: public JS 157.2 KiB gzip; complete JS 331.9 KiB gzip; WOFF2 fonts 59.9 KiB; CSS 4.4 KiB gzip. Both public and authenticated budgets passed. Firestore is deferred until needed. Vite reports a size warning for its deferred Firestore chunk; the compressed budget passes.

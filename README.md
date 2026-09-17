@@ -6,6 +6,8 @@ React, TypeScript, Vite, React Router, modular Firebase, and Anime.js. The appro
 
 Use Node 22, then run `npm ci` and `npm run dev`. The default preview uses labeled sample accounts and in-memory data. Reloading resets sample changes. It never connects to production.
 
+For Firebase-backed local development, copy `.env.example` to `.env.local`, set `VITE_DATA_MODE=firebase` and `VITE_USE_EMULATORS=true`, then run `netlify dev`. The API is available at `/api/academy`; Netlify Dev serves Vite and the function from the same origin. Emulator tools provide the local project ID. Never put `FIREBASE_ADMIN_*` values in `VITE_*` variables.
+
 For staging configuration, see `.env.example` and [release gates](docs/ROLLOUT.md). Publish only `dist/`.
 
 ## Verification

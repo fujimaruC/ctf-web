@@ -18,8 +18,8 @@ await db.doc('challenges/browser-fixture').set({title:'Browser boundary',descrip
 await db.doc('challengeSecrets/browser-fixture').set({flag:'FLAG{adapter}',caseInsensitive:false});
 await db.terminate();
 """], cwd=ROOT, check=True, timeout=30)
-env = dict(os.environ, VITE_DATA_MODE="firebase", VITE_FIREBASE_PROJECT_ID="demo-flagforge", VITE_FIREBASE_API_KEY="demo-key", VITE_FIREBASE_AUTH_DOMAIN="localhost", VITE_FIREBASE_APP_ID="demo-app", VITE_FIREBASE_REGION="us-central1", VITE_USE_EMULATORS="true")
-server = subprocess.Popen(["node", "node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", "5174", "--strictPort"], cwd=ROOT, env=env, stdout=subprocess.DEVNULL)
+env = dict(os.environ, VITE_DATA_MODE="firebase", VITE_FIREBASE_PROJECT_ID="demo-flagforge", VITE_FIREBASE_API_KEY="demo-key", VITE_FIREBASE_AUTH_DOMAIN="localhost", VITE_FIREBASE_APP_ID="demo-app", VITE_USE_EMULATORS="true")
+server = subprocess.Popen(["node", "node_modules/netlify-cli/bin/run.js", "dev", "--port", "5174"], cwd=ROOT, env=env, stdout=subprocess.DEVNULL)
 try:
     for _ in range(60):
         try:

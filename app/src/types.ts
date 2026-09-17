@@ -88,6 +88,12 @@ export interface Repair {
   solves?: number;
   applied?: boolean;
   changes?: { path: string; values: Record<string, unknown> }[];
+  processed: number;
+  repaired: number;
+  remaining: number;
+  hasMore: boolean;
+  continuation: string | null;
+  phase: "scan" | "ready" | "solves" | "challenges" | "users" | "complete";
 }
 export interface Page<T> {
   items: T[];
@@ -127,5 +133,5 @@ export interface Academy {
   settings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<void>;
   maintenance(enabled: boolean): Promise<void>;
-  reconcile(apply?: boolean, digest?: string): Promise<Repair>;
+  reconcile(apply?: boolean, digest?: string, token?: string): Promise<Repair>;
 }
