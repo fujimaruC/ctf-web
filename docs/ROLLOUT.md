@@ -11,9 +11,10 @@ The vanilla files remain as reference. Only `dist/` is published. Do not publish
 1. Use Node 22. Run `npm ci`.
 2. Run `npm run dev`. The default is a clearly labeled local preview with in-memory sample data and no production requests. Preview changes reset on reload; a preview session identifier remains in session storage.
 3. For Firebase development, copy `.env.example` to `.env.local`, set `VITE_DATA_MODE=firebase`, and supply staging configuration. Run `netlify dev` so Vite and `/api/academy` share one origin. Emulator tools provide the local project ID, `FIRESTORE_EMULATOR_HOST`, and `FIREBASE_AUTH_EMULATOR_HOST`; no private key is needed for that local-only mode. Never use production credentials for tests.
-4. Run `npm run build`, `npm test`, and `npm run test:budget`.
-5. Run `npm run test:rules` and `npm run test:backend` with Java installed. These commands use only `demo-flagforge` emulators.
-6. Run `tests/browser.py` with Python Playwright against the local server. It checks routes, forms, sample solves, admin operations, keyboard focus, responsive layouts, both themes, and axe. Set `FLAGFORGE_TEST_URL` for another local port.
+4. Enable only the Google provider in Firebase Authentication for staging and production; disable Email/Password and add local, staging, and production domains to Auth's authorized domains. Test popup sign-in and redirect continuation on a popup-blocked or mobile browser. Google email addresses never determine administrator access; the server verifies the ID token and Firestore role.
+5. Run `npm run build`, `npm test`, and `npm run test:budget`.
+6. Run `npm run test:rules` and `npm run test:backend` with Java installed. These commands use only `demo-flagforge` emulators.
+7. Run `tests/browser.py` with Python Playwright against the local server. It checks routes, forms, sample solves, admin operations, keyboard focus, responsive layouts, both themes, and axe. Set `FLAGFORGE_TEST_URL` for another local port. Run `tests/firebase_browser.py` through the Auth and Firestore emulators to confirm that only the Google entry is shown; finish OAuth popup/redirect validation against staging because the emulator does not complete Google OAuth.
 
 Keep temporary tools under `.local-tools/`. Set `TMPDIR` to its absolute `tmp/` path and `PLAYWRIGHT_BROWSERS_PATH` to its `browsers/` path. Store screenshots in `artifacts/`. Remove temporary tools after checks. Run browser and emulator suites sequentially on machines with limited RAM.
 
@@ -59,7 +60,7 @@ Verify account/challenge/solve counts, scores, first-blood counts, original IDs,
 
 ## Gate 4: deployment and capacity
 
-- Set all `.env.example` Firebase values in Netlify production environment; set a real `VITE_SUPPORT_EMAIL`. Configure Auth authorized domains for staging/production.
+- Set all `.env.example` Firebase values in Netlify production environment; set a real `VITE_SUPPORT_EMAIL`. Enable Google and disable Email/Password in Firebase Authentication. Configure Auth authorized domains for staging/production.
 - Set `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and `FIREBASE_ADMIN_PRIVATE_KEY` as Netlify server environment variables. The private key may use escaped `\\n` line breaks. These are secret credentials; Firebase web `VITE_*` configuration is intentionally public.
 - Review and finalize academy privacy/retention information and terms before launch. Set `FLAGFORGE_RELEASE_READY=reviewed` only after these checks and the gates below.
 - Test the built site with Netlify headers. Inline scripts are disallowed; CSS inline styles remain allowed for Anime.js. Inspect actual Firebase/Functions network calls against CSP.
@@ -104,4 +105,4 @@ With Python Playwright installed and workspace-local browser binaries available,
 firebase emulators:exec --only auth,firestore --project demo-flagforge 'python tests/firebase_browser.py'
 ```
 
-The script seeds only the demo emulator, starts Netlify Dev on port 5174, exercises actual Auth/Firestore/API integration, then stops its server. Set `TMPDIR`, `PLAYWRIGHT_BROWSERS_PATH`, and `FIREBASE_EMULATORS_PATH` to workspace-local folders before running it. For constrained machines, cap Java with `JAVA_TOOL_OPTIONS='-Xmx384m -Djava.io.tmpdir=ABSOLUTE_WORKSPACE_TEMP_PATH'`.
+The script seeds only the demo emulator, starts Vite on port 5174, and checks the real Firebase Auth/Firestore Google-only entry; `test:backend` covers the Netlify API. Set `TMPDIR`, `PLAYWRIGHT_BROWSERS_PATH`, and `FIREBASE_EMULATORS_PATH` to workspace-local folders before running it. For constrained machines, cap Java with `JAVA_TOOL_OPTIONS='-Xmx384m -Djava.io.tmpdir=ABSOLUTE_WORKSPACE_TEMP_PATH'`.

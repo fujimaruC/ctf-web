@@ -10,9 +10,9 @@ export function errorMessage(error: unknown): string {
       return "Connection failed. Your input is safe. Check your connection and try again.";
     if (e.code === "auth/too-many-requests")
       return "Too many attempts. Wait a few minutes and try again.";
-    if (e.code === "auth/email-already-in-use")
-      return "Could not create this account. Try signing in or resetting your password.";
-    return "Could not verify your credentials. Check your email and password, then try again.";
+    if (e.code === "auth/popup-closed-by-user")
+      return "Google sign-in was cancelled. Try again when you’re ready.";
+    return "Google could not complete sign-in. Check your connection and try again.";
   }
   if (e.code === "permission-denied")
     return "You no longer have access. Sign in again or contact your instructor.";

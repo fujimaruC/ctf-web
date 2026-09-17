@@ -2,13 +2,10 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
   signOut,
-  sendPasswordResetEmail,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
   connectAuthEmulator,
 } from "firebase/auth";
 import type {
@@ -47,6 +44,8 @@ const app = initializeApp({
   appId: env.VITE_FIREBASE_APP_ID,
 });
 const auth = getAuth(app);
+const google = new GoogleAuthProvider();
+google.setCustomParameters({ prompt: "select_account" });
 if (env.VITE_USE_EMULATORS === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
@@ -156,7 +155,9 @@ export const firebase: Academy = {
         stopProfile();
         stopControl();
         state = {
-          user: user ? { uid: user.uid, email: user.email } : null,
+          user: user
+            ? { uid: user.uid, email: user.email, displayName: user.displayName }
+            : null,
           profile: null,
           loading: !!user,
           error: "",
@@ -202,30 +203,27 @@ export const firebase: Academy = {
       stopControl();
     };
   },
-  async signIn(email, password) {
-    await signInWithEmailAndPassword(auth, email, password);
-  },
-  async register(email, password) {
-    await createUserWithEmailAndPassword(auth, email, password);
+  async signInWithGoogle() {
+    if (window.matchMedia?.("(pointer: coarse)").matches) {
+      await signInWithRedirect(auth, google);
+      return;
+    }
+    try {
+      await signInWithPopup(auth, google);
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        await signInWithRedirect(auth, google);
+        return;
+      }
+      throw error;
+    }
   },
   async signOut() {
     await signOut(auth);
-  },
-  async resetPassword(email) {
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } catch (error) {
-      if ((error as { code?: string }).code !== "auth/user-not-found")
-        throw error;
-    }
-  },
-  async changePassword(current, next) {
-    if (!auth.currentUser?.email) throw new Error("Sign in again.");
-    await reauthenticateWithCredential(
-      auth.currentUser,
-      EmailAuthProvider.credential(auth.currentUser.email, current),
-    );
-    await updatePassword(auth.currentUser, next);
   },
   async saveProfile(displayName, username) {
     await call("saveProfile", { displayName, username });

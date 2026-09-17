@@ -190,7 +190,7 @@ function Shell() {
               <Link to="/#method">The method</Link>
               <Link to="/challenges">Challenges</Link>
               <Link to="/login">Sign in</Link>
-              <Link className="button primary" to="/register">
+              <Link className="button primary" to="/login">
                 Start learning <span aria-hidden="true">↗</span>
               </Link>
             </>
@@ -262,7 +262,7 @@ function Protected({ admin = false }: { admin?: boolean }) {
   if (!s.profile)
     return (
       <Navigate
-        to={`/register?returnTo=${encodeURIComponent(location.pathname + location.search)}`}
+      to={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}
         replace
       />
     );
@@ -294,12 +294,16 @@ function Protected({ admin = false }: { admin?: boolean }) {
     );
   return <Outlet />;
 }
+function DisabledAuthRoute() {
+  const location = useLocation();
+  return <Navigate to={`/login${location.search}`} replace />;
+}
 function Legacy() {
   const location = useLocation();
   const [params] = useSearchParams();
   const names: Record<string, string> = {
     "index.html": "/",
-    "login.html": params.get("tab") === "register" ? "/register" : "/login",
+    "login.html": "/login",
     "admin.html": "/admin/challenges",
     "challenge.html": params.get("id")
       ? `/challenges/${encodeURIComponent(params.get("id")!)}`
@@ -325,8 +329,8 @@ export default function App() {
           <Route element={<Shell />}>
             <Route index element={<Landing />} />
             <Route path="login" element={<Auth />} />
-            <Route path="register" element={<Auth />} />
-            <Route path="forgot-password" element={<Auth />} />
+            <Route path="register" element={<DisabledAuthRoute />} />
+            <Route path="forgot-password" element={<DisabledAuthRoute />} />
             {["contact", "privacy", "terms"].map((path) => (
               <Route key={path} path={path} element={<Information />} />
             ))}

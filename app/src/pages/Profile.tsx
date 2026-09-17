@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { academy, preview } from "../data";
+import { academy } from "../data";
 import {
   Empty,
   Feedback,
@@ -17,8 +17,7 @@ import { History } from "./Learner";
 export default function Profile() {
   useTitle("My profile");
   const { profile: p } = useSession(),
-    profileAction = useAction(),
-    passwordAction = useAction();
+    profileAction = useAction();
   const [cursor, setCursor] = useState<string>();
   const history = useResource(`history-${p!.uid}-${cursor || ""}`, async () =>
     (await academy).history(p!.uid, cursor),
@@ -134,47 +133,6 @@ export default function Profile() {
               <button className="primary" disabled={profileAction.busy}>
                 Save profile
               </button>
-            </Form>
-          </section>
-          <section className="form-section">
-            <h2>Change password</h2>
-            <Form
-              onSubmit={(data, event) => {
-                const form = event.currentTarget;
-                void passwordAction.run(
-                  async () => {
-                    await (
-                      await academy
-                    ).changePassword(
-                      String(data.get("currentPassword")),
-                      String(data.get("newPassword")),
-                    );
-                    form.reset();
-                  },
-                  preview
-                    ? "Preview only: no password was changed."
-                    : "Password updated.",
-                );
-              }}
-            >
-              <Field
-                label="Current password"
-                name="currentPassword"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-              <Field
-                label="New password"
-                name="newPassword"
-                type="password"
-                autoComplete="new-password"
-                minLength={8}
-                hint="At least 8 characters. Use a unique password."
-                required
-              />
-              <Feedback action={passwordAction} />
-              <button disabled={passwordAction.busy}>Update password</button>
             </Form>
           </section>
         </aside>

@@ -18,6 +18,9 @@ import {
 import academy from "../netlify/lib/netlify/functions/academy.js";
 import { resetAdminForTests } from "../netlify/lib/netlify/functions/admin.js";
 
+// The Auth emulator issues test ID tokens with email/password; the handler
+// verifies tokens and Firestore roles, never a provider or email address.
+
 test("Netlify API auth, scoring races, idempotency, roles, suspension, and paginated repair", async () => {
   assert.ok(
     process.env.FIRESTORE_EMULATOR_HOST &&

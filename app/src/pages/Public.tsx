@@ -34,7 +34,7 @@ export function Landing() {
             <br className="desktop-break" /> one discovery at a time.
           </p>
           <div className="hero-actions">
-            <Link className="button primary" to="/register">
+            <Link className="button primary" to="/login">
               Open your fieldbook <span aria-hidden="true">↗</span>
             </Link>
             <a className="text-link" href="#method">
@@ -219,7 +219,7 @@ export function Landing() {
           <br />
           We’ll bring the questions.
         </h2>
-        <Link className="button primary" to="/register">
+            <Link className="button primary" to="/login">
           Start learning ↗
         </Link>
         {stats.data && (
@@ -264,7 +264,7 @@ export function Information() {
           <p>
             FlagForge stores your account identity, username, challenge
             attempts, solves, points, and first-blood achievements in Firebase.
-            Firebase Authentication manages your password.
+            Firebase Authentication manages your Google sign-in.
           </p>
           <p>
             Signed-in learners can see display names, usernames, scores, and
@@ -274,7 +274,7 @@ export function Information() {
           <p>
             Suspension preserves learning history. Contact your instructor about
             access, correction, or deletion requests. Theme preferences stay in
-            your browser. Flags and passwords are not stored in browser drafts.
+            your browser. Flags and sign-in credentials are not stored in browser drafts.
           </p>
           <h2>Before production launch</h2>
           <p>

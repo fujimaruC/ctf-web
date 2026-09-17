@@ -121,7 +121,9 @@ const listeners = new Set<(s: Session) => void>();
 function session(): Session {
   const profile = profiles.find((p) => p.uid === userId) || null;
   return {
-    user: profile ? { uid: profile.uid, email: profile.email } : null,
+    user: profile
+      ? { uid: profile.uid, email: profile.email, displayName: profile.displayName }
+      : null,
     profile,
     loading: false,
     error: "",
@@ -147,14 +149,8 @@ export const demo: Academy = {
     fn(session());
     return () => listeners.delete(fn);
   },
-  async signIn(email) {
-    userId = email.startsWith("instructor") ? "instructor" : "preview";
-    sessionStorage.setItem("flagforge.preview.user", userId);
-    emit();
-  },
-  async register(email) {
+  async signInWithGoogle() {
     userId = "preview";
-    profiles[0].email = email;
     sessionStorage.setItem("flagforge.preview.user", userId);
     emit();
   },
@@ -163,8 +159,6 @@ export const demo: Academy = {
     sessionStorage.removeItem("flagforge.preview.user");
     emit();
   },
-  async resetPassword() {},
-  async changePassword() {},
   async saveProfile(displayName, username) {
     Object.assign(me(), { displayName, username });
     emit();

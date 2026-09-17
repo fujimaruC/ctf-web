@@ -55,7 +55,7 @@ export interface Solve {
   isFirstBlood: boolean;
 }
 export interface Session {
-  user: { uid: string; email: string | null } | null;
+  user: { uid: string; email: string | null; displayName: string | null } | null;
   profile: Profile | null;
   loading: boolean;
   error: string;
@@ -101,11 +101,8 @@ export interface Page<T> {
 }
 export interface Academy {
   watchSession(callback: (session: Session) => void): () => void;
-  signIn(email: string, password: string): Promise<void>;
-  register(email: string, password: string): Promise<void>;
+  signInWithGoogle(): Promise<void>;
   signOut(): Promise<void>;
-  resetPassword(email: string): Promise<void>;
-  changePassword(current: string, next: string): Promise<void>;
   saveProfile(displayName: string, username: string): Promise<void>;
   catalog(admin?: boolean): Promise<Challenge[]>;
   challenge(id: string): Promise<Challenge | null>;
