@@ -9,12 +9,12 @@ The vanilla files remain as reference. Only `dist/` is published. Do not publish
 ## Local workflow
 
 1. Use Node 22. Run `npm ci`.
-2. Run `npm run dev`. The default is a clearly labeled local preview with in-memory sample data and no production requests. Preview changes reset on reload; a preview session identifier remains in session storage.
+2. Select a mode explicitly before starting Vite. For fixtures run `VITE_DATA_MODE=demo npm run dev`; it is local/test-only, clearly labeled, and resets on reload. With no mode, or an invalid mode, the app and release check refuse to choose a data source.
 3. For Firebase development, copy `.env.example` to `.env.local`, set `VITE_DATA_MODE=firebase`, and supply staging configuration. Run `netlify dev` so Vite and `/api/academy` share one origin. Emulator tools provide the local project ID, `FIRESTORE_EMULATOR_HOST`, and `FIREBASE_AUTH_EMULATOR_HOST`; no private key is needed for that local-only mode. Never use production credentials for tests.
 4. Enable only the Google provider in Firebase Authentication for staging and production; disable Email/Password and add local, staging, and production domains to Auth's authorized domains. Test popup sign-in and redirect continuation on a popup-blocked or mobile browser. Google email addresses never determine administrator access; the server verifies the ID token and Firestore role.
 5. Run `npm run build`, `npm test`, and `npm run test:budget`.
 6. Run `npm run test:rules` and `npm run test:backend` with Java installed. These commands use only `demo-flagforge` emulators.
-7. Run `tests/browser.py` with Python Playwright against the local server. It checks routes, forms, sample solves, admin operations, keyboard focus, responsive layouts, both themes, and axe. Set `FLAGFORGE_TEST_URL` for another local port. Run `tests/firebase_browser.py` through the Auth and Firestore emulators to confirm that only the Google entry is shown; finish OAuth popup/redirect validation against staging because the emulator does not complete Google OAuth.
+7. Run `VITE_DATA_MODE=demo npm run dev`, then `tests/browser.py` with Python Playwright against that local fixture server. It checks routes, forms, sample solves, admin operations, keyboard focus, responsive layouts, both themes, and axe. Set `FLAGFORGE_TEST_URL` for another local port. Run `tests/firebase_browser.py` through the Auth and Firestore emulators to confirm that only the Google entry is shown; finish OAuth popup/redirect validation against staging because the emulator does not complete Google OAuth.
 
 Keep temporary tools under `.local-tools/`. Set `TMPDIR` to its absolute `tmp/` path and `PLAYWRIGHT_BROWSERS_PATH` to its `browsers/` path. Store screenshots in `artifacts/`. Remove temporary tools after checks. Run browser and emulator suites sequentially on machines with limited RAM.
 
@@ -60,8 +60,9 @@ Verify account/challenge/solve counts, scores, first-blood counts, original IDs,
 
 ## Gate 4: deployment and capacity
 
-- Set all `.env.example` Firebase values in Netlify production environment; set a real `VITE_SUPPORT_EMAIL`. Enable Google and disable Email/Password in Firebase Authentication. Configure Auth authorized domains for staging/production.
-- Set `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and `FIREBASE_ADMIN_PRIVATE_KEY` as Netlify server environment variables. The private key may use escaped `\\n` line breaks. These are secret credentials; Firebase web `VITE_*` configuration is intentionally public.
+- Netlify production and branch deploys set `VITE_DATA_MODE=firebase`; only pull-request deploy previews intentionally override it to `demo`. In the Netlify dashboard, scope the following public build configuration to production and the `recon/total-v1` branch: `VITE_DATA_MODE=firebase`, `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`, `VITE_SUPPORT_EMAIL`, `VITE_USE_EMULATORS=false`, and `FLAGFORGE_RELEASE_READY=reviewed`. Firebase web configuration is public by design, not a secret.
+- Set `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and `FIREBASE_ADMIN_PRIVATE_KEY` as server-only Netlify Function variables with the same production/branch scopes. The private key may use escaped `\\n` line breaks. These are secrets: never use a `VITE_` name, put them in source, logs, artifacts, or a service-account JSON file.
+- In Firebase Console, enable **Google** under Authentication → Sign-in method and disable Email/Password. Add the Netlify production domain and the branch/staging domain shown by Netlify under Authentication → Settings → Authorized domains. Configure the staging Firebase project, not production, for the branch deploy first.
 - Review and finalize academy privacy/retention information and terms before launch. Set `FLAGFORGE_RELEASE_READY=reviewed` only after these checks and the gates below.
 - Test the built site with Netlify headers. Inline scripts are disallowed; CSS inline styles remain allowed for Anime.js. Inspect actual Firebase/Functions network calls against CSP.
 - Public entry JS ≤250 KiB compressed; authenticated entry ≤350 KiB; fonts ≤100 KiB; initial public transfer ≤500 KiB. `test:budget` checks the stricter total built JS ceiling.
@@ -77,6 +78,14 @@ Verify account/challenge/solve counts, scores, first-blood counts, original IDs,
 4. Rotate flags previously delivered to browsers, coordinating challenge attachments. Old answers cannot become confidential merely by moving them.
 5. Smoke-test Auth, direct URLs, real submissions, ranking, admin actions, CSP, caching, and legacy-worker updates. Reconcile counts and historical awards.
 6. Reopen only after review. Watch API error rates, permission denials, duplicate-award checks, Firestore reads, latency, and billing. Do not log submitted flags or personal profile data.
+
+## Exact staging and promotion steps
+
+1. In Netlify, scope the public configuration and server-only secrets above to `recon/total-v1`; confirm its branch deploy has `CONTEXT=branch-deploy`, `VITE_DATA_MODE=firebase`, and `VITE_USE_EMULATORS=false`.
+2. Run `npm ci`, the release check with staging values, `npm run build`, `npm test`, `npm run test:budget`, and emulator/browser gates. Inspect the Firebase-mode `dist/` for fixture names, preview storage, and sample flags.
+3. Create the branch deploy. On its Netlify URL, test direct `/login`, `/profile-setup`, `/dashboard`, `/challenges`, `/leaderboard`, `/profile`, and `/admin/challenges`; test Google popup and mobile/blocked-popup redirect return; create a new profile; verify `/api/academy` accepts a Firebase ID token and rejects no token.
+4. Confirm Firestore rules in staging deny client writes, flags, challenge secrets, audits, and trusted profile fields. Do not promote until the listed Firebase Console provider/domain setup and staging smoke test are recorded.
+5. Promote the same reviewed build and equivalent production-scoped values only after the production cutover gates above. Do not deploy rules, data, or credentials as part of the frontend promotion without separate approval.
 
 ## Rollback
 

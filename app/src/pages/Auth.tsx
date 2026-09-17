@@ -1,13 +1,31 @@
+import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { academy, preview } from "../data";
 import { Field, Form, Feedback, Heading, useAction, useSession, useTitle } from "../ui";
 
+const safeDestination = (value: string | null) =>
+  value?.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
+    ? value
+    : "/dashboard";
+
 export default function Auth() {
   const session = useSession(), action = useAction(), navigate = useNavigate();
   const [params] = useSearchParams();
-  const returnTo = params.get("returnTo") || "/dashboard";
-  const destination = returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\") ? returnTo : "/dashboard";
+  const destination = safeDestination(params.get("returnTo"));
   const onboarding = !!session.user && !session.profile;
+  useEffect(() => {
+    const saved = sessionStorage.getItem("flagforge.auth.returnTo");
+    if (session.profile && saved) {
+      sessionStorage.removeItem("flagforge.auth.returnTo");
+      navigate(safeDestination(saved), { replace: true });
+    }
+  }, [navigate, session.profile]);
+  const signIn = () => action.run(async () => {
+    sessionStorage.setItem("flagforge.auth.returnTo", destination);
+    await (await academy).signInWithGoogle();
+    sessionStorage.removeItem("flagforge.auth.returnTo");
+    navigate(destination, { replace: true });
+  });
   useTitle(onboarding ? "Set up your profile" : "Sign in");
   return (
     <div className="auth-page" data-route>
@@ -39,14 +57,11 @@ export default function Auth() {
         ) : (
           <>
             <Feedback action={action} />
-            <button className="primary wide" disabled={action.busy} aria-busy={action.busy} onClick={() => action.run(async () => {
-              await (await academy).signInWithGoogle();
-              navigate(destination, { replace: true });
-            })}>
+            <button className="primary wide" disabled={action.busy} aria-busy={action.busy} onClick={signIn}>
               {action.busy ? "Opening Google…" : "Continue with Google"}
             </button>
             <p className="help" aria-live="polite">Popup blocked or on a mobile device? Google sign-in will continue in this tab.</p>
-            {preview && <div className="preview-controls"><p className="eyebrow">Explore the local preview</p><button disabled={action.busy} onClick={() => action.run(async () => { await (await academy).signInWithGoogle(); navigate(destination); })}>Enter preview</button></div>}
+            {preview && <div className="preview-controls"><p className="eyebrow">Explore the local preview</p><button disabled={action.busy} onClick={signIn}>Enter preview</button></div>}
           </>
         )}
         <p className="help">By continuing, you agree to the <Link to="/terms">terms</Link> and <Link to="/privacy">privacy notice</Link>.</p>

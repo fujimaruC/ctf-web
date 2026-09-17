@@ -1,5 +1,10 @@
 import type { Academy } from "./types";
-export const preview = import.meta.env.VITE_DATA_MODE !== "firebase";
+const mode = import.meta.env.VITE_DATA_MODE;
+if (mode !== "demo" && mode !== "firebase")
+  throw new Error(
+    "VITE_DATA_MODE must be exactly demo or firebase. Refusing to select sample data implicitly.",
+  );
+export const preview = mode === "demo";
 export const academy: Promise<Academy> = preview
   ? import("./demo").then((m) => m.demo)
   : import("./firebase").then((m) => m.firebase);
@@ -12,6 +17,12 @@ export function errorMessage(error: unknown): string {
       return "Too many attempts. Wait a few minutes and try again.";
     if (e.code === "auth/popup-closed-by-user")
       return "Google sign-in was cancelled. Try again when you’re ready.";
+    if (
+      e.code === "auth/unauthorized-domain" ||
+      e.code === "auth/operation-not-allowed" ||
+      e.code === "auth/invalid-api-key"
+    )
+      return "Google sign-in is not configured for this site. Contact the academy administrator.";
     return "Google could not complete sign-in. Check your connection and try again.";
   }
   if (e.code === "permission-denied")

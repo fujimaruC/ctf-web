@@ -262,7 +262,7 @@ function Protected({ admin = false }: { admin?: boolean }) {
   if (!s.profile)
     return (
       <Navigate
-      to={`/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`}
+      to={`/profile-setup?returnTo=${encodeURIComponent(location.pathname + location.search)}`}
         replace
       />
     );
@@ -329,6 +329,7 @@ export default function App() {
           <Route element={<Shell />}>
             <Route index element={<Landing />} />
             <Route path="login" element={<Auth />} />
+            <Route path="profile-setup" element={<Auth />} />
             <Route path="register" element={<DisabledAuthRoute />} />
             <Route path="forgot-password" element={<DisabledAuthRoute />} />
             {["contact", "privacy", "terms"].map((path) => (

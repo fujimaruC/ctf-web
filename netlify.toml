@@ -4,7 +4,6 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  VITE_DATA_MODE = "demo"
 
 [functions]
   directory = "netlify/functions"
@@ -18,7 +17,11 @@
 [context.production.environment]
   VITE_DATA_MODE = "firebase"
 
+[context.branch-deploy.environment]
+  VITE_DATA_MODE = "firebase"
+
 [context.deploy-preview.environment]
+  # Pull-request previews are intentionally isolated fixtures, never staging.
   VITE_DATA_MODE = "demo"
 
 # React owns known routes. Legacy adapters preserve query parameters.
@@ -64,6 +67,11 @@
 
 [[redirects]]
   from = "/profile"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile-setup"
   to = "/index.html"
   status = 200
 

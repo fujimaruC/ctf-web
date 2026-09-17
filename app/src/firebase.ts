@@ -46,6 +46,8 @@ const app = initializeApp({
 const auth = getAuth(app);
 const google = new GoogleAuthProvider();
 google.setCustomParameters({ prompt: "select_account" });
+// A prior preview must not survive into a real Firebase session.
+sessionStorage.removeItem(["flagforge", "preview", "user"].join("."));
 if (env.VITE_USE_EMULATORS === "true") {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
