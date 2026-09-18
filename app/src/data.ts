@@ -11,6 +11,8 @@ export const academy: Promise<Academy> = preview
 export function errorMessage(error: unknown): string {
   const e = error as { code?: string; message?: string };
   if (e.code?.startsWith("auth/")) {
+    if (import.meta.env.DEV)
+      return `Google sign-in failed (${e.code}). ${e.message || "Check browser console."}`;
     if (e.code === "auth/network-request-failed")
       return "Connection failed. Your input is safe. Check your connection and try again.";
     if (e.code === "auth/too-many-requests")

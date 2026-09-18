@@ -214,6 +214,7 @@ export const firebase: Academy = {
       await signInWithPopup(auth, google);
     } catch (error) {
       const code = (error as { code?: string }).code;
+      if (env.DEV) console.error("Google sign-in failed", code || error);
       if (
         code === "auth/popup-blocked" ||
         code === "auth/operation-not-supported-in-this-environment"

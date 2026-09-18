@@ -99,3 +99,18 @@ test("Netlify owns /api/academy through academy config only", async () => {
   const spa = netlify.indexOf('to = "/index.html"');
   assert.ok(api === -1 || spa === -1 || api < spa, "SPA fallback must not shadow API");
 });
+
+test("CSP scopes Firebase popup inline scripts to script elements", async () => {
+  const netlify = await readFile("netlify.toml", "utf8");
+  const csp = /Content-Security-Policy = "([^"]+)"/.exec(netlify)?.[1];
+  assert.ok(csp, "CSP missing");
+  const script = /(?:^|; )script-src ([^;]+)/.exec(csp)?.[1];
+  assert.equal(script, "'self' https://apis.google.com");
+  assert.doesNotMatch(script, /unsafe-inline/);
+  assert.match(csp, /script-src-elem 'self' 'unsafe-inline' https:\/\/apis\.google\.com/);
+  assert.match(csp, /script-src-attr 'none'/);
+  assert.match(csp, /object-src 'none'/);
+  assert.match(csp, /base-uri 'self'/);
+  assert.match(csp, /connect-src[^;]*identitytoolkit\.googleapis\.com[^;]*securetoken\.googleapis\.com/);
+  assert.match(csp, /frame-src[^;]*firebaseapp\.com[^;]*accounts\.google\.com/);
+});
