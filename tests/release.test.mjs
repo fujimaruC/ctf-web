@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 
 test("production release rejects fixtures, missing configuration, and emulators", () => {
   const base = {
@@ -83,4 +83,19 @@ test("the Firebase path is exact, removes obsolete preview state, and uses Googl
     netlify.slice(netlify.indexOf("[build.environment]"), netlify.indexOf("[functions]")),
     /VITE_DATA_MODE/,
   );
+});
+
+test("Netlify owns /api/academy through academy config only", async () => {
+  const [netlify, academy, entries] = await Promise.all([
+    readFile("netlify.toml", "utf8"),
+    readFile("netlify/functions/academy.ts", "utf8"),
+    readdir("netlify/functions"),
+  ]);
+  assert.deepEqual(entries.sort(), ["academy.ts"]);
+  assert.match(academy, /export const config = \{ path: "\/api\/academy" \}/);
+  assert.doesNotMatch(netlify, /from\s*=\s*"\/api\/academy"/);
+  assert.doesNotMatch(netlify, /to\s*=\s*"\/\.netlify\/functions\/academy"/);
+  const api = netlify.indexOf("/api/academy");
+  const spa = netlify.indexOf('to = "/index.html"');
+  assert.ok(api === -1 || spa === -1 || api < spa, "SPA fallback must not shadow API");
 });

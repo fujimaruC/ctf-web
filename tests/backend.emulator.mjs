@@ -16,7 +16,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import academy from "../netlify/lib/netlify/functions/academy.js";
-import { resetAdminForTests } from "../netlify/lib/netlify/functions/admin.js";
+import { resetAdminForTests } from "../netlify/lib/server/netlify-admin.js";
 
 // The Auth emulator issues test ID tokens with email/password; the handler
 // verifies tokens and Firestore roles, never a provider or email address.
@@ -32,12 +32,17 @@ test("Netlify API auth, scoring races, idempotency, roles, suspension, and pagin
     accounts = adminAuth(admin),
     apps = [];
   try {
+    const method = await academy(new Request("http://localhost/api/academy"));
+    assert.equal(method.status, 405);
+    assert.match(method.headers.get("content-type") || "", /application\/json/);
+    assert.equal((await method.json()).error.code, "method-not-allowed");
     const anonymous = await academy(new Request("http://localhost/api/academy", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ action: "submitFlag", data: {} }),
     }));
     assert.equal(anonymous.status, 401);
+    assert.equal((await anonymous.clone().json()).error.code, "unauthenticated");
     await db.recursiveDelete(db.collection("users"));
     await db.recursiveDelete(db.collection("solves"));
     await db.recursiveDelete(db.collection("attempts"));

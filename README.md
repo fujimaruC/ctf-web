@@ -12,6 +12,12 @@ For Firebase-backed staging or production, enable **Google** in Firebase Authent
 
 For staging configuration, see `.env.example` and [release gates](docs/ROLLOUT.md). Publish only `dist/`; do not commit `.env.local`, service-account JSON, private keys, tokens, exports, or migration backups.
 
+After deploy, run read-only routing checks:
+
+```sh
+npm run smoke:deploy -- https://flagforge-arena.netlify.app
+```
+
 ## Verification
 
 ```sh

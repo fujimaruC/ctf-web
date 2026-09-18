@@ -11,7 +11,8 @@
     "test": "tsc -p netlify/tsconfig.json && node --test tests/domain.test.mjs tests/release.test.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-flagforge 'node --test tests/rules.emulator.mjs'",
     "test:backend": "firebase emulators:exec --only auth,firestore --project demo-flagforge 'tsc -p netlify/tsconfig.json && node --test tests/backend.emulator.mjs'",
-    "test:budget": "node scripts/check-budget.mjs"
+    "test:budget": "node scripts/check-budget.mjs",
+    "smoke:deploy": "node scripts/smoke-deploy.mjs"
   },
   "dependencies": {
     "@fontsource/archivo": "^5.2.0",

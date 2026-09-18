@@ -8,12 +8,6 @@
 [functions]
   directory = "netlify/functions"
 
-[[redirects]]
-  from = "/api/academy"
-  to = "/.netlify/functions/academy"
-  status = 200
-  force = true
-
 [context.production.environment]
   VITE_DATA_MODE = "firebase"
 

@@ -1,5 +1,5 @@
 import { createAcademy, ApiError } from "../../server/academy.js";
-import { admin } from "./admin.js";
+import { admin } from "../../server/netlify-admin.js";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -30,6 +30,8 @@ export default async function academy(request: Request): Promise<Response> {
     if (raw.length > 16_384) throw new ApiError("invalid-argument", "Request is too large.");
     const body = JSON.parse(raw || "{}") as { action?: unknown; data?: unknown };
     const uid = await identity(request);
+    if (!uid && body.action !== "publicStats")
+      throw new ApiError("unauthenticated", "Sign in to continue.");
     const services = admin();
     const call = createAcademy(services.db, services.auth);
     return json({ data: await call(body.action, uid, body.data ?? {}) });
